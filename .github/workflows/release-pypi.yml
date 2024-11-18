@@ -21,6 +21,8 @@ jobs:
 
       - name: Install dependencies
         run: pip install -U build twine
+      - name: Overview Readme for release
+        run: echo "# Lit Logger" > README.md
       - name: Build package
         run: python -m build
       - name: Check package
@@ -35,9 +37,9 @@ jobs:
           password: ${{ secrets.test_pypi_password }}
           repository_url: https://test.pypi.org/legacy/
 
-      - name: Publish distribution 📦 to PyPI
-        if: startsWith(github.event.ref, 'refs/tags') || github.event_name == 'release'
-        uses: pypa/gh-action-pypi-publish@v1.12.2
-        with:
-          user: __token__
-          password: ${{ secrets.pypi_password }}
+      #- name: Publish distribution 📦 to PyPI
+      #  if: startsWith(github.event.ref, 'refs/tags') || github.event_name == 'release'
+      #  uses: pypa/gh-action-pypi-publish@v1.12.2
+      #  with:
+      #    user: __token__
+      #    password: ${{ secrets.pypi_password }}

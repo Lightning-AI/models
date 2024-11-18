@@ -14,7 +14,7 @@ This is starter project template which shall simplify initial steps for each new
 
 Listing the implemented sections:
 
-- sample package named `lit_sandbox`
+- sample package named `litmodels`
 - setting [CI](https://github.com/Lightning-AI/lightning-sandbox/actions?query=workflow%3A%22CI+testing%22) for package and _tests_ folder
 - setup/install package
 - setting docs with Sphinx
@@ -26,7 +26,6 @@ Listing the implemented sections:
 
 You still need to enable some external integrations such as:
 
-- [ ] rename `pl_<sandbox>` to anu other name, simple find-replace shall work well
 - [ ] update path used in the badges to the repository
 - [ ] lock the main breach in GH setting - no direct push without PR
 - [ ] set `gh-pages` as website and _docs_ as source folder in GH setting

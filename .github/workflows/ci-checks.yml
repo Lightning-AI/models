@@ -28,7 +28,7 @@ jobs:
     uses: Lightning-AI/utilities/.github/workflows/check-package.yml@main
     with:
       actions-ref: main
-      import-name: "lit_sandbox"
+      import-name: "litmodels"
       artifact-name: dist-packages-${{ github.sha }}
       testing-matrix: |
         {
