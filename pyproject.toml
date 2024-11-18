@@ -110,6 +110,7 @@ extend-select = [
 ]
 ignore = [
     "E731",  # Do not assign a lambda expression, use a def
+    "D100", # Missing docstring in public module
 ]
 # Exclude a variety of commonly ignored directories.
 ignore-init-module-imports = true
@@ -117,7 +118,8 @@ ignore-init-module-imports = true
 [tool.ruff.lint.per-file-ignores]
 "setup.py" = ["D100", "SIM115"]
 "__about__.py" = ["D100"]
-"__init__.py" = ["D100"]
+"__init__.py" = ["D100", "E402"]
+"tests/**" = ["D"]
 
 [tool.ruff.lint.pydocstyle]
 # Use Google-style docstrings.
