@@ -1,2 +1,1 @@
-torch >=2.0.0
-lightning >=2.0.0
+lightning-sdk >=0.1.26
