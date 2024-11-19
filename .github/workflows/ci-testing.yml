@@ -16,9 +16,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
-        python-version: [3.9]
-        requires: ["oldest", "latest"]
+        os: ["ubuntu-latest", "macOS-latest", "windows-latest"]
+        python-version: ["3.9", "3.12"]
+        requires: ["latest"]
+        include:
+          - {os: "ubuntu-20.04", python-version: "3.9", requires: "oldest"}
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     timeout-minutes: 35
@@ -32,19 +34,11 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      # Github Actions: Run step on specific OS: https://stackoverflow.com/a/57948488/4521646
-      #- name: Setup macOS
-      #  if: runner.os == 'macOS'
-      #  run: |
-      #    brew install libomp  # https://github.com/pytorch/pytorch/issues/20030
-
       - name: Set min. dependencies
         if: matrix.requires == 'oldest'
         run: |
-          for fpath in ('requirements.txt', '_requirements/test.txt'):
-              req = open(fpath).read().replace('>=', '==')
-              open(fpath, 'w').write(req)
-        shell: python
+          pip install 'lightning-utilities[cli]'
+          python -m lightning_utilities.cli requirements set-oldest
 
       - name: Get pip cache dir
         id: pip-cache
