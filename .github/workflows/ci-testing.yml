@@ -20,7 +20,7 @@ jobs:
         python-version: ["3.9", "3.12"]
         requires: ["latest"]
         include:
-          - {os: "ubuntu-20.04", python-version: "3.9", requires: "oldest"}
+          - { os: "ubuntu-20.04", python-version: "3.9", requires: "oldest" }
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     timeout-minutes: 35
