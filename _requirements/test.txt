@@ -2,6 +2,5 @@ coverage >=5.0
 pytest >=6.0
 pytest-cov
 pytest-mock
-mypy ==1.13.0
 
 pytorch-lightning >=2.0

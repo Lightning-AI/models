@@ -13,11 +13,11 @@ from lightning_sdk.utils import resolve as sdk_resolvers
 from lightning_utilities import module_available
 
 if TYPE_CHECKING:
-    from torch import nn
+    from torch.nn import Module
 
 if module_available("torch"):
     import torch
-    from torch import nn
+    from torch.nn import Module
 else:
     torch = None
 
@@ -64,7 +64,7 @@ def _get_teamspace(name: str, organization: str) -> Teamspace:
 
 
 def upload_model(
-    model: Union[str, Path, nn.Module],
+    model: Union[str, Path, "Module"],
     name: str,
     progress_bar: bool = True,
     cluster_id: Optional[str] = None,
@@ -88,7 +88,7 @@ def upload_model(
     # if LightningModule and isinstance(model, LightningModule):
     #     path = os.path.join(staging_dir, f"{model.__class__.__name__}.ckpt")
     #     model.save_checkpoint(path)
-    elif torch and isinstance(model, nn.Module):
+    elif torch and isinstance(model, Module):
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pth")
         torch.save(model.state_dict(), path)
     elif isinstance(model, str):
