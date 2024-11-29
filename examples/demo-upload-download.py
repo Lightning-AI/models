@@ -10,7 +10,7 @@ if __name__ == "__main__":
     torch.save(model.state_dict(), "./boring-checkpoint.pt")
 
     # Upload the model checkpoint
-    litmodels.upload_model_files(
+    litmodels.upload_model(
         "./boring-checkpoint.pt",
         "jirka/kaggle/boring-model",
     )
