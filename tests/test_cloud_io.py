@@ -1,3 +1,4 @@
+import os
 from unittest import mock
 
 import pytest
@@ -18,7 +19,7 @@ def test_wrong_model_name(name):
     [
         ("path/to/checkpoint", "path/to/checkpoint"),
         # (BoringModel(), "%s/BoringModel.ckpt"),
-        (Module(), "%s/Module.pth"),
+        (Module(), f"%s{os.path.sep}Module.pth"),
     ],
 )
 def test_upload_model(mocker, tmpdir, model, model_path):
