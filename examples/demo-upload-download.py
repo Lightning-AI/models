@@ -16,7 +16,7 @@ if __name__ == "__main__":
     )
 
     # Download the model checkpoint
-    model_path = litmodels.download_model_files("jirka/kaggle/boring-model", download_dir="./my-models")
+    model_path = litmodels.download_model("jirka/kaggle/boring-model", download_dir="./my-models")
     print(f"Model downloaded to {model_path}")
 
     # Load the model checkpoint

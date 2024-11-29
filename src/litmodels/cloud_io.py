@@ -132,7 +132,7 @@ def upload_model_files(
     )
 
 
-def download_model_files(
+def download_model(
     name: str,
     download_dir: str = ".",
     progress_bar: bool = True,
