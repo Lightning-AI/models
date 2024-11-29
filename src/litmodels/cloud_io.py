@@ -70,7 +70,7 @@ def upload_model(
     cluster_id: Optional[str] = None,
     staging_dir: Optional[str] = None,
 ) -> UploadedModelInfo:
-    """Upload a local checkpoint file to the model store.
+    """Upload a checkpoint to the model store.
 
     Args:
         model: The model to upload. Can be a path to a checkpoint file, a PyTorch model, or a Lightning model.
