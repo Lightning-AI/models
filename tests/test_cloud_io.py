@@ -15,7 +15,7 @@ def test_wrong_model_name(name):
 
 
 @pytest.mark.parametrize(
-    "model, model_path",
+    ("model", "model_path"),
     [
         ("path/to/checkpoint", "path/to/checkpoint"),
         # (BoringModel(), "%s/BoringModel.ckpt"),
