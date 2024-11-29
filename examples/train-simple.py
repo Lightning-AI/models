@@ -2,7 +2,7 @@ import torch.utils.data as data
 import torchvision as tv
 from lightning import Trainer
 from lightning.pytorch.callbacks import ModelCheckpoint
-from litmodels import upload_model
+from litmodels import upload_model_files
 from sample_model import LitAutoEncoder
 
 if __name__ == "__main__":
@@ -30,4 +30,4 @@ if __name__ == "__main__":
         data.DataLoader(val, batch_size=256),
     )
     print(f"last: {vars(checkpoint_callback)}")
-    upload_model(path=checkpoint_callback.last_model_path, name="jirka/kaggle/lit-auto-encoder-simple")
+    upload_model_files(path=checkpoint_callback.last_model_path, name="jirka/kaggle/lit-auto-encoder-simple")

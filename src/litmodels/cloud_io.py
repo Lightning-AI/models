@@ -2,12 +2,31 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-
-from typing import Optional, Tuple
+import os
+import tempfile
+from pathlib import Path
+from typing import TYPE_CHECKING, Optional, Tuple, Union
 
 from lightning_sdk.api.teamspace_api import UploadedModelInfo
 from lightning_sdk.teamspace import Teamspace
 from lightning_sdk.utils import resolve as sdk_resolvers
+from lightning_utilities import module_available
+
+if TYPE_CHECKING:
+    from torch import nn
+
+if module_available("torch"):
+    import torch
+    from torch import nn
+else:
+    torch = None
+
+# if module_available("lightning"):
+#     from lightning import LightningModule
+# elif module_available("pytorch_lightning"):
+#     from pytorch_lightning import LightningModule
+# else:
+#     LightningModule = None
 
 
 def _parse_name(name: str) -> Tuple[str, str, str]:
@@ -45,6 +64,48 @@ def _get_teamspace(name: str, organization: str) -> Teamspace:
 
 
 def upload_model(
+    model: Union[str, Path, nn.Module],
+    name: str,
+    progress_bar: bool = True,
+    cluster_id: Optional[str] = None,
+    staging_dir: Optional[str] = None,
+) -> UploadedModelInfo:
+    """Upload a local checkpoint file to the model store.
+
+    Args:
+        model: The model to upload. Can be a path to a checkpoint file, a PyTorch model, or a Lightning model.
+        name: Name tag of the model to upload. Must be in the format 'organization/teamspace/modelname'
+            where entity is either your username or the name of an organization you are part of.
+        progress_bar: Whether to show a progress bar for the upload.
+        cluster_id: The name of the cluster to use. Only required if it can't be determined
+            automatically.
+        staging_dir: A directory where the model can be saved temporarily. If not provided, a temporary directory will
+            be created and used.
+
+    """
+    if not staging_dir:
+        staging_dir = tempfile.mkdtemp()
+    # if LightningModule and isinstance(model, LightningModule):
+    #     path = os.path.join(staging_dir, f"{model.__class__.__name__}.ckpt")
+    #     model.save_checkpoint(path)
+    elif torch and isinstance(model, nn.Module):
+        path = os.path.join(staging_dir, f"{model.__class__.__name__}.pth")
+        torch.save(model.state_dict(), path)
+    elif isinstance(model, str):
+        path = model
+    elif isinstance(model, Path):
+        path = str(model)
+    else:
+        raise ValueError(f"Unsupported model type {type(model)}")
+    return upload_model_files(
+        path=path,
+        name=name,
+        progress_bar=progress_bar,
+        cluster_id=cluster_id,
+    )
+
+
+def upload_model_files(
     path: str,
     name: str,
     progress_bar: bool = True,
@@ -71,7 +132,7 @@ def upload_model(
     )
 
 
-def download_model(
+def download_model_files(
     name: str,
     download_dir: str = ".",
     progress_bar: bool = True,

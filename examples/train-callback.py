@@ -1,7 +1,7 @@
 import torch.utils.data as data
 import torchvision as tv
 from lightning import Callback, Trainer
-from litmodels import upload_model
+from litmodels import upload_model_files
 from sample_model import LitAutoEncoder
 
 
@@ -11,7 +11,7 @@ class UploadModelCallback(Callback):
         best_model_path = trainer.checkpoint_callback.best_model_path
         if best_model_path:
             print(f"Uploading model: {best_model_path}")
-            upload_model(path=best_model_path, name="jirka/kaggle/lit-auto-encoder-callback")
+            upload_model_files(path=best_model_path, name="jirka/kaggle/lit-auto-encoder-callback")
 
 
 if __name__ == "__main__":

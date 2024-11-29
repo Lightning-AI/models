@@ -10,13 +10,13 @@ if __name__ == "__main__":
     torch.save(model.state_dict(), "./boring-checkpoint.pt")
 
     # Upload the model checkpoint
-    litmodels.upload_model(
+    litmodels.upload_model_files(
         "./boring-checkpoint.pt",
         "jirka/kaggle/boring-model",
     )
 
     # Download the model checkpoint
-    model_path = litmodels.download_model("jirka/kaggle/boring-model", download_dir="./my-models")
+    model_path = litmodels.download_model_files("jirka/kaggle/boring-model", download_dir="./my-models")
     print(f"Model downloaded to {model_path}")
 
     # Load the model checkpoint
