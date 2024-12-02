@@ -5,6 +5,11 @@ from lightning.pytorch.callbacks import ModelCheckpoint
 from litmodels import upload_model
 from sample_model import LitAutoEncoder
 
+# Define the model name - this should be unique to your model
+# The format is <organization>/<teamspace>/<model-name>
+MY_MODEL_NAME = "jirka/kaggle/lit-auto-encoder-callback"
+
+
 if __name__ == "__main__":
     dataset = tv.datasets.MNIST(".", download=True, transform=tv.transforms.ToTensor())
     train, val = data.random_split(dataset, [55000, 5000])
@@ -30,4 +35,4 @@ if __name__ == "__main__":
         data.DataLoader(val, batch_size=256),
     )
     print(f"last: {vars(checkpoint_callback)}")
-    upload_model(path=checkpoint_callback.last_model_path, name="jirka/kaggle/lit-auto-encoder-simple")
+    upload_model(path=checkpoint_callback.last_model_path, name=MY_MODEL_NAME)
