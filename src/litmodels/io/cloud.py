@@ -50,7 +50,7 @@ def _get_teamspace(name: str, organization: str) -> Teamspace:
     return Teamspace(**teamspaces[requested_teamspace])
 
 
-def upload_model_files(
+def upload_model_file(
     name: str,
     path: str,
     progress_bar: bool = True,
