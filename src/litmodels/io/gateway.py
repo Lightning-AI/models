@@ -1,12 +1,12 @@
 import os
 import tempfile
 from pathlib import Path
-from typing import Union, Optional
+from typing import Optional, Union
 
 from lightning_sdk.api.teamspace_api import UploadedModelInfo
 from torch.nn import Module
 
-from litmodels.io.cloud import torch, upload_model_files, download_model_file
+from litmodels.io.cloud import download_model_file, torch, upload_model_files
 
 
 def upload_model(
@@ -49,6 +49,7 @@ def upload_model(
         progress_bar=progress_bar,
         cluster_id=cluster_id,
     )
+
 
 def download_model(
     name: str,
