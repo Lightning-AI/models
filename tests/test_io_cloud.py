@@ -30,7 +30,7 @@ def test_upload_model(mocker, tmpdir, model, model_path):
 
     # The lit-logger function is just a wrapper around the SDK function
     upload_model(
-        model,
+        model=model,
         name="org-name/teamspace/model-name",
         cluster_id="cluster_id",
         staging_dir=tmpdir,
