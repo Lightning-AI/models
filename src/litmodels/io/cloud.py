@@ -2,20 +2,11 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import Optional, Tuple
 
 from lightning_sdk.api.teamspace_api import UploadedModelInfo
 from lightning_sdk.teamspace import Teamspace
 from lightning_sdk.utils import resolve as sdk_resolvers
-from lightning_utilities import module_available
-
-if TYPE_CHECKING:
-    pass
-
-if module_available("torch"):
-    pass
-else:
-    torch = None
 
 # if module_available("lightning"):
 #     from lightning import LightningModule

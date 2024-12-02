@@ -4,9 +4,15 @@ from pathlib import Path
 from typing import Optional, Union
 
 from lightning_sdk.api.teamspace_api import UploadedModelInfo
+from lightning_utilities import module_available
 from torch.nn import Module
 
-from litmodels.io.cloud import download_model_file, torch, upload_model_files
+from litmodels.io.cloud import download_model_file, upload_model_files
+
+if module_available("torch"):
+    import torch
+else:
+    torch = None
 
 
 def upload_model(
