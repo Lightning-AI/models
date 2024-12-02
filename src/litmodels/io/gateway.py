@@ -7,7 +7,7 @@ from lightning_sdk.api.teamspace_api import UploadedModelInfo
 from lightning_utilities import module_available
 from torch.nn import Module
 
-from litmodels.io.cloud import download_model_file, upload_model_files
+from litmodels.io.cloud import download_model_file, upload_model_file
 
 if module_available("torch"):
     import torch
@@ -49,7 +49,7 @@ def upload_model(
         path = str(model)
     else:
         raise ValueError(f"Unsupported model type {type(model)}")
-    return upload_model_files(
+    return upload_model_file(
         path=path,
         name=name,
         progress_bar=progress_bar,
