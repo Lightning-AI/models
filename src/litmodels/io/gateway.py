@@ -5,12 +5,12 @@ from typing import Optional, Union
 
 from lightning_sdk.api.teamspace_api import UploadedModelInfo
 from lightning_utilities import module_available
-from torch.nn import Module
 
 from litmodels.io.cloud import download_model_file, upload_model_file
 
 if module_available("torch"):
     import torch
+    from torch.nn import Module
 else:
     torch = None
 
