@@ -47,7 +47,7 @@ def test_upload_model(mocker, tmpdir, model, model_path):
 def test_download_model(mocker):
     # mocking the _get_teamspace to return another mock
     ts_mock = mock.MagicMock()
-    mocker.patch("litmodels.cloud_io._get_teamspace", return_value=ts_mock)
+    mocker.patch("litmodels.io.cloud._get_teamspace", return_value=ts_mock)
     # The lit-logger function is just a wrapper around the SDK function
     download_model(
         name="org-name/teamspace/model-name",
