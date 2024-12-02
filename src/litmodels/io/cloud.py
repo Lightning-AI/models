@@ -2,10 +2,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-import os
-import tempfile
-from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Optional, Tuple
 
 from lightning_sdk.api.teamspace_api import UploadedModelInfo
 from lightning_sdk.teamspace import Teamspace
@@ -13,11 +10,10 @@ from lightning_sdk.utils import resolve as sdk_resolvers
 from lightning_utilities import module_available
 
 if TYPE_CHECKING:
-    from torch.nn import Module
+    pass
 
 if module_available("torch"):
-    import torch
-    from torch.nn import Module
+    pass
 else:
     torch = None
 
@@ -63,60 +59,18 @@ def _get_teamspace(name: str, organization: str) -> Teamspace:
     return Teamspace(**teamspaces[requested_teamspace])
 
 
-def upload_model(
-    model: Union[str, Path, "Module"],
-    name: str,
-    progress_bar: bool = True,
-    cluster_id: Optional[str] = None,
-    staging_dir: Optional[str] = None,
-) -> UploadedModelInfo:
-    """Upload a checkpoint to the model store.
-
-    Args:
-        model: The model to upload. Can be a path to a checkpoint file, a PyTorch model, or a Lightning model.
-        name: Name tag of the model to upload. Must be in the format 'organization/teamspace/modelname'
-            where entity is either your username or the name of an organization you are part of.
-        progress_bar: Whether to show a progress bar for the upload.
-        cluster_id: The name of the cluster to use. Only required if it can't be determined
-            automatically.
-        staging_dir: A directory where the model can be saved temporarily. If not provided, a temporary directory will
-            be created and used.
-
-    """
-    if not staging_dir:
-        staging_dir = tempfile.mkdtemp()
-    # if LightningModule and isinstance(model, LightningModule):
-    #     path = os.path.join(staging_dir, f"{model.__class__.__name__}.ckpt")
-    #     model.save_checkpoint(path)
-    if torch and isinstance(model, Module):
-        path = os.path.join(staging_dir, f"{model.__class__.__name__}.pth")
-        torch.save(model.state_dict(), path)
-    elif isinstance(model, str):
-        path = model
-    elif isinstance(model, Path):
-        path = str(model)
-    else:
-        raise ValueError(f"Unsupported model type {type(model)}")
-    return upload_model_files(
-        path=path,
-        name=name,
-        progress_bar=progress_bar,
-        cluster_id=cluster_id,
-    )
-
-
 def upload_model_files(
-    path: str,
     name: str,
+    path: str,
     progress_bar: bool = True,
     cluster_id: Optional[str] = None,
 ) -> UploadedModelInfo:
     """Upload a local checkpoint file to the model store.
 
     Args:
-        path: Path to the model file to upload.
-        name: Name tag of the model to upload. Must be in the format 'organization/teamspace/modelname'
+        name: Name of the model to upload. Must be in the format 'organization/teamspace/modelname'
             where entity is either your username or the name of an organization you are part of.
+        path: Path to the model file to upload.
         progress_bar: Whether to show a progress bar for the upload.
         cluster_id: The name of the cluster to use. Only required if it can't be determined
             automatically.
@@ -132,7 +86,7 @@ def upload_model_files(
     )
 
 
-def download_model(
+def download_model_file(
     name: str,
     download_dir: str = ".",
     progress_bar: bool = True,
@@ -140,7 +94,7 @@ def download_model(
     """Download a checkpoint from the model store.
 
     Args:
-        name: Name tag of the model to download. Must be in the format 'organization/teamspace/modelname'
+        name: Name of the model to download. Must be in the format 'organization/teamspace/modelname'
             where entity is either your username or the name of an organization you are part of.
         download_dir: A path to directory where the model should be downloaded. Defaults
             to the current working directory.
