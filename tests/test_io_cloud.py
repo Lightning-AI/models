@@ -3,14 +3,14 @@ from unittest import mock
 
 import pytest
 from litmodels import download_model, upload_model
-from litmodels.io import upload_model_file
+from litmodels.io import upload_model_files
 from torch.nn import Module
 
 
 @pytest.mark.parametrize("name", ["org/model", "model-name", "/too/many/slashes"])
 def test_wrong_model_name(name):
     with pytest.raises(ValueError, match=r".*organization/teamspace/model.*"):
-        upload_model_file(path="path/to/checkpoint", name=name)
+        upload_model_files(path="path/to/checkpoint", name=name)
     with pytest.raises(ValueError, match=r".*organization/teamspace/model.*"):
         download_model(name=name)
 

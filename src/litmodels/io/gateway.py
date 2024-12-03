@@ -6,7 +6,7 @@ from typing import Optional, Union
 from lightning_sdk.api.teamspace_api import UploadedModelInfo
 from lightning_utilities import module_available
 
-from litmodels.io.cloud import download_model_file, upload_model_file
+from litmodels.io.cloud import download_model_files, upload_model_files
 
 if module_available("torch"):
     import torch
@@ -49,7 +49,7 @@ def upload_model(
         path = str(model)
     else:
         raise ValueError(f"Unsupported model type {type(model)}")
-    return upload_model_file(
+    return upload_model_files(
         path=path,
         name=name,
         progress_bar=progress_bar,
@@ -74,7 +74,7 @@ def download_model(
     Returns:
         The absolute path to the downloaded model file or folder.
     """
-    return download_model_file(
+    return download_model_files(
         name=name,
         download_dir=download_dir,
         progress_bar=progress_bar,
