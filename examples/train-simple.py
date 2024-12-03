@@ -7,7 +7,7 @@ from sample_model import LitAutoEncoder
 
 # Define the model name - this should be unique to your model
 # The format is <organization>/<teamspace>/<model-name>
-MY_MODEL_NAME = "jirka/kaggle/lit-auto-encoder-callback"
+MY_MODEL_NAME = "jirka/kaggle/lit-auto-encoder-simple"
 
 
 if __name__ == "__main__":
