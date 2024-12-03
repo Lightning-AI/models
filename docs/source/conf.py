@@ -84,7 +84,7 @@ def _convert_markdown(path_in: str, path_out: str) -> None:
 
 
 # export the READme
-_convert_markdown(os.path.join(_PATH_ROOT, "README.md"), "readme.md")
+_convert_markdown(os.path.join(_PATH_ROOT, "README.md"), "readme.rst")
 
 # -- General configuration ---------------------------------------------------
 
