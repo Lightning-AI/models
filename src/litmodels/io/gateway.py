@@ -21,6 +21,7 @@ def upload_model(
     progress_bar: bool = True,
     cluster_id: Optional[str] = None,
     staging_dir: Optional[str] = None,
+    verbose: Union[bool, int] = 0,
 ) -> UploadedModelInfo:
     """Upload a checkpoint to the model store.
 
@@ -33,6 +34,7 @@ def upload_model(
             automatically.
         staging_dir: A directory where the model can be saved temporarily. If not provided, a temporary directory will
             be created and used.
+        verbose: Whether to print some additional information about the uploaded model.
 
     """
     if not staging_dir:
@@ -54,6 +56,7 @@ def upload_model(
         name=name,
         progress_bar=progress_bar,
         cluster_id=cluster_id,
+        verbose=verbose,
     )
 
 

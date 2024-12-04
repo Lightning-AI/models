@@ -23,7 +23,7 @@ def test_wrong_model_name(name):
         (Module(), f"%s{os.path.sep}Module.pth", True),
     ],
 )
-def test_upload_model(mocker, tmpdir, model, model_path):
+def test_upload_model(mocker, tmpdir, model, model_path, verbose):
     # mocking the _get_teamspace to return another mock
     ts_mock = mock.MagicMock()
     mocker.patch("litmodels.io.cloud._get_teamspace", return_value=ts_mock)
@@ -34,6 +34,7 @@ def test_upload_model(mocker, tmpdir, model, model_path):
         name="org-name/teamspace/model-name",
         cluster_id="cluster_id",
         staging_dir=tmpdir,
+        verbose=verbose,
     )
     expected_path = model_path % str(tmpdir) if "%" in model_path else model_path
     ts_mock.upload_model.assert_called_once_with(
