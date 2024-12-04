@@ -16,11 +16,11 @@ def test_wrong_model_name(name):
 
 
 @pytest.mark.parametrize(
-    ("model", "model_path"),
+    ("model", "model_path", "verbose"),
     [
-        ("path/to/checkpoint", "path/to/checkpoint"),
+        ("path/to/checkpoint", "path/to/checkpoint", False),
         # (BoringModel(), "%s/BoringModel.ckpt"),
-        (Module(), f"%s{os.path.sep}Module.pth"),
+        (Module(), f"%s{os.path.sep}Module.pth", True),
     ],
 )
 def test_upload_model(mocker, tmpdir, model, model_path):
