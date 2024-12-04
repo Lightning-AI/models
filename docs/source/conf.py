@@ -386,13 +386,10 @@ autosectionlabel_prefix_document = True
 # only run doctests marked with a ".. doctest::" directive
 doctest_test_doctest_blocks = ""
 doctest_global_setup = """
-
-import importlib
-import os
-import torch
-
-import pytorch_lightning as pl
-from pytorch_lightning import Trainer, LightningModule
-
 """
 coverage_skip_undoc_in_source = True
+
+linkcheck_ignore = [
+    # ignore the following URLs
+    "https://github.com/gridai/lit-logger",
+]
