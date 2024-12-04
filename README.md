@@ -76,7 +76,7 @@ print(f"last: {vars(checkpoint_callback)}")
 upload_model(model=checkpoint_callback.last_model_path, name=MY_MODEL_NAME)
 ```
 
-To load the model, use the `load_model` function.
+To load the model, use the `download_model` function.
 
 ```python
 from lightning import Trainer
