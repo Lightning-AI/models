@@ -5,6 +5,7 @@
 from typing import Optional, Tuple, Union
 
 from lightning_sdk.api.teamspace_api import UploadedModelInfo
+from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
 from lightning_sdk.teamspace import Teamspace
 from lightning_sdk.utils import resolve as sdk_resolvers
 
@@ -65,7 +66,7 @@ def _print_model_link(org_name: str, teamspace_name: str, model_name: str, verbo
             - If set to 1, the link will be printed only once.
             - If set to 2, the link will be printed every time.
     """
-    url = f"https://lightning.ai/{org_name}/{teamspace_name}/models/{model_name}"
+    url = f"{LIGHTNING_CLOUD_URL}/{org_name}/{teamspace_name}/models/{model_name}"
     msg = f"Model uploaded successfully. Link to the model: '{url}'"
     if int(verbose) > 1:
         print(msg)
