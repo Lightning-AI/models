@@ -108,7 +108,7 @@ trainer.fit(
 )
 ```
 
-You can also use model store sto together with [LitLogger](https://github.com/gridai/lit-logger) to log your model to the cloud storage.
+You can also use model store together with [LitLogger](https://github.com/gridai/lit-logger) to log your model to the cloud storage.
 
 ```python
 import os
