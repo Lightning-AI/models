@@ -109,6 +109,7 @@ YOu can also enhance your training with simple Checkpointing callback which woul
 This can would be handy especially with long trainings or using interruptible machines so you would always resume/recover from the best model.
 
 ```python
+import os
 import torch.utils.data as data
 import torchvision as tv
 from lightning import Callback, Trainer
@@ -131,10 +132,9 @@ class LitModel(BoringModel):
 class UploadModelCallback(Callback):
     def on_train_epoch_end(self, trainer, pl_module):
         # Get the best model path from the checkpoint callback
-        best_model_path = trainer.checkpoint_callback.best_model_path
-        if best_model_path:
-            print(f"Uploading model: {best_model_path}")
-            upload_model(model=best_model_path, name=MY_MODEL_NAME)
+        checkpoint_path = getattr(trainer.checkpoint_callback, "best_model_path")
+        if checkpoint_path and os.path.exists(checkpoint_path):
+            upload_model(model=checkpoint_path, name=MY_MODEL_NAME)
 
 
 dataset = tv.datasets.MNIST(".", download=True, transform=tv.transforms.ToTensor())
