@@ -2,24 +2,12 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-import os
-import tempfile
-from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 from lightning_sdk.api.teamspace_api import UploadedModelInfo
+from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
 from lightning_sdk.teamspace import Teamspace
 from lightning_sdk.utils import resolve as sdk_resolvers
-from lightning_utilities import module_available
-
-if TYPE_CHECKING:
-    from torch.nn import Module
-
-if module_available("torch"):
-    import torch
-    from torch.nn import Module
-else:
-    torch = None
 
 # if module_available("lightning"):
 #     from lightning import LightningModule
@@ -27,6 +15,8 @@ else:
 #     from pytorch_lightning import LightningModule
 # else:
 #     LightningModule = None
+
+_SHOWED_MODEL_LINKS = []
 
 
 def _parse_name(name: str) -> Tuple[str, str, str]:
@@ -63,76 +53,61 @@ def _get_teamspace(name: str, organization: str) -> Teamspace:
     return Teamspace(**teamspaces[requested_teamspace])
 
 
-def upload_model(
-    model: Union[str, Path, "Module"],
-    name: str,
-    progress_bar: bool = True,
-    cluster_id: Optional[str] = None,
-    staging_dir: Optional[str] = None,
-) -> UploadedModelInfo:
-    """Upload a checkpoint to the model store.
+def _print_model_link(org_name: str, teamspace_name: str, model_name: str, verbose: Union[bool, int]) -> None:
+    """Print a link to the uploaded model.
 
     Args:
-        model: The model to upload. Can be a path to a checkpoint file, a PyTorch model, or a Lightning model.
-        name: Name tag of the model to upload. Must be in the format 'organization/teamspace/modelname'
-            where entity is either your username or the name of an organization you are part of.
-        progress_bar: Whether to show a progress bar for the upload.
-        cluster_id: The name of the cluster to use. Only required if it can't be determined
-            automatically.
-        staging_dir: A directory where the model can be saved temporarily. If not provided, a temporary directory will
-            be created and used.
+        org_name: Name of the organization.
+        teamspace_name: Name of the teamspace.
+        model_name: Name of the model.
+        verbose: Whether to print the link:
 
+            - If set to 0, no link will be printed.
+            - If set to 1, the link will be printed only once.
+            - If set to 2, the link will be printed every time.
     """
-    if not staging_dir:
-        staging_dir = tempfile.mkdtemp()
-    # if LightningModule and isinstance(model, LightningModule):
-    #     path = os.path.join(staging_dir, f"{model.__class__.__name__}.ckpt")
-    #     model.save_checkpoint(path)
-    if torch and isinstance(model, Module):
-        path = os.path.join(staging_dir, f"{model.__class__.__name__}.pth")
-        torch.save(model.state_dict(), path)
-    elif isinstance(model, str):
-        path = model
-    elif isinstance(model, Path):
-        path = str(model)
-    else:
-        raise ValueError(f"Unsupported model type {type(model)}")
-    return upload_model_files(
-        path=path,
-        name=name,
-        progress_bar=progress_bar,
-        cluster_id=cluster_id,
-    )
+    url = f"{LIGHTNING_CLOUD_URL}/{org_name}/{teamspace_name}/models/{model_name}"
+    msg = f"Model uploaded successfully. Link to the model: '{url}'"
+    if int(verbose) > 1:
+        print(msg)
+    elif url not in _SHOWED_MODEL_LINKS:
+        print(msg)
+        _SHOWED_MODEL_LINKS.append(url)
 
 
 def upload_model_files(
-    path: str,
     name: str,
+    path: str,
     progress_bar: bool = True,
     cluster_id: Optional[str] = None,
+    verbose: Union[bool, int] = 1,
 ) -> UploadedModelInfo:
     """Upload a local checkpoint file to the model store.
 
     Args:
-        path: Path to the model file to upload.
-        name: Name tag of the model to upload. Must be in the format 'organization/teamspace/modelname'
+        name: Name of the model to upload. Must be in the format 'organization/teamspace/modelname'
             where entity is either your username or the name of an organization you are part of.
+        path: Path to the model file to upload.
         progress_bar: Whether to show a progress bar for the upload.
         cluster_id: The name of the cluster to use. Only required if it can't be determined
             automatically.
+        verbose: Whether to print a link to the uploaded model. If set to 0, no link will be printed.
 
     """
     org_name, teamspace_name, model_name = _parse_name(name)
     teamspace = _get_teamspace(name=teamspace_name, organization=org_name)
-    return teamspace.upload_model(
+    info = teamspace.upload_model(
         path=path,
         name=model_name,
         progress_bar=progress_bar,
         cluster_id=cluster_id,
     )
+    if verbose:
+        _print_model_link(org_name, teamspace_name, model_name, verbose)
+    return info
 
 
-def download_model(
+def download_model_files(
     name: str,
     download_dir: str = ".",
     progress_bar: bool = True,
@@ -140,7 +115,7 @@ def download_model(
     """Download a checkpoint from the model store.
 
     Args:
-        name: Name tag of the model to download. Must be in the format 'organization/teamspace/modelname'
+        name: Name of the model to download. Must be in the format 'organization/teamspace/modelname'
             where entity is either your username or the name of an organization you are part of.
         download_dir: A path to directory where the model should be downloaded. Defaults
             to the current working directory.
