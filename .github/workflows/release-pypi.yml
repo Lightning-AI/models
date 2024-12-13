@@ -21,8 +21,6 @@ jobs:
 
       - name: Install dependencies
         run: pip install -U build twine
-      - name: Overview Readme for release
-        run: echo "# Lit Models" > README.md
       - name: Build package
         run: python -m build
       - name: Check package
