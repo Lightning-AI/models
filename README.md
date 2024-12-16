@@ -91,7 +91,7 @@ trainer = Trainer(max_epochs=4)
 trainer.fit(LitModel(), ckpt_path=checkpoint_path)
 ```
 
-YOu can also enhance your training with simple Checkpointing callback which would always save the best model to the cloud storage and continue training.
+You can also enhance your training with a simple Checkpointing callback which would always save the best model to the cloud storage and continue training.
 This can would be handy especially with long trainings or using interruptible machines so you would always resume/recover from the best model.
 
 ```python
