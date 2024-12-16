@@ -1,7 +1,7 @@
 import os
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from lightning_utilities import module_available
 
@@ -66,7 +66,7 @@ def download_model(
     name: str,
     download_dir: str = ".",
     progress_bar: bool = True,
-) -> str:
+) -> Union[str, List[str]]:
     """Download a checkpoint from the model store.
 
     Args:
