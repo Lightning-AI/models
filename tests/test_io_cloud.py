@@ -23,37 +23,34 @@ def test_wrong_model_name(name):
         (Module(), f"%s{os.path.sep}Module.pth", True),
     ],
 )
-def test_upload_model(mocker, tmpdir, model, model_path, verbose):
-    # mocking the _get_teamspace to return another mock
-    ts_mock = mock.MagicMock()
-    mocker.patch("litmodels.io.cloud._get_teamspace", return_value=ts_mock)
+@mock.patch("litmodels.io.cloud.upload_model")
+def test_upload_model(mock_upload_model, tmpdir, model, model_path, verbose):
+    mock_upload_model.return_value.name = "org-name/teamspace/model-name"
 
     # The lit-logger function is just a wrapper around the SDK function
     upload_model(
         model=model,
         name="org-name/teamspace/model-name",
-        cluster_id="cluster_id",
+        cloud_account="cluster_id",
         staging_dir=tmpdir,
         verbose=verbose,
     )
     expected_path = model_path % str(tmpdir) if "%" in model_path else model_path
-    ts_mock.upload_model.assert_called_once_with(
+    mock_upload_model.assert_called_once_with(
         path=expected_path,
-        name="model-name",
-        cluster_id="cluster_id",
+        name="org-name/teamspace/model-name",
+        cloud_account="cluster_id",
         progress_bar=True,
     )
 
 
-def test_download_model(mocker):
-    # mocking the _get_teamspace to return another mock
-    ts_mock = mock.MagicMock()
-    mocker.patch("litmodels.io.cloud._get_teamspace", return_value=ts_mock)
+@mock.patch("litmodels.io.cloud.download_model")
+def test_download_model(mock_download_model):
     # The lit-logger function is just a wrapper around the SDK function
     download_model(
         name="org-name/teamspace/model-name",
         download_dir="where/to/download",
     )
-    ts_mock.download_model.assert_called_once_with(
-        name="model-name", download_dir="where/to/download", progress_bar=True
+    mock_download_model.assert_called_once_with(
+        name="org-name/teamspace/model-name", download_dir="where/to/download", progress_bar=True
     )
