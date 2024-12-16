@@ -2,7 +2,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-from typing import TYPE_CHECKING, Optional, Tuple, Union, List
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
 from lightning_sdk.models import download_model, upload_model
@@ -35,9 +35,7 @@ def _print_model_link(name: str, verbose: Union[bool, int]) -> None:
     """Print a link to the uploaded model.
 
     Args:
-        org_name: Name of the organization.
-        teamspace_name: Name of the teamspace.
-        model_name: Name of the model.
+        name: Name of the model.
         verbose: Whether to print the link:
 
             - If set to 0, no link will be printed.
