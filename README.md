@@ -39,6 +39,10 @@ from lightning.pytorch.callbacks import ModelCheckpoint
 from litmodels import upload_model
 from litmodels.demos import BoringModel
 
+# Define the model name - this should be unique to your model
+# The format is <organization>/<teamspace>/<model-name>
+MY_MODEL_NAME = "jirka/kaggle/lit-boring-model"
+
 
 class LitModel(BoringModel):
     def training_step(self, batch, batch_idx: int):
@@ -48,32 +52,14 @@ class LitModel(BoringModel):
         return {"loss": loss}
 
 
-# Define the model name - this should be unique to your model
-# The format is <organization>/<teamspace>/<model-name>
-MY_MODEL_NAME = "jirka/kaggle/lit-boring-model"
-
-# Define the model
-model = LitModel()
-# Save the best model based on validation loss
-checkpoint_callback = ModelCheckpoint(
-    monitor="train_loss",  # Metric to monitor
-    save_top_k=1,  # Only save the best model (use -1 to save all)
-    mode="min",  # 'min' for loss, 'max' for accuracy
-    save_last=True,  # Additionally save the last checkpoint
-    dirpath="my_checkpoints/",  # Directory to save checkpoints
-    filename="{epoch:02d}-{val_loss:.2f}",  # Custom checkpoint filename
-)
-
-# Train the model
-trainer = Trainer(
-    max_epochs=2,
-    callbacks=[checkpoint_callback],
-)
-trainer.fit(model)
+# Configure Lightning Trainer
+trainer = Trainer(max_epochs=2)
+# Define the model and train it
+trainer.fit(LitModel())
 
 # Upload the best model to cloud storage
-print(f"last: {vars(checkpoint_callback)}")
-upload_model(model=checkpoint_callback.last_model_path, name=MY_MODEL_NAME)
+checkpoint_path = getattr(trainer.checkpoint_callback, "best_model_path")
+upload_model(model=checkpoint_path, name=MY_MODEL_NAME)
 ```
 
 To load the model, use the `download_model` function.
@@ -97,12 +83,12 @@ class LitModel(BoringModel):
 
 
 # Load the model from cloud storage
-model_path = download_model(name=MY_MODEL_NAME, download_dir="my_models")
-print(f"model: {model_path}")
+checkpoint_path = download_model(name=MY_MODEL_NAME, download_dir="my_models")
+print(f"model: {checkpoint_path}")
 
 # Train the model with extended training period
 trainer = Trainer(max_epochs=4)
-trainer.fit(LitModel(), ckpt_path=model_path)
+trainer.fit(LitModel(), ckpt_path=checkpoint_path)
 ```
 
 YOu can also enhance your training with simple Checkpointing callback which would always save the best model to the cloud storage and continue training.

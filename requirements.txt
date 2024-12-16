@@ -1,4 +1,4 @@
 # NOTE: once we add more dependencies, consider update dependabot to check for updates
 
-lightning-sdk >=0.1.35
+lightning-sdk >=0.1.40
 lightning-utilities
