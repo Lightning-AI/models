@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 from typing import Optional, Union
 
-from lightning_sdk.api.teamspace_api import UploadedModelInfo
+from lightning_sdk.models import UploadedModelInfo
 from lightning_utilities import module_available
 
 from litmodels.io.cloud import download_model_files, upload_model_files

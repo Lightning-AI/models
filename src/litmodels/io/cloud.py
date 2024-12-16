@@ -4,8 +4,8 @@
 #
 from typing import Optional, Tuple, Union
 
-from lightning_sdk.api.teamspace_api import UploadedModelInfo
 from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
+from lightning_sdk.models import UploadedModelInfo
 from lightning_sdk.teamspace import Teamspace
 from lightning_sdk.utils import resolve as sdk_resolvers
 
