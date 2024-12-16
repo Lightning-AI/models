@@ -1,40 +1,158 @@
-# Lightning Sample project/package
+# Lightning Models
 
-This is starter project template which shall simplify initial steps for each new PL project...
+This package provides utilities for saving and loading machine learning models using PyTorch Lightning. It aims to simplify the process of managing model checkpoints, making it easier to save, load, and share models.
+
+## Features
+
+- **Save Models**: Easily save your trained models to cloud storage.
+- **Load Models**: Load pre-trained models for inference or further training.
+- **Checkpoint Management**: Manage multiple checkpoints with ease.
+- **Cloud Integration**: Support for saving and loading models from cloud storage services.
 
 [![lightning](https://img.shields.io/badge/-Lightning_2.0+-792ee5?logo=pytorchlightning&logoColor=white)](https://lightning.ai/)
-[![CI testing](https://github.com/Lightning-AI/lightning-sandbox/actions/workflows/ci-testing.yml/badge.svg?event=push)](https://github.com/Lightning-AI/lightning-sandbox/actions/workflows/ci-testing.yml)
-[![General checks](https://github.com/Lightning-AI/lightning-sandbox/actions/workflows/ci-checks.yml/badge.svg?event=push)](https://github.com/Lightning-AI/lightning-sandbox/actions/workflows/ci-checks.yml)
-[![Documentation Status](https://readthedocs.org/projects/lightning-sandbox/badge/?version=latest)](https://lightning-sandbox.readthedocs.io/en/latest/?badge=latest)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Lightning-AI/lightning-sandbox/main.svg?badge_token=mqheL1-cTn-280Vx4cJUdg)](https://results.pre-commit.ci/latest/github/Lightning-AI/lightning-sandbox/main?badge_token=mqheL1-cTn-280Vx4cJUdg)
+[![CI testing](https://github.com/Lightning-AI/models/actions/workflows/ci-testing.yml/badge.svg?event=push)](https://github.com/Lightning-AI/models/actions/workflows/ci-testing.yml)
+[![General checks](https://github.com/Lightning-AI/models/actions/workflows/ci-checks.yml/badge.svg?event=push)](https://github.com/Lightning-AI/models/actions/workflows/ci-checks.yml)
+[![Documentation Status](https://readthedocs.org/projects/models/badge/?version=latest)](https://models.readthedocs.io/en/latest/?badge=latest)
+[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Lightning-AI/models/main.svg?badge_token=mqheL1-cTn-280Vx4cJUdg)](https://results.pre-commit.ci/latest/github/Lightning-AI/models/main?badge_token=mqheL1-cTn-280Vx4cJUdg)
 
-\* the Read-The-Docs is failing as this one leads to the public domain which requires the repo to be public too
+## Installation
 
-## Included
+To install the package, you can use `pip` from [Test PyPI](https://test.pypi.org/project/litmodels/):
 
-Listing the implemented sections:
+```bash
+pip install -i https://test.pypi.org/simple/ litmodels
+```
 
-- sample package named `litmodels`
-- setting [CI](https://github.com/Lightning-AI/lightning-sandbox/actions?query=workflow%3A%22CI+testing%22) for package and _tests_ folder
-- setup/install package
-- setting docs with Sphinx
-- automatic PyPI release on GH release
-- Docs deployed as [GH pages](https://Lightning-AI.github.io/lightning-sandbox)
-- Makefile for building docs with `make docs` and run all tests `make test`
+Or installing from source:
 
-## To be Done aka cross-check
+```bash
+pip install https://github.com/Lightning-AI/models/archive/refs/heads/main.zip
+```
 
-You still need to enable some external integrations such as:
+## Usage
 
-- [ ] update path used in the badges to the repository
-- [ ] lock the main breach in GH setting - no direct push without PR
-- [ ] set `gh-pages` as website and _docs_ as source folder in GH setting
-- [ ] init Read-The-Docs (add this new project)
-- [ ] add credentials for releasing package to PyPI
-- [ ] specify license in `LICENSE` file and package init
+Here's a simple example of how to save and load a model using `litmodels`. First, you need to train a model using PyTorch Lightning. Then, you can save the model using the `upload_model` function.
 
-## Tests / Docs notes
+```python
+from lightning import Trainer
+from lightning.pytorch.callbacks import ModelCheckpoint
+from litmodels import upload_model
+from litmodels.demos import BoringModel
 
-- We are using [Napoleon style,](https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html) and we shall use static types...
-- It is nice to se [doctest](https://docs.python.org/3/library/doctest.html) as they are also generated as examples in documentation
-- For wider and edge cases testing use [pytest parametrization](https://docs.pytest.org/en/stable/parametrize.html) :\]
+# Define the model name - this should be unique to your model
+# The format is <organization>/<teamspace>/<model-name>
+MY_MODEL_NAME = "jirka/kaggle/lit-boring-model"
+
+
+class LitModel(BoringModel):
+    def training_step(self, batch, batch_idx: int):
+        loss = self.step(batch)
+        # logging the computed loss
+        self.log("train_loss", loss)
+        return {"loss": loss}
+
+
+# Configure Lightning Trainer
+trainer = Trainer(max_epochs=2)
+# Define the model and train it
+trainer.fit(LitModel())
+
+# Upload the best model to cloud storage
+checkpoint_path = getattr(trainer.checkpoint_callback, "best_model_path")
+upload_model(model=checkpoint_path, name=MY_MODEL_NAME)
+```
+
+To load the model, use the `download_model` function.
+
+```python
+from lightning import Trainer
+from litmodels import download_model
+from litmodels.demos import BoringModel
+
+
+# Define the model name - this should be unique to your model
+# The format is <organization>/<teamspace>/<model-name>:<model-version>
+MY_MODEL_NAME = "jirka/kaggle/lit-boring-model:latest"
+
+
+class LitModel(BoringModel):
+    def training_step(self, batch, batch_idx: int):
+        loss = self.step(batch)
+        # logging the computed loss
+        self.log("train_loss", loss)
+        return {"loss": loss}
+
+
+# Load the model from cloud storage
+checkpoint_path = download_model(name=MY_MODEL_NAME, download_dir="my_models")
+print(f"model: {checkpoint_path}")
+
+# Train the model with extended training period
+trainer = Trainer(max_epochs=4)
+trainer.fit(LitModel(), ckpt_path=checkpoint_path)
+```
+
+You can also use model store together with [LitLogger](https://github.com/gridai/lit-logger) to log your model to the cloud storage.
+
+```python
+import os
+import lightning as L
+from psutil import cpu_count
+from torch import optim, nn
+from torch.utils.data import DataLoader
+from torchvision.datasets import MNIST
+from torchvision.transforms import ToTensor
+from litlogger import LightningLogger
+
+
+class LitAutoEncoder(L.LightningModule):
+
+    def __init__(self, lr=1e-3, inp_size=28):
+        super().__init__()
+
+        self.encoder = nn.Sequential(
+            nn.Linear(inp_size * inp_size, 64), nn.ReLU(), nn.Linear(64, 3)
+        )
+        self.decoder = nn.Sequential(
+            nn.Linear(3, 64), nn.ReLU(), nn.Linear(64, inp_size * inp_size)
+        )
+        self.lr = lr
+        self.save_hyperparameters()
+
+    def training_step(self, batch, batch_idx):
+        x, y = batch
+        x = x.view(x.size(0), -1)
+        z = self.encoder(x)
+        x_hat = self.decoder(z)
+        loss = nn.functional.mse_loss(x_hat, x)
+        # log metrics
+        self.log("train_loss", loss)
+        return loss
+
+    def configure_optimizers(self):
+        optimizer = optim.Adam(self.parameters(), lr=self.lr)
+        return optimizer
+
+
+if __name__ == "__main__":
+    # init the autoencoder
+    autoencoder = LitAutoEncoder(lr=1e-3, inp_size=28)
+
+    # setup data
+    train_loader = DataLoader(
+        dataset=MNIST(os.getcwd(), download=True, transform=ToTensor()),
+        batch_size=32,
+        shuffle=True,
+        num_workers=cpu_count(),
+        persistent_workers=True,
+    )
+
+    # configure the logger
+    lit_logger = LightningLogger(log_model=True)
+
+    # pass logger to the Trainer
+    trainer = L.Trainer(max_epochs=5, logger=lit_logger)
+
+    # train the model
+    trainer.fit(model=autoencoder, train_dataloaders=train_loader)
+```

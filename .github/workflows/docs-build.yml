@@ -2,8 +2,6 @@ name: "Build (& deploy) Docs"
 on:
   push:
     branches: [main]
-  pull_request:
-    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -15,7 +13,6 @@ jobs:
   # https://github.com/marketplace/actions/deploy-to-github-pages
   docs-deploy:
     needs: build-docs
-    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 # deploy needs git credentials
@@ -26,7 +23,7 @@ jobs:
           path: docs/build/html
 
       - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.6.9
+        uses: JamesIves/github-pages-deploy-action@v4.7.1
         if: ${{ github.event_name == 'push' }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}

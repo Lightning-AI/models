@@ -9,10 +9,10 @@ updates:
     directory: "/"
     # Check for updates once a week
     schedule:
-      interval: "monthly"
+      interval: "daily"
     # Labels on pull requests for version updates only
     labels:
-      - "ci / tests"
+      - "dependencies"
     pull-request-branch-name:
       # Separate sections of the branch name with a hyphen
       # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
@@ -27,15 +27,17 @@ updates:
     directory: "/"
     # Check for updates once a week
     schedule:
-      interval: "weekly"
+      interval: "monthly"
     # Labels on pull requests for version updates only
-    labels:
-      - "ci / tests"
+    labels: ["CI"]
     pull-request-branch-name:
-      # Separate sections of the branch name with a hyphen
-      # for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
+      # Separate sections of the branch name with a hyphen for example, `dependabot-npm_and_yarn-next_js-acorn-6.4.1`
       separator: "-"
     # Allow up to 5 open pull requests for GitHub Actions
     open-pull-requests-limit: 5
     reviewers:
-      - "Borda"
+      - "borda"
+    groups:
+      GHA-updates:
+        patterns:
+          - "*"

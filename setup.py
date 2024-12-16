@@ -52,13 +52,13 @@ def _prepare_extras(requirements_dir: str = _PATH_REQUIRES, skip_files: tuple = 
 # the goal of the project is simplicity for researchers, don't want to add too much
 # engineer specific practices
 setup(
-    name="lightning-sandbox",
+    name="litmodels",
     version=about.__version__,
     description=about.__docs__,
     author=about.__author__,
     author_email=about.__author_email__,
     url=about.__homepage__,
-    download_url="https://github.com/Lightning-AI/lightning-sandbox",
+    download_url="https://github.com/Lightning-AI/models",
     license=about.__license__,
     packages=find_packages(where="src"),
     package_dir={"": "src"},
@@ -72,9 +72,9 @@ setup(
     install_requires=_load_requirements(),
     extras_require=_prepare_extras(),
     project_urls={
-        "Bug Tracker": "https://github.com/Lightning-AI/lightning-sandbox/issues",
-        "Documentation": "https://lightning-ai.github.io/lightning-sandbox/",
-        "Source Code": "https://github.com/Lightning-AI/lightning-sandbox",
+        "Bug Tracker": "https://github.com/Lightning-AI/models/issues",
+        "Documentation": "https://lightning-ai.github.io/models/",
+        "Source Code": "https://github.com/Lightning-AI/models",
     },
     classifiers=[
         "Environment :: Console",
