@@ -1,9 +1,8 @@
 import os
 import tempfile
 from pathlib import Path
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
-from lightning_sdk.api.teamspace_api import UploadedModelInfo
 from lightning_utilities import module_available
 
 from litmodels.io.cloud import download_model_files, upload_model_files
@@ -14,6 +13,9 @@ if module_available("torch"):
 else:
     torch = None
 
+if TYPE_CHECKING:
+    from lightning_sdk.models import UploadedModelInfo
+
 
 def upload_model(
     name: str,
@@ -22,7 +24,7 @@ def upload_model(
     cluster_id: Optional[str] = None,
     staging_dir: Optional[str] = None,
     verbose: Union[bool, int] = 1,
-) -> UploadedModelInfo:
+) -> "UploadedModelInfo":
     """Upload a checkpoint to the model store.
 
     Args:
