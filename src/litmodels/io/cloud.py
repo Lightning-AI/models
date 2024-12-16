@@ -2,12 +2,14 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-from typing import Optional, Tuple, Union
+from typing import TYPE_CHECKING, Optional, Tuple, Union
 
 from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
-from lightning_sdk.models import UploadedModelInfo
 from lightning_sdk.teamspace import Teamspace
 from lightning_sdk.utils import resolve as sdk_resolvers
+
+if TYPE_CHECKING:
+    from lightning_sdk.models import UploadedModelInfo
 
 # if module_available("lightning"):
 #     from lightning import LightningModule
@@ -81,7 +83,7 @@ def upload_model_files(
     progress_bar: bool = True,
     cluster_id: Optional[str] = None,
     verbose: Union[bool, int] = 1,
-) -> UploadedModelInfo:
+) -> "UploadedModelInfo":
     """Upload a local checkpoint file to the model store.
 
     Args:
