@@ -5,7 +5,8 @@
 from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
-from lightning_sdk.models import download_model, upload_model
+from lightning_sdk.models import download_model as sdk_download_model
+from lightning_sdk.models import upload_model as sdk_upload_model
 
 if TYPE_CHECKING:
     from lightning_sdk.models import UploadedModelInfo
@@ -71,7 +72,7 @@ def upload_model_files(
         verbose: Whether to print a link to the uploaded model. If set to 0, no link will be printed.
 
     """
-    info = upload_model(
+    info = sdk_upload_model(
         name=name,
         path=path,
         progress_bar=progress_bar,
@@ -99,7 +100,7 @@ def download_model_files(
     Returns:
         The absolute path to the downloaded model file or folder.
     """
-    return download_model(
+    return sdk_download_model(
         name=name,
         download_dir=download_dir,
         progress_bar=progress_bar,

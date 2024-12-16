@@ -23,7 +23,7 @@ def test_wrong_model_name(name):
         (Module(), f"%s{os.path.sep}Module.pth", True),
     ],
 )
-@mock.patch("lightning_sdk.models.upload_model")
+@mock.patch("litmodels.io.cloud.sdk_upload_model")
 def test_upload_model(mock_upload_model, tmpdir, model, model_path, verbose):
     mock_upload_model.return_value.name = "org-name/teamspace/model-name"
 
@@ -44,7 +44,7 @@ def test_upload_model(mock_upload_model, tmpdir, model, model_path, verbose):
     )
 
 
-@mock.patch("lightning_sdk.models.download_model")
+@mock.patch("litmodels.io.cloud.sdk_download_model")
 def test_download_model(mock_download_model):
     # The lit-logger function is just a wrapper around the SDK function
     download_model(
