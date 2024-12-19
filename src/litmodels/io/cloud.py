@@ -79,7 +79,7 @@ def upload_model_files(
         cloud_account=cloud_account,
     )
     if verbose:
-        _print_model_link(info.name, verbose)
+        _print_model_link(name, verbose)
     return info
 
 
