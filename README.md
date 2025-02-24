@@ -1,4 +1,4 @@
-# Effortless Model Management for Your Models ⚡
+# Effortless Model Management for Your Development ⚡
 
 __Effortless management for your ML models.__
 
