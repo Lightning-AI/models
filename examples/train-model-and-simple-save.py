@@ -1,3 +1,7 @@
+"""
+This example demonstrates how to train a model and upload it to the cloud using the `upload_model` function.
+"""
+
 import torch.utils.data as data
 import torchvision as tv
 from lightning import Trainer

@@ -1,3 +1,7 @@
+"""
+This example demonstrates how to resume training of a model using the `download_model` function.
+"""
+
 import torch.utils.data as data
 import torchvision as tv
 from lightning import Trainer

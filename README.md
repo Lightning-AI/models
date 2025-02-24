@@ -38,9 +38,65 @@ pip install https://github.com/Lightning-AI/models/archive/refs/heads/main.zip
 ## Saving and Loading Models
 
 Lightning Models offers a simple API to manage your model checkpoints.
-Train your model using your preferred framework (our examples demonstrate PyTorch Lightning integration) and then save your best checkpoint with a single function call.
+Train your model using your preferred framework (our fist examples show `scikit-learn`) and then save your best checkpoint with a single function call.
 
-### Saving a Model
+### Train scikit-learn model and save it
+
+```python
+import joblib
+from sklearn import datasets, model_selection, svm
+from litmodels import upload_model
+
+# Unique model identifier: <organization>/<teamspace>/<model-name>
+MY_MODEL_NAME = "your_org/your_team/sklearn-svm-model"
+
+# Load example dataset
+iris = datasets.load_iris()
+X, y = iris.data, iris.target
+
+# Split dataset into training and test sets
+X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train a simple SVC model
+model = svm.SVC()
+model.fit(X_train, y_train)
+
+# Save the trained model to a checkpoint file
+model_file = "svm_model.pkl"
+joblib.dump(model, model_file)
+
+# Upload the saved model using litmodels
+upload_model(model=model_file, name=MY_MODEL_NAME)
+```
+
+### Download and Load the Model for inference
+
+```python
+import joblib
+from litmodels import download_model
+
+# Unique model identifier: <organization>/<teamspace>/<model-name>
+MY_MODEL_NAME = "your_org/your_team/sklearn-svm-model"
+
+# Download the model file from cloud storage
+model_path = download_model(name=MY_MODEL_NAME, download_dir="my_models")
+print(f"Model downloaded to {model_path}")
+
+# Load the model for inference using joblib
+model = joblib.load(model_path)
+
+# Example: run inference with the loaded model
+sample_input = [[5.1, 3.5, 1.4, 0.2]]
+prediction = model.predict(sample_input)
+print(f"Prediction: {prediction}")
+```
+
+
+## Saving and Loading Models with Pytorch Lightning
+
+Next examples demonstrate seamless PyTorch Lightning integration with Lightning Models.
+
+### Train a simple Lightning model and save it
 
 ```python
 from lightning import Trainer
@@ -69,7 +125,7 @@ checkpoint_path = getattr(trainer.checkpoint_callback, "best_model_path")
 upload_model(model=checkpoint_path, name=MY_MODEL_NAME)
 ```
 
-### Loading a Model
+### Download and Load the Model for fine-tuning
 
 ```python
 from lightning import Trainer
@@ -97,7 +153,8 @@ trainer = Trainer(max_epochs=4)
 trainer.fit(LitModel(), ckpt_path=checkpoint_path)
 ```
 
-## Advanced Checkpointing Workflow
+<details>
+    <summary>Advanced Checkpointing Workflow</summary>
 
 Enhance your training process with an automatic checkpointing callback that uploads the best model at the end of each epoch.
 While the example uses PyTorch Lightning callbacks, similar workflows can be implemented in any training loop that produces checkpoints.
@@ -143,71 +200,4 @@ trainer.fit(
     data.DataLoader(val, batch_size=256),
 )
 ```
-
-## Enhanced Logging with LightningLogger
-
-Integrate with [LitLogger](https://github.com/gridai/lit-logger) to automatically log your model checkpoints and training metrics to cloud storage.
-Though the example utilizes PyTorch Lightning, this integration concept works across various model training frameworks.
-
-```python
-import os
-import lightning as L
-from psutil import cpu_count
-from torch import optim, nn
-from torch.utils.data import DataLoader
-from torchvision.datasets import MNIST
-from torchvision.transforms import ToTensor
-from litlogger import LightningLogger
-
-
-class LitAutoEncoder(L.LightningModule):
-
-    def __init__(self, lr=1e-3, inp_size=28):
-        super().__init__()
-
-        self.encoder = nn.Sequential(
-            nn.Linear(inp_size * inp_size, 64), nn.ReLU(), nn.Linear(64, 3)
-        )
-        self.decoder = nn.Sequential(
-            nn.Linear(3, 64), nn.ReLU(), nn.Linear(64, inp_size * inp_size)
-        )
-        self.lr = lr
-        self.save_hyperparameters()
-
-    def training_step(self, batch, batch_idx):
-        x, y = batch
-        x = x.view(x.size(0), -1)
-        z = self.encoder(x)
-        x_hat = self.decoder(z)
-        loss = nn.functional.mse_loss(x_hat, x)
-        # log metrics
-        self.log("train_loss", loss)
-        return loss
-
-    def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters(), lr=self.lr)
-        return optimizer
-
-
-if __name__ == "__main__":
-    # init the autoencoder
-    autoencoder = LitAutoEncoder(lr=1e-3, inp_size=28)
-
-    # setup data
-    train_loader = DataLoader(
-        dataset=MNIST(os.getcwd(), download=True, transform=ToTensor()),
-        batch_size=32,
-        shuffle=True,
-        num_workers=cpu_count(),
-        persistent_workers=True,
-    )
-
-    # configure the logger
-    lit_logger = LightningLogger(log_model=True)
-
-    # pass logger to the Trainer
-    trainer = L.Trainer(max_epochs=5, logger=lit_logger)
-
-    # train the model
-    trainer.fit(model=autoencoder, train_dataloaders=train_loader)
-```
+</details>

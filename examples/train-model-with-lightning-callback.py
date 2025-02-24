@@ -1,3 +1,7 @@
+"""
+Train a model with a Lightning callback that uploads the best model to the cloud after each epoch.
+"""
+
 import torch.utils.data as data
 import torchvision as tv
 from lightning import Callback, Trainer
