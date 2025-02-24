@@ -1,15 +1,15 @@
 # Effortless Model Management for Your Models ⚡
 
-**Effortless management for your ML models.**
-
-Simple. Flexible. Scalable.
+__Effortless management for your ML models.__
 
 **Lightning Models** is a streamlined toolkit for effortlessly saving, loading, and managing your model checkpoints. Designed to simplify the entire model lifecycle—from training and inference to sharing, deployment, and cloud integration—Lightning Models supports any framework that produces model checkpoints, including but not limited to PyTorch Lightning.
-
+  
+<pre>
 ✅ Seamless Model Saving & Loading
 ✅ Robust Checkpoint Management
 ✅ Cloud Integration Out of the Box
 ✅ Versatile Across Frameworks
+</pre>
 
 # Quick start
 
