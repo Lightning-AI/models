@@ -2,8 +2,18 @@
 
 __Effortless management for your ML models.__
 
+<div align="center">
+
+🚀 [Quick start](#quick-start)
+📦 [Examples](#saving-and-loading-models)
+📚 [Documentation](https://lightning.ai/docs/overview/model-registry)
+💬 [Get help on Discord](https://discord.com/invite/XncpTy7DSt)
+📋 [License: Apache 2.0](https://github.com/Lightning-AI/models/blob/main/LICENSE)
+
+</div>
+
 **Lightning Models** is a streamlined toolkit for effortlessly saving, loading, and managing your model checkpoints. Designed to simplify the entire model lifecycle—from training and inference to sharing, deployment, and cloud integration—Lightning Models supports any framework that produces model checkpoints, including but not limited to PyTorch Lightning.
-  
+
 <pre>
 ✅ Seamless Model Saving & Loading
 ✅ Robust Checkpoint Management
