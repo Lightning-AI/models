@@ -1,19 +1,19 @@
-# Lightning Models
+# Effortless Model Management for Your Models ⚡
 
-**Effortless model management for PyTorch Lightning.**
+**Effortless management for your ML models.**
 
 Simple. Flexible. Scalable.
 
-**Lightning Models** provides a streamlined toolkit for saving, loading, and managing your PyTorch Lightning model checkpoints. It’s designed to simplify the model lifecycle—from training and inference to sharing and deployment—with built‐in support for cloud storage integration.
+**Lightning Models** is a streamlined toolkit for effortlessly saving, loading, and managing your model checkpoints. Designed to simplify the entire model lifecycle—from training and inference to sharing, deployment, and cloud integration—Lightning Models supports any framework that produces model checkpoints, including but not limited to PyTorch Lightning.
 
-✅ **Seamless Model Saving & Loading**
-✅ **Robust Checkpoint Management**
-✅ **Cloud Integration Out of the Box**
-✅ **Optimized for PyTorch Lightning**
+✅ Seamless Model Saving & Loading
+✅ Robust Checkpoint Management
+✅ Cloud Integration Out of the Box
+✅ Versatile Across Frameworks
 
-## Quick Start
+# Quick start
 
-Install Lightning Models via `pip`:
+Install Lightning Models via pip (more installation options below):
 
 ```bash
 pip install -U litmodels
@@ -27,7 +27,8 @@ pip install https://github.com/Lightning-AI/models/archive/refs/heads/main.zip
 
 ## Saving and Loading Models
 
-Lightning Models offers a straightforward API for managing model checkpoints. First, train your model using PyTorch Lightning, then save your best checkpoint with a single function call.
+Lightning Models offers a simple API to manage your model checkpoints.
+Train your model using your preferred framework (our examples demonstrate PyTorch Lightning integration) and then save your best checkpoint with a single function call.
 
 ### Saving a Model
 
@@ -89,7 +90,7 @@ trainer.fit(LitModel(), ckpt_path=checkpoint_path)
 ## Advanced Checkpointing Workflow
 
 Enhance your training process with an automatic checkpointing callback that uploads the best model at the end of each epoch.
-This approach is ideal for long or interruptible training sessions, ensuring you’re always ready to resume from the latest optimal state.
+While the example uses PyTorch Lightning callbacks, similar workflows can be implemented in any training loop that produces checkpoints.
 
 ```python
 import os
@@ -136,7 +137,7 @@ trainer.fit(
 ## Enhanced Logging with LightningLogger
 
 Integrate with [LitLogger](https://github.com/gridai/lit-logger) to automatically log your model checkpoints and training metrics to cloud storage.
-This seamless integration keeps your experiment tracking organized and transparent.
+Though the example utilizes PyTorch Lightning, this integration concept works across various model training frameworks.
 
 ```python
 import os
