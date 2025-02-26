@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING, List, Optional, Union
 
 from lightning_utilities import module_available
 
+import joblib
+
 from litmodels.io.cloud import download_model_files, upload_model_files
 
 if module_available("torch"):
@@ -51,6 +53,9 @@ def upload_model(
         path = model
     elif isinstance(model, Path):
         path = str(model)
+    elif isinstance(model, object):
+        path = os.path.join(staging_dir, f"{model.__class__.__name__}.pkl")
+        joblib.dump(model, path)
     else:
         raise ValueError(f"Unsupported model type {type(model)}")
     return upload_model_files(

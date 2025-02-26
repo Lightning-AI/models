@@ -5,6 +5,7 @@ import pytest
 from litmodels import download_model, upload_model
 from litmodels.io import upload_model_files
 from torch.nn import Module
+from sklearn import svm
 
 
 @pytest.mark.parametrize("name", ["org/model", "model-name", "/too/many/slashes"])
@@ -21,6 +22,7 @@ def test_wrong_model_name(name):
         ("path/to/checkpoint", "path/to/checkpoint", False),
         # (BoringModel(), "%s/BoringModel.ckpt"),
         (Module(), f"%s{os.path.sep}Module.pth", True),
+        (svm.SVC(), f"%s{os.path.sep}SVC.pkl", 1),
     ],
 )
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
