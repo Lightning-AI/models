@@ -4,8 +4,8 @@ from unittest import mock
 import pytest
 from litmodels import download_model, upload_model
 from litmodels.io import upload_model_files
-from torch.nn import Module
 from sklearn import svm
+from torch.nn import Module
 
 
 @pytest.mark.parametrize("name", ["org/model", "model-name", "/too/many/slashes"])

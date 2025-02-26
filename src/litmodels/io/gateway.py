@@ -3,9 +3,8 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
 
-from lightning_utilities import module_available
-
 import joblib
+from lightning_utilities import module_available
 
 from litmodels.io.cloud import download_model_files, upload_model_files
 
