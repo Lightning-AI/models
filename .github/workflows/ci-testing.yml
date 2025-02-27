@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-latest", "macOS-latest", "windows-latest"]
+        os: ["ubuntu-22.04", "macOS-13", "windows-2022"]
         python-version: ["3.9", "3.12"]
         requires: ["latest"]
         include:
