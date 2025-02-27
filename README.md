@@ -55,23 +55,22 @@ iris = datasets.load_iris()
 X, y = iris.data, iris.target
 
 # Split dataset into training and test sets
-X_train, X_test, y_train, y_test = model_selection.train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = model_selection.train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
 
 # Train a simple SVC model
 model = svm.SVC()
 model.fit(X_train, y_train)
 
-# Save the trained model to a checkpoint file
-model_file = "svm_model.pkl"
-joblib.dump(model, model_file)
-
 # Upload the saved model using litmodels
-upload_model(model=model_file, name=MY_MODEL_NAME)
+upload_model(model=model, name=MY_MODEL_NAME)
 ```
 
 ### Download and Load the Model for inference
 
 ```python
+import os
 import joblib
 from litmodels import download_model
 
@@ -80,17 +79,15 @@ MY_MODEL_NAME = "your_org/your_team/sklearn-svm-model"
 
 # Download the model file from cloud storage
 model_path = download_model(name=MY_MODEL_NAME, download_dir="my_models")
-print(f"Model downloaded to {model_path}")
 
 # Load the model for inference using joblib
-model = joblib.load(model_path)
+model = joblib.load(os.path.join("my_models", model_path[0]))
 
 # Example: run inference with the loaded model
 sample_input = [[5.1, 3.5, 1.4, 0.2]]
 prediction = model.predict(sample_input)
 print(f"Prediction: {prediction}")
 ```
-
 
 ## Saving and Loading Models with Pytorch Lightning
 
@@ -200,4 +197,5 @@ trainer.fit(
     data.DataLoader(val, batch_size=256),
 )
 ```
+
 </details>

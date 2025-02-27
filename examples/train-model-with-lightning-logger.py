@@ -1,32 +1,29 @@
 """
 # Enhanced Logging with LightningLogger
 
-Integrate with [LitLogger](https://github.com/gridai/lit-logger) to automatically log your model checkpoints and training metrics to cloud storage.
+Integrate with [LitLogger](https://github.com/gridai/lit-logger) to automatically log your model checkpoints
+ and training metrics to cloud storage.
 Though the example utilizes PyTorch Lightning, this integration concept works across various model training frameworks.
 
 """
 
 import os
-import lightning as L
+
+from lightning import LightningModule, Trainer
+from litlogger import LightningLogger
 from psutil import cpu_count
-from torch import optim, nn
+from torch import nn, optim
 from torch.utils.data import DataLoader
 from torchvision.datasets import MNIST
 from torchvision.transforms import ToTensor
-from litlogger import LightningLogger
 
 
-class LitAutoEncoder(L.LightningModule):
-
+class LitAutoEncoder(LightningModule):
     def __init__(self, lr=1e-3, inp_size=28):
         super().__init__()
 
-        self.encoder = nn.Sequential(
-            nn.Linear(inp_size * inp_size, 64), nn.ReLU(), nn.Linear(64, 3)
-        )
-        self.decoder = nn.Sequential(
-            nn.Linear(3, 64), nn.ReLU(), nn.Linear(64, inp_size * inp_size)
-        )
+        self.encoder = nn.Sequential(nn.Linear(inp_size * inp_size, 64), nn.ReLU(), nn.Linear(64, 3))
+        self.decoder = nn.Sequential(nn.Linear(3, 64), nn.ReLU(), nn.Linear(64, inp_size * inp_size))
         self.lr = lr
         self.save_hyperparameters()
 
@@ -41,8 +38,7 @@ class LitAutoEncoder(L.LightningModule):
         return loss
 
     def configure_optimizers(self):
-        optimizer = optim.Adam(self.parameters(), lr=self.lr)
-        return optimizer
+        return optim.Adam(self.parameters(), lr=self.lr)
 
 
 if __name__ == "__main__":
@@ -62,7 +58,7 @@ if __name__ == "__main__":
     lit_logger = LightningLogger(log_model=True)
 
     # pass logger to the Trainer
-    trainer = L.Trainer(max_epochs=5, logger=lit_logger)
+    trainer = Trainer(max_epochs=5, logger=lit_logger)
 
     # train the model
     trainer.fit(model=autoencoder, train_dataloaders=train_loader)
