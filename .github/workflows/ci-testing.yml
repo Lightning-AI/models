@@ -26,7 +26,6 @@ jobs:
     timeout-minutes: 35
     env:
       TORCH_URL: "https://download.pytorch.org/whl/cpu/torch_stable.html"
-      PYTORCH_MPS_HIGH_WATERMARK_RATIO: 0.0
 
     steps:
       - uses: actions/checkout@v4

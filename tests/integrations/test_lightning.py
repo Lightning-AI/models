@@ -13,7 +13,7 @@ elif _PYTORCHLIGHTNING_AVAILABLE:
 
 
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
-def test_upload_model(mock_upload_model, tmp_path):
+def test_lightning_checkpoint_callback(mock_upload_model, tmp_path):
     mock_upload_model.return_value.name = "org-name/teamspace/model-name"
 
     trainer = Trainer(
@@ -32,4 +32,4 @@ def test_upload_model(mock_upload_model, tmp_path):
     # Verify paths match the expected pattern
     for call_args in mock_upload_model.call_args_list:
         path = call_args[1]["path"]
-        assert re.match(r".*/lightning_logs/version_\d+/checkpoints/epoch=\d+-step=\d+\.ckpt$", path)
+        assert re.match(r".*[/\\]lightning_logs[/\\]version_\d+[/\\]checkpoints[/\\]epoch=\d+-step=\d+\.ckpt$", path)

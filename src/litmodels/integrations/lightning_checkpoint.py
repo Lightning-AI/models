@@ -1,3 +1,5 @@
+from typing import Any
+
 from litmodels import upload_model
 from litmodels.integrations.imports import _LIGHTNING_AVAILABLE, _PYTORCHLIGHTNING_AVAILABLE
 
@@ -21,7 +23,7 @@ class LitModelCheckpoint(ModelCheckpoint):
 
     """
 
-    def __init__(self, model_name: str, *args, **kwargs):
+    def __init__(self, model_name: str, *args: Any, **kwargs: Any) -> None:
         """Initialize the LitModelCheckpoint."""
         super().__init__(*args, **kwargs)
         self.model_name = model_name
