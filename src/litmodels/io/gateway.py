@@ -1,7 +1,7 @@
 import os
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Union
 
 import joblib
 from lightning_utilities import module_available
@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 def upload_model(
     name: str,
-    model: Union[str, Path, "Module"],
+    model: Union[str, Path, "Module", Any],
     progress_bar: bool = True,
     cloud_account: Optional[str] = None,
     staging_dir: Optional[str] = None,
@@ -52,11 +52,10 @@ def upload_model(
         path = model
     elif isinstance(model, Path):
         path = str(model)
-    elif isinstance(model, object):
+    else:
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pkl")
         joblib.dump(model, path)
-    else:
-        raise ValueError(f"Unsupported model type {type(model)}")
+
     return upload_model_files(
         path=path,
         name=name,
