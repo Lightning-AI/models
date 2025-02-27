@@ -3,7 +3,7 @@ from unittest import mock
 
 import joblib
 import pytest
-from litmodels import download_model, upload_model, load_model
+from litmodels import download_model, load_model, upload_model
 from litmodels.io import upload_model_files
 from sklearn import svm
 from torch.nn import Module
@@ -57,6 +57,7 @@ def test_download_model(mock_download_model):
     mock_download_model.assert_called_once_with(
         name="org-name/teamspace/model-name", download_dir="where/to/download", progress_bar=True
     )
+
 
 @mock.patch("litmodels.io.cloud.sdk_download_model")
 def test_load_model(mock_download_model, tmp_path):

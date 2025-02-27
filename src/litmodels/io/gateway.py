@@ -103,7 +103,7 @@ def load_model(name: str, download_dir: str = ".") -> Any:
     """
     download_paths = download_model(name=name, download_dir=download_dir)
     # filter out all Markdown, TXT and RST files
-    download_paths = [p for p in download_paths if not Path(p).suffix.lower() in {".md", ".txt", ".rst"}]
+    download_paths = [p for p in download_paths if Path(p).suffix.lower() not in {".md", ".txt", ".rst"}]
     if len(download_paths) > 1:
         raise NotImplementedError("Downloaded model with multiple files is not supported yet.")
     model_path = Path(os.path.join(download_dir, download_paths[0]))
