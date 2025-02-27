@@ -5,8 +5,7 @@ if _LIGHTNING_AVAILABLE:
     from lightning.pytorch import Trainer
     from lightning.pytorch.callbacks import ModelCheckpoint
 elif _PYTORCHLIGHTNING_AVAILABLE:
-    from pytorch_lightning.callbacks import Trainer
-    from pytorch_lightning.callbacks import ModelCheckpoint
+    from pytorch_lightning.callbacks import ModelCheckpoint, Trainer
 else:
     raise ModuleNotFoundError("No module named 'lightning' or 'pytorch_lightning'")
 
@@ -23,6 +22,7 @@ class LitModelCheckpoint(ModelCheckpoint):
     """
 
     def __init__(self, model_name: str, *args, **kwargs):
+        """Initialize the LitModelCheckpoint."""
         super().__init__(*args, **kwargs)
         self.model_name = model_name
 
