@@ -4,22 +4,13 @@ Train a model with a Lightning callback that uploads the best model to the cloud
 
 import torch.utils.data as data
 import torchvision as tv
-from lightning import Callback, Trainer
-from litmodels import upload_model
+from lightning import Trainer
+from litmodels.integrations.lightning_checkpoint import LitModelCheckpoint
 from sample_model import LitAutoEncoder
 
 # Define the model name - this should be unique to your model
 # The format is <organization>/<teamspace>/<model-name>
-MY_MODEL_NAME = "jirka/kaggle/lit-auto-encoder-callback"
-
-
-class UploadModelCallback(Callback):
-    def on_train_epoch_end(self, trainer, pl_module):
-        # Get the best model path from the checkpoint callback
-        best_model_path = trainer.checkpoint_callback.best_model_path
-        if best_model_path:
-            print(f"Uploading model: {best_model_path}")
-            upload_model(model=best_model_path, name=MY_MODEL_NAME)
+MY_MODEL_NAME = "lightning-ai/jirka/lit-auto-encoder-callback"
 
 
 if __name__ == "__main__":
@@ -30,7 +21,7 @@ if __name__ == "__main__":
 
     trainer = Trainer(
         max_epochs=2,
-        callbacks=[UploadModelCallback()],
+        callbacks=LitModelCheckpoint(model_name=MY_MODEL_NAME),
     )
     trainer.fit(
         autoencoder,
