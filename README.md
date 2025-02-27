@@ -72,16 +72,13 @@ upload_model(model=model, name=MY_MODEL_NAME)
 ```python
 import os
 import joblib
-from litmodels import download_model
+from litmodels import load_model
 
 # Unique model identifier: <organization>/<teamspace>/<model-name>
 MY_MODEL_NAME = "your_org/your_team/sklearn-svm-model"
 
-# Download the model file from cloud storage
-model_path = download_model(name=MY_MODEL_NAME, download_dir="my_models")
-
-# Load the model for inference using joblib
-model = joblib.load(os.path.join("my_models", model_path[0]))
+# Download and load the model file from cloud storage
+model = load_model(name=MY_MODEL_NAME, download_dir="my_models")
 
 # Example: run inference with the loaded model
 sample_input = [[5.1, 3.5, 1.4, 0.2]]

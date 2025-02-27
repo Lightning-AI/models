@@ -87,3 +87,26 @@ def download_model(
         download_dir=download_dir,
         progress_bar=progress_bar,
     )
+
+
+def load_model(name: str, download_dir: str = ".") -> Any:
+    """Download a model from the model store and load it into memory.
+
+    Args:
+        name: Name of the model to download. Must be in the format 'organization/teamspace/modelname'
+            where entity is either your username or the name of an organization you are part of.
+        download_dir: A path to directory where the model should be downloaded. Defaults
+            to the current working directory.
+
+    Returns:
+        The loaded model.
+    """
+    download_paths = download_model(name=name, download_dir=download_dir)
+    # filter out all Markdown, TXT and RST files
+    download_paths = [p for p in download_paths if not Path(p).suffix.lower() in {".md", ".txt", ".rst"}]
+    if len(download_paths) > 1:
+        raise NotImplementedError("Downloaded model with multiple files is not supported yet.")
+    model_path = Path(os.path.join(download_dir, download_paths[0]))
+    if model_path.suffix.lower() == ".pkl":
+        return joblib.load(model_path)
+    raise NotImplementedError(f"Loading model from {model_path.suffix} is not supported yet.")

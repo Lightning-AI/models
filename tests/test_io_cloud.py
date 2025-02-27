@@ -1,8 +1,9 @@
 import os
 from unittest import mock
 
+import joblib
 import pytest
-from litmodels import download_model, upload_model
+from litmodels import download_model, upload_model, load_model
 from litmodels.io import upload_model_files
 from sklearn import svm
 from torch.nn import Module
@@ -56,3 +57,21 @@ def test_download_model(mock_download_model):
     mock_download_model.assert_called_once_with(
         name="org-name/teamspace/model-name", download_dir="where/to/download", progress_bar=True
     )
+
+@mock.patch("litmodels.io.cloud.sdk_download_model")
+def test_load_model(mock_download_model, tmp_path):
+    # create a dummy model file
+    model_file = tmp_path / "dummy_model.pkl"
+    test_data = svm.SVC()
+    joblib.dump(test_data, model_file)
+    mock_download_model.return_value = [str(model_file.name)]
+
+    # The lit-logger function is just a wrapper around the SDK function
+    model = load_model(
+        name="org-name/teamspace/model-name",
+        download_dir=str(tmp_path),
+    )
+    mock_download_model.assert_called_once_with(
+        name="org-name/teamspace/model-name", download_dir=str(tmp_path), progress_bar=True
+    )
+    assert isinstance(model, svm.SVC)
