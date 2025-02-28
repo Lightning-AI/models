@@ -48,6 +48,9 @@ jobs:
           pip list
 
       - name: Tests
+        env: # the following values are just dummies since the actual http calls are mocked out
+          LIGHTNING_USER_ID: ${{ secrets.LIGHTNING_USER_ID }}
+          LIGHTNING_API_KEY: ${{ secrets.LIGHTNING_API_KEY }}
         run: |
           coverage run --source litmodels -m pytest src tests -v
 
