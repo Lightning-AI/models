@@ -1,5 +1,5 @@
 # NOTE: once we add more dependencies, consider update dependabot to check for updates
 
-lightning-sdk >=0.1.40
+lightning-sdk >=0.1.56
 lightning-utilities
 joblib
