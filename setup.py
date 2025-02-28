@@ -29,7 +29,7 @@ with open(os.path.join(_PATH_ROOT, "README.md"), encoding="utf-8") as fopen:
     readme = fopen.read()
 
 
-def _prepare_extras(requirements_dir: str = _PATH_REQUIRES, skip_files: tuple = ("devel.txt", "docs.txt")) -> dict:
+def _prepare_extras(requirements_dir: str = _PATH_REQUIRES, skip_files: tuple = ("devel.txt",)) -> dict:
     # https://setuptools.readthedocs.io/en/latest/setuptools.html#declaring-extras
     # Define package extras. These are only installed if you specify them.
     # From remote, use like `pip install pytorch-lightning[dev, docs]`
@@ -38,7 +38,8 @@ def _prepare_extras(requirements_dir: str = _PATH_REQUIRES, skip_files: tuple = 
     extras = {
         p.stem: _load_requirements(file_name=p.name, path_dir=str(p.parent))
         for p in req_files
-        if p.name not in skip_files
+        # ignore some development specific requirements
+        if p.name not in skip_files and not p.name.startswith("_")
     }
     # todo: eventually add some custom aggregations such as `develop`
     extras = {name: sorted(set(reqs)) for name, reqs in extras.items()}
@@ -96,5 +97,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
     ],
 )

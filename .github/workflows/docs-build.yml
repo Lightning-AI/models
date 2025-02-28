@@ -8,7 +8,7 @@ jobs:
   build-docs:
     uses: Lightning-AI/utilities/.github/workflows/check-docs.yml@main
     with:
-      requirements-file: "_requirements/docs.txt"
+      requirements-file: "_requirements/_docs.txt"
 
   # https://github.com/marketplace/actions/deploy-to-github-pages
   docs-deploy:

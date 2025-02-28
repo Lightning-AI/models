@@ -40,4 +40,4 @@ jobs:
   check-docs:
     uses: Lightning-AI/utilities/.github/workflows/check-docs.yml@main
     with:
-      requirements-file: "_requirements/docs.txt"
+      requirements-file: "_requirements/_docs.txt"
