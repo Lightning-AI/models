@@ -3,7 +3,7 @@ name: CI testing
 # see: https://help.github.com/en/actions/reference/events-that-trigger-workflows
 on: # Trigger the workflow on push or pull request, but only for the main branch
   push: {}
-  pull_request:
+  pull_request_target:
     branches: [main]
 
 defaults:
@@ -47,12 +47,16 @@ jobs:
           pip install -e '.[test,extra]' -U -q --find-links $TORCH_URL
           pip list
 
-      - name: Tests
-        env: # the following values are just dummies since the actual http calls are mocked out
+      - name: Tests with mocks
+        run: |
+          coverage run --source litmodels -m pytest src tests -v -m "not cloud"
+
+      - name: Test integrations
+        env:
           LIGHTNING_USER_ID: ${{ secrets.LIGHTNING_USER_ID }}
           LIGHTNING_API_KEY: ${{ secrets.LIGHTNING_API_KEY }}
         run: |
-          coverage run --source litmodels -m pytest src tests -v
+          coverage run --source litmodels -m pytest src tests -v -m cloud
 
       - name: Statistics
         run: |
