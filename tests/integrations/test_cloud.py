@@ -2,12 +2,10 @@ import os
 from contextlib import redirect_stdout
 from io import StringIO
 
-
 import pytest
 from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
-
-from litmodels import upload_model, download_model
+from litmodels import download_model, upload_model
 
 LIT_ORG = "lightning-ai"
 LIT_TEAMSPACE = "LitModels"
@@ -28,15 +26,11 @@ def test_upload_download_model(tmp_path):
 
     out = StringIO()
     with redirect_stdout(out):
-        upload_model(
-            name=f"{org_team}/{model_name}",
-            model=file_path
-        )
+        upload_model(name=f"{org_team}/{model_name}", model=file_path)
 
     # validate the output
     assert (
-        "Model uploaded successfully. Link to the model:"
-        f" 'https://lightning.ai/{org_team}/models/{model_name}'"
+        f"Model uploaded successfully. Link to the model: 'https://lightning.ai/{org_team}/models/{model_name}'"
     ) in out.getvalue()
 
     os.remove(file_path)
