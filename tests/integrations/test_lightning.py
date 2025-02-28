@@ -13,7 +13,8 @@ elif _PYTORCHLIGHTNING_AVAILABLE:
 
 
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
-def test_lightning_checkpoint_callback(mock_upload_model, tmp_path):
+@mock.patch("litmodels.integrations.lightning_checkpoint.Auth")
+def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, tmp_path):
     mock_upload_model.return_value.name = "org-name/teamspace/model-name"
 
     trainer = Trainer(
