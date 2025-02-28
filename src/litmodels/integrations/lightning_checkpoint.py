@@ -35,15 +35,11 @@ class LitModelCheckpoint(ModelCheckpoint):
             # authenticate before anything else starts
             auth = Auth()
             auth.authenticate()
-            self._authorized = True
         except Exception:
-            rank_zero_warn("Unable to authenticate with Lightning Cloud. Check your credentials.")
-            self._authorized = False
+            raise ConnectionError("Unable to authenticate with Lightning Cloud. Check your credentials.")
 
     def _save_checkpoint(self, trainer: Trainer, filepath: str) -> None:
         super()._save_checkpoint(trainer, filepath)
-        if not self._authorized:
-            return
         # todo: uploading on background so training does nt stops
         # todo: use filename as version but need to validate that such version does not exists yet
         upload_model(name=self.model_name, model=filepath)
