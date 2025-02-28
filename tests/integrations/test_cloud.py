@@ -37,7 +37,7 @@ def test_upload_download_model(tmp_path):
     assert not os.path.isfile(file_path)
 
     model_files = download_model(name=f"{org_team}/{model_name}", download_dir=tmp_path)
-    assert model_files, "Model files not downloaded"
+    assert model_files == ["dummy.txt"]
     for file in model_files:
         assert os.path.isfile(os.path.join(tmp_path, file))
 
