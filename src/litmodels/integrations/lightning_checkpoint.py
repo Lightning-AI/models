@@ -1,7 +1,6 @@
 from typing import Any
 
 from lightning_sdk.lightning_cloud.login import Auth
-from lightning_utilities.core.rank_zero import rank_zero_warn
 
 from litmodels import upload_model
 from litmodels.integrations.imports import _LIGHTNING_AVAILABLE, _PYTORCHLIGHTNING_AVAILABLE
