@@ -57,6 +57,7 @@ jobs:
           LIGHTNING_API_KEY: ${{ secrets.LIGHTNING_API_KEY }}
         run: |
           coverage run --source litmodels -m pytest src tests -v -m cloud
+        timeout-minutes: 5
 
       - name: Statistics
         run: |
