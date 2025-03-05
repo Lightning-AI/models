@@ -1,8 +1,12 @@
+<div align='center'>
+
 # Effortless Model Management for Your Development ⚡
 
-__Effortless management for your ML models.__
+<img alt="Lightning" src="https://pl-public-data.s3.us-east-1.amazonaws.com/assets_lightning/LitModels.png" width="800px" style="max-width: 100%;">
 
-<div align="center">
+&nbsp;
+
+<strong>Effortless management for your ML models.</strong>
 
 🚀 [Quick start](#quick-start)
 📦 [Examples](#saving-and-loading-models)
@@ -11,6 +15,8 @@ __Effortless management for your ML models.__
 📋 License: Apache 2.0
 
 </div>
+
+----
 
 **Lightning Models** is a streamlined toolkit for effortlessly saving, loading, and managing your model checkpoints. Designed to simplify the entire model lifecycle—from training and inference to sharing, deployment, and cloud integration—Lightning Models supports any framework that produces model checkpoints, including but not limited to PyTorch Lightning.
 
