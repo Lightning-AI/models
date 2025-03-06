@@ -9,7 +9,8 @@ if _LIGHTNING_AVAILABLE:
     from lightning.pytorch import Trainer
     from lightning.pytorch.callbacks import ModelCheckpoint
 elif _PYTORCHLIGHTNING_AVAILABLE:
-    from pytorch_lightning.callbacks import ModelCheckpoint, Trainer
+    from pytorch_lightning import Trainer
+    from pytorch_lightning.callbacks import ModelCheckpoint
 else:
     raise ModuleNotFoundError("No module named 'lightning' or 'pytorch_lightning'")
 

@@ -16,11 +16,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["ubuntu-22.04", "macOS-13", "windows-2022"]
+        os: ["ubuntu-24.04", "macOS-13", "windows-2022"]
         python-version: ["3.9", "3.12"]
         requires: ["latest"]
+        dependency: ["lightning"]
         include:
-          - { os: "ubuntu-20.04", python-version: "3.9", requires: "oldest" }
+          - { os: "ubuntu-22.04", python-version: "3.9", requires: "oldest", dependency: "lightning" }
+          - { os: "ubuntu-24.04", python-version: "3.10", requires: "latest", dependency: "pytorch_lightning" }
+          - { os: "ubuntu-24.04", python-version: "3.12", requires: "latest", dependency: "pytorch_lightning" }
+          - { os: "macOS-14", python-version: "3.12", requires: "latest", dependency: "pytorch_lightning" }
 
     # Timeout: https://stackoverflow.com/a/59076067/4521646
     timeout-minutes: 35
@@ -41,11 +45,22 @@ jobs:
           pip install 'lightning-utilities[cli]'
           python -m lightning_utilities.cli requirements set-oldest --req_files='["requirements.txt"]'
 
+      - name: Adjust requirements
+        run: |
+          pip install 'lightning-utilities[cli]' -U -q
+          python -m lightning_utilities.cli requirements replace-pkg \
+            --old_package="lightning" \
+            --new_package="pytorch-lightning" \
+            --req_files='["_requirements/extra.txt"]'
+
       - name: Install package & dependencies
         run: |
+          set -e
           pip --version
           pip install -e '.[test,extra]' -U -q --find-links $TORCH_URL
           pip list
+          # check that right package was installed
+          python -c "import ${{matrix.dependency}}; print(${{matrix.dependency}}.__version__)"
 
       - name: Tests with mocks
         run: |
