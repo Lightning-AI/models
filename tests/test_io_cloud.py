@@ -9,13 +9,17 @@ from sklearn import svm
 from torch.nn import Module
 
 
-@pytest.mark.parametrize("name", ["/too/many/slashes", "org/model"])  # todo: add back "model-name" after next SDk release
+@pytest.mark.parametrize(
+    "name", ["/too/many/slashes", "org/model"]
+)  # todo: add back "model-name" after next SDk release
 def test_upload_wrong_model_name(name):
     with pytest.raises(ValueError, match=r".*organization/teamspace/model.*"):
         upload_model_files(path="path/to/checkpoint", name=name)
 
 
-@pytest.mark.parametrize("name", ["/too/many/slashes", "org/model"])  # todo: add back "model-name" after next SDk release
+@pytest.mark.parametrize(
+    "name", ["/too/many/slashes", "org/model"]
+)  # todo: add back "model-name" after next SDk release
 def test_download_wrong_model_name(name):
     with pytest.raises(ValueError, match=r".*organization/teamspace/model.*"):
         download_model(name=name)
