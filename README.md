@@ -4,8 +4,6 @@
 
 <img alt="Lightning" src="https://pl-public-data.s3.us-east-1.amazonaws.com/assets_lightning/LitModels.png" width="800px" style="max-width: 100%;">
 
-&nbsp;
-
 <strong>Effortless management for your ML models.</strong>
 
 🚀 [Quick start](#quick-start)
@@ -16,7 +14,7 @@
 
 </div>
 
-----
+______________________________________________________________________
 
 **Lightning Models** is a streamlined toolkit for effortlessly saving, loading, and managing your model checkpoints. Designed to simplify the entire model lifecycle—from training and inference to sharing, deployment, and cloud integration—Lightning Models supports any framework that produces model checkpoints, including but not limited to PyTorch Lightning.
 
