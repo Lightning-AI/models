@@ -16,7 +16,6 @@ def test_upload_wrong_model_name(name):
 
 
 @pytest.mark.parametrize("name", ["/too/many/slashes", "org/model"])  # todo: add back "model-name" after next SDk release
-@mock.patch.dict(os.environ, {"LIGHTNING_TEAMSPACE": "ts"})
 def test_download_wrong_model_name(name):
     with pytest.raises(ValueError, match=r".*organization/teamspace/model.*"):
         download_model(name=name)
