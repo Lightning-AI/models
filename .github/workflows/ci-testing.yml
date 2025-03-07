@@ -52,6 +52,7 @@ jobs:
             --old_package="lightning" \
             --new_package="pytorch-lightning" \
             --req_files='["_requirements/extra.txt"]'
+          cat _requirements/extra.txt
 
       - name: Install package & dependencies
         run: |
