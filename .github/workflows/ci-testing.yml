@@ -50,7 +50,7 @@ jobs:
           pip install 'lightning-utilities[cli]' -U -q
           python -m lightning_utilities.cli requirements replace-pkg \
             --old_package="lightning" \
-            --new_package="pytorch-lightning" \
+            --new_package="${{matrix.dependency}}" \
             --req_files='["_requirements/extra.txt"]'
           cat _requirements/extra.txt
 
