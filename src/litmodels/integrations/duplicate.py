@@ -53,4 +53,4 @@ def duplicate_hf_model(
     if not lit_model:
         lit_model = model_name
     model = upload_model(name=lit_model, model=local_workdir / model_name, verbose=verbose)
-    return f"{model.teamspace}/{model.name}"
+    return model.name
