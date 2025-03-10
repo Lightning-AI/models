@@ -57,7 +57,7 @@ def _model_checkpoint_template(checkpoint_cls: Type[ModelCheckpointType]) -> Typ
     return cast(Type[ModelCheckpointType], LitModelCheckpointTemplate)
 
 
-# Create explicit classes with specific names if needed
+# Create explicit classes with specific names
 if _LIGHTNING_AVAILABLE:
     LightningModelCheckpoint = _model_checkpoint_template(LightningModelCheckpoint)
 if _PYTORCHLIGHTNING_AVAILABLE:
