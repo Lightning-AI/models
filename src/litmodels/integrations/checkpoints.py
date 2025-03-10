@@ -42,8 +42,7 @@ def _model_checkpoint_template(checkpoint_cls: Type[ModelCheckpointType]) -> Typ
             super().__init__(*args, **kwargs)
             self.model_name = model_name
 
-            try:
-                # authenticate before anything else starts
+            try:  # authenticate before anything else starts
                 auth = Auth()
                 auth.authenticate()
             except Exception:
