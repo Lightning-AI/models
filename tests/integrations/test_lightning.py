@@ -1,8 +1,8 @@
 import re
 from unittest import mock
 
-from litmodels.integrations.imports import _LIGHTNING_AVAILABLE, _PYTORCHLIGHTNING_AVAILABLE
 from litmodels.integrations.checkpoints import LitModelCheckpoint
+from litmodels.integrations.imports import _LIGHTNING_AVAILABLE, _PYTORCHLIGHTNING_AVAILABLE
 
 if _LIGHTNING_AVAILABLE:
     from lightning import Trainer
