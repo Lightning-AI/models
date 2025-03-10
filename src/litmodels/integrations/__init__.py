@@ -1,5 +1,15 @@
 """Integrations with training frameworks like PyTorch Lightning, TensorFlow, and others."""
 
-from litmodels.integrations.checkpoints import LitModelCheckpoint
+from litmodels.integrations.imports import _LIGHTNING_AVAILABLE, _PYTORCHLIGHTNING_AVAILABLE
 
-__all__ = ["LitModelCheckpoint"]
+__all__ = []
+
+if _LIGHTNING_AVAILABLE:
+    from litmodels.integrations.checkpoints import LightningModelCheckpoint
+
+    __all__ += ["LightningModelCheckpoint"]
+
+if _PYTORCHLIGHTNING_AVAILABLE:
+    from litmodels.integrations.checkpoints import PTLightningModelCheckpoint
+
+    __all__ += ["PTLightningModelCheckpoint"]
