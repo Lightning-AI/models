@@ -5,7 +5,7 @@ Train a model with a Lightning callback that uploads the best model to the cloud
 import torch.utils.data as data
 import torchvision as tv
 from lightning import Trainer
-from litmodels.integrations.lightning_checkpoint import LitModelCheckpoint
+from litmodels.integrations import LitModelCheckpoint
 from sample_model import LitAutoEncoder
 
 # Define the model name - this should be unique to your model

@@ -2,7 +2,7 @@ import re
 from unittest import mock
 
 from litmodels.integrations.imports import _LIGHTNING_AVAILABLE, _PYTORCHLIGHTNING_AVAILABLE
-from litmodels.integrations.lightning_checkpoint import LitModelCheckpoint
+from litmodels.integrations.checkpoints import LitModelCheckpoint
 
 if _LIGHTNING_AVAILABLE:
     from lightning import Trainer
@@ -13,7 +13,7 @@ elif _PYTORCHLIGHTNING_AVAILABLE:
 
 
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
-@mock.patch("litmodels.integrations.lightning_checkpoint.Auth")
+@mock.patch("litmodels.integrations.checkpoints.Auth")
 def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, tmp_path):
     mock_upload_model.return_value.name = "org-name/teamspace/model-name"
 
