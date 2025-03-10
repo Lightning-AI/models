@@ -21,8 +21,6 @@ def duplicate_hf_model(
 
     Returns:
         The name of the duplicated model in Lightning Cloud.
-
-    >>> duplicate_hf_model("bert-base-uncased", lit_model="lightning-ai/jirka/bert-base-uncased", local_workdir=".")
     """
     try:
         from huggingface_hub import snapshot_download
