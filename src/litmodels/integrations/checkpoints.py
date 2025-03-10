@@ -51,7 +51,8 @@ def _model_checkpoint_template(checkpoint_cls: Type[ModelCheckpointType]) -> Typ
 
         def _save_checkpoint(self, trainer: Trainer, filepath: str) -> None:
             super()._save_checkpoint(trainer, filepath)
-            # upload model after checkpoint is saved
+            # todo: uploading on background so training does nt stops
+            # todo: use filename as version but need to validate that such version does not exists yet
             upload_model(name=self.model_name, model=filepath)
 
     return cast(Type[ModelCheckpointType], LitModelCheckpointTemplate)
