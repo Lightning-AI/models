@@ -1,5 +1,6 @@
 from typing import Any, Type, TypeVar, cast
 
+from lightning.fabric.utilities import rank_zero_only
 from lightning_sdk.lightning_cloud.login import Auth
 
 from litmodels import upload_model
@@ -48,11 +49,15 @@ def _model_checkpoint_template(checkpoint_cls: Type[ModelCheckpointType]) -> Typ
             except Exception:
                 raise ConnectionError("Unable to authenticate with Lightning Cloud. Check your credentials.")
 
-        def _save_checkpoint(self, trainer: Trainer, filepath: str) -> None:
-            super()._save_checkpoint(trainer, filepath)
+        @rank_zero_only
+        def _upload_model(self, filepath: str) -> None:
             # todo: uploading on background so training does nt stops
             # todo: use filename as version but need to validate that such version does not exists yet
             upload_model(name=self.model_name, model=filepath)
+
+        def _save_checkpoint(self, trainer: Trainer, filepath: str) -> None:
+            super()._save_checkpoint(trainer, filepath)
+            self._upload_model(filepath)
 
     return cast(Type[ModelCheckpointType], LitModelCheckpointTemplate)
 
