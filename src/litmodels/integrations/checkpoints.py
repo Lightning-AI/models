@@ -1,4 +1,4 @@
-from typing import Any, TypeVar
+from typing import TYPE_CHECKING, Any
 
 from lightning_sdk.lightning_cloud.login import Auth
 from lightning_utilities.core.rank_zero import rank_zero_only
@@ -8,11 +8,16 @@ from litmodels.integrations.imports import _LIGHTNING_AVAILABLE, _PYTORCHLIGHTNI
 
 if _LIGHTNING_AVAILABLE:
     from lightning.pytorch.callbacks import ModelCheckpoint as _LightningModelCheckpoint
+
+    if TYPE_CHECKING:
+        from lightning.pytorch import Trainer
+
+
 if _PYTORCHLIGHTNING_AVAILABLE:
     from pytorch_lightning.callbacks import ModelCheckpoint as _PytorchLightningModelCheckpoint
 
-# Type variable for the ModelCheckpoint class
-ModelCheckpointType = TypeVar("ModelCheckpointType")
+    if TYPE_CHECKING:
+        from pytorch_lightning import Trainer
 
 
 # Base class to be inherited
@@ -49,6 +54,7 @@ if _LIGHTNING_AVAILABLE:
         """
 
         def __init__(self, model_name: str, *args: Any, **kwargs: Any) -> None:
+            """Initialize the checkpoint with model name and other parameters."""
             _LightningModelCheckpoint.__init__(self, *args, **kwargs)
             LitModelCheckpointMixin.__init__(self, model_name)
 
@@ -69,6 +75,7 @@ if _PYTORCHLIGHTNING_AVAILABLE:
         """
 
         def __init__(self, model_name: str, *args: Any, **kwargs: Any) -> None:
+            """Initialize the checkpoint with model name and other parameters."""
             _PytorchLightningModelCheckpoint.__init__(self, *args, **kwargs)
             LitModelCheckpointMixin.__init__(self, model_name)
 
