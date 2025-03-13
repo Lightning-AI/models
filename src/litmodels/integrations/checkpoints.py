@@ -1,7 +1,7 @@
 from typing import Any, Type, TypeVar, cast
 
-from lightning.fabric.utilities import rank_zero_only
 from lightning_sdk.lightning_cloud.login import Auth
+from lightning_utilities.core.rank_zero import rank_zero_only
 
 from litmodels import upload_model
 from litmodels.integrations.imports import _LIGHTNING_AVAILABLE, _PYTORCHLIGHTNING_AVAILABLE
