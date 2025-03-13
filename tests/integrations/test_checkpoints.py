@@ -1,18 +1,17 @@
+import pickle
 import re
 from unittest import mock
 
 import pytest
-from litmodels.integrations.imports import _LIGHTNING_AVAILABLE, _PYTORCHLIGHTNING_AVAILABLE
+
+from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHTNING_MISSING
 
 
 @pytest.mark.parametrize(
     "importing",
     [
-        pytest.param("lightning", marks=pytest.mark.skipif(not _LIGHTNING_AVAILABLE, reason="Lightning not available")),
-        pytest.param(
-            "pytorch_lightning",
-            marks=pytest.mark.skipif(not _PYTORCHLIGHTNING_AVAILABLE, reason="PyTorch Lightning not available"),
-        ),
+        pytest.param("lightning", marks=_SKIP_IF_LIGHTNING_MISSING),
+        pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_MISSING),
     ],
 )
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
@@ -51,3 +50,21 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, importing, 
     for call_args in mock_upload_model.call_args_list:
         path = call_args[1]["path"]
         assert re.match(r".*[/\\]lightning_logs[/\\]version_\d+[/\\]checkpoints[/\\]epoch=\d+-step=\d+\.ckpt$", path)
+
+
+@pytest.mark.parametrize(
+    "importing",
+    [
+        pytest.param("lightning", marks=_SKIP_IF_LIGHTNING_MISSING),
+        pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_MISSING),
+    ],
+)
+@mock.patch("litmodels.integrations.checkpoints.Auth")
+def test_lightning_checkpointing_pickleable(mock_auth, importing):
+    if importing == "lightning":
+        from litmodels.integrations.checkpoints import LightningModelCheckpoint as LitModelCheckpoint
+    elif importing == "pytorch_lightning":
+        from litmodels.integrations.checkpoints import PTLightningModelCheckpoint as LitModelCheckpoint
+
+    ckpt = LitModelCheckpoint(model_name="org-name/teamspace/model-name")
+    pickle.dumps(ckpt)
