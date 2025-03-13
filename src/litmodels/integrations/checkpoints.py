@@ -1,4 +1,4 @@
-from typing import Any, Type, TypeVar, cast
+from typing import Any, TypeVar
 
 from lightning_sdk.lightning_cloud.login import Auth
 from lightning_utilities.core.rank_zero import rank_zero_only
@@ -38,6 +38,7 @@ class LitModelCheckpointMixin:
 
 # Create specific implementations
 if _LIGHTNING_AVAILABLE:
+
     class LightningModelCheckpoint(LitModelCheckpointMixin, _LightningModelCheckpoint):
         """Lightning ModelCheckpoint with LitModel support.
 
@@ -55,7 +56,9 @@ if _LIGHTNING_AVAILABLE:
             super()._save_checkpoint(trainer, filepath)
             self._upload_model(filepath)
 
+
 if _PYTORCHLIGHTNING_AVAILABLE:
+
     class PTLightningModelCheckpoint(LitModelCheckpointMixin, _PytorchLightningModelCheckpoint):
         """PyTorch Lightning ModelCheckpoint with LitModel support.
 
