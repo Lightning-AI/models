@@ -60,7 +60,9 @@ if _LIGHTNING_AVAILABLE:
 
         def _save_checkpoint(self, trainer: "Trainer", filepath: str) -> None:
             super()._save_checkpoint(trainer, filepath)
-            self._upload_model(filepath)
+            if trainer.is_global_zero:
+                # Only upload from the main process
+                self._upload_model(filepath)
 
 
 if _PYTORCHLIGHTNING_AVAILABLE:
@@ -81,4 +83,6 @@ if _PYTORCHLIGHTNING_AVAILABLE:
 
         def _save_checkpoint(self, trainer: "Trainer", filepath: str) -> None:
             super()._save_checkpoint(trainer, filepath)
-            self._upload_model(filepath)
+            if trainer.is_global_zero:
+                # Only upload from the main process
+                self._upload_model(filepath)
