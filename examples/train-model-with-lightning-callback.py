@@ -8,7 +8,7 @@ from litmodels.integrations import LightningModelCheckpoint
 
 # Define the model name - this should be unique to your model
 # The format is <organization>/<teamspace>/<model-name>
-MY_MODEL_NAME = "lightning-ai/jirka/lit-auto-encoder-callback"
+MY_MODEL_NAME = "lightning-ai/jirka/lit-boring-callback"
 
 
 if __name__ == "__main__":

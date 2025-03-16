@@ -8,7 +8,7 @@ from litmodels import upload_model
 
 # Define the model name - this should be unique to your model
 # The format is <organization>/<teamspace>/<model-name>
-MY_MODEL_NAME = "jirka/kaggle/lit-auto-encoder-simple"
+MY_MODEL_NAME = "lightning-ai/jirka/lit-boring-simple"
 
 
 if __name__ == "__main__":

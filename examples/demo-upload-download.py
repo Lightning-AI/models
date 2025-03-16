@@ -12,11 +12,11 @@ if __name__ == "__main__":
     # Upload the model checkpoint
     litmodels.upload_model(
         "./boring-checkpoint.pt",
-        "jirka/kaggle/boring-model",
+        "lightning-ai/jirka/lit-boring-model",
     )
 
     # Download the model checkpoint
-    model_path = litmodels.download_model("jirka/kaggle/boring-model", download_dir="./my-models")
+    model_path = litmodels.download_model("lightning-ai/jirka/lit-boring-model", download_dir="./my-models")
     print(f"Model downloaded to {model_path}")
 
     # Load the model checkpoint
