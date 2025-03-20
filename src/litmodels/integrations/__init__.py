@@ -10,6 +10,6 @@ if _LIGHTNING_AVAILABLE:
     __all__ += ["LightningModelCheckpoint"]
 
 if _PYTORCHLIGHTNING_AVAILABLE:
-    from litmodels.integrations.checkpoints import PTLightningModelCheckpoint
+    from litmodels.integrations.checkpoints import PytorchLightningModelCheckpoint
 
     __all__ += ["PTLightningModelCheckpoint"]

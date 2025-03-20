@@ -67,7 +67,7 @@ if _LIGHTNING_AVAILABLE:
 
 if _PYTORCHLIGHTNING_AVAILABLE:
 
-    class PTLightningModelCheckpoint(LitModelCheckpointMixin, _PytorchLightningModelCheckpoint):
+    class PytorchLightningModelCheckpoint(LitModelCheckpointMixin, _PytorchLightningModelCheckpoint):
         """PyTorch Lightning ModelCheckpoint with LitModel support.
 
         Args:

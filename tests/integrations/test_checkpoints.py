@@ -23,7 +23,7 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, importing, 
         from lightning.pytorch.demos.boring_classes import BoringModel
         from litmodels.integrations.checkpoints import LightningModelCheckpoint as LitModelCheckpoint
     elif importing == "pytorch_lightning":
-        from litmodels.integrations.checkpoints import PTLightningModelCheckpoint as LitModelCheckpoint
+        from litmodels.integrations.checkpoints import PytorchLightningModelCheckpoint as LitModelCheckpoint
         from pytorch_lightning import Trainer
         from pytorch_lightning.callbacks import ModelCheckpoint
         from pytorch_lightning.demos.boring_classes import BoringModel
@@ -64,7 +64,7 @@ def test_lightning_checkpointing_pickleable(mock_auth, importing):
     if importing == "lightning":
         from litmodels.integrations.checkpoints import LightningModelCheckpoint as LitModelCheckpoint
     elif importing == "pytorch_lightning":
-        from litmodels.integrations.checkpoints import PTLightningModelCheckpoint as LitModelCheckpoint
+        from litmodels.integrations.checkpoints import PytorchLightningModelCheckpoint as LitModelCheckpoint
 
     ckpt = LitModelCheckpoint(model_name="org-name/teamspace/model-name")
     pickle.dumps(ckpt)
