@@ -34,7 +34,7 @@ def _cleanup_model(teamspace: Teamspace, model_name: str, expected_num_versions:
     if expected_num_versions is not None:
         versions = client.models_store_list_model_versions(project_id=model.project_id, model_id=model.id)
         assert expected_num_versions == len(versions.versions)
-    client.models_store_delete_model(project_id=teamspace.id, model_id=model.id)
+    client.models_store_delete_model(project_id=model.project_id, model_id=model.id)
 
 
 @pytest.mark.cloud()
