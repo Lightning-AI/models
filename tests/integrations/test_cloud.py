@@ -160,8 +160,6 @@ def test_lightning_checkpoint_and_resume(importing, tmp_path):
         "accelerator": "cpu",
         "strategy": "ddp_spawn",
         "devices": 4,
-        "limit_train_batches": 50,
-        "limit_val_batches": 25,
         "model_registry": f"{org_team}/{model_name}",
     }
 
