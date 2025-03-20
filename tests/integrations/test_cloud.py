@@ -66,7 +66,7 @@ def test_upload_download_model(tmp_path):
         assert os.path.isfile(os.path.join(tmp_path, file))
 
     # CLEANING
-    _cleanup_model(teamspace, model_name, expected_mun_versions=1)
+    _cleanup_model(teamspace, model_name, expected_num_versions=1)
 
 
 @pytest.mark.parametrize(
@@ -97,7 +97,7 @@ def test_lightning_default_checkpointing(importing, tmp_path):
     trainer.fit(BoringModel())
 
     # CLEANING
-    _cleanup_model(teamspace, model_name, expected_mun_versions=2)
+    _cleanup_model(teamspace, model_name, expected_num_versions=2)
 
 
 @pytest.mark.parametrize(
@@ -134,7 +134,7 @@ def test_lightning_plain_resume(importing, registry, tmp_path):
     trainer.fit(BoringModel(), ckpt_path=registry)
 
     # CLEANING
-    _cleanup_model(teamspace, model_name, expected_mun_versions=2 if trainer_kwargs else 1)
+    _cleanup_model(teamspace, model_name, expected_num_versions=2 if trainer_kwargs else 1)
 
 
 @pytest.mark.parametrize(
@@ -172,4 +172,4 @@ def test_lightning_checkpoint_and_resume(importing, tmp_path):
     trainer.fit(BoringModel(), ckpt_path="registry")
 
     # CLEANING
-    _cleanup_model(teamspace, model_name, expected_mun_versions=5)
+    _cleanup_model(teamspace, model_name, expected_num_versions=5)
