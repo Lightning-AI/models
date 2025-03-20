@@ -16,7 +16,7 @@ LIT_TEAMSPACE = "LitModels"
 
 
 def _prepare_variables(test_name: str) -> tuple[Teamspace, str, str]:
-    model_name = f"CI-test_integrations_{test_name}+{os.urandom(8).hex()}"
+    model_name = f"ci-test_integrations_{test_name}+{os.urandom(8).hex()}"
     teamspace = _resolve_teamspace(org=LIT_ORG, teamspace=LIT_TEAMSPACE, user=None)
     org_team = f"{teamspace.owner.name}/{teamspace.name}"
     return teamspace, org_team, model_name
