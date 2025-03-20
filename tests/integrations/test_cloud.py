@@ -78,6 +78,7 @@ def test_lightning_default_checkpointing(importing, tmp_path):
 
     trainer = Trainer(
         max_epochs=2,
+        default_root_dir=tmp_path,
         model_registry=f"{org_team}/{model_name}",
     )
     trainer.fit(BoringModel())
