@@ -31,9 +31,9 @@ def _cleanup_model(teamspace: Teamspace, model_name: str, expected_num_versions:
         project_name=teamspace.name,
         model_name=model_name,
     )
-    if expected_mun_versions is not None:
+    if expected_num_versions is not None:
         versions = client.models_store_list_model_versions(project_id=model.project_id, model_id=model.id)
-        assert expected_mun_versions == len(versions.versions)
+        assert expected_num_versions == len(versions.versions)
     client.models_store_delete_model(project_id=teamspace.id, model_id=model.id)
 
 
