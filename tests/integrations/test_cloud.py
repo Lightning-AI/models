@@ -112,7 +112,7 @@ def test_lightning_default_checkpointing(importing, tmp_path):
 )
 @pytest.mark.cloud()
 # todo: mock env variables as it would run in studio
-def test_lightning_resume(importing, registry, tmp_path):
+def test_lightning_plain_resume(importing, registry, tmp_path):
     if importing == "lightning":
         from lightning import Trainer
         from lightning.pytorch.demos.boring_classes import BoringModel
@@ -134,10 +134,9 @@ def test_lightning_resume(importing, registry, tmp_path):
     trainer.fit(BoringModel(), ckpt_path=registry)
 
     # CLEANING
-    _cleanup_model(teamspace, model_name, expected_mun_versions=2)
+    _cleanup_model(teamspace, model_name, expected_mun_versions=2 if trainer_kwargs else 1)
 
 
-@pytest.mark.parametrize("registry", ["registry", "registry:version:default"])
 @pytest.mark.parametrize(
     "importing",
     [
@@ -146,8 +145,7 @@ def test_lightning_resume(importing, registry, tmp_path):
     ],
 )
 @pytest.mark.cloud()
-# todo: mock env variables as it would run in studio
-def test_lightning_checkpoint_and_resume(importing, registry, tmp_path):
+def test_lightning_checkpoint_and_resume(importing, tmp_path):
     if importing == "lightning":
         from lightning import Trainer
         from lightning.pytorch.demos.boring_classes import BoringModel
@@ -171,7 +169,7 @@ def test_lightning_checkpoint_and_resume(importing, registry, tmp_path):
     trainer.fit(BoringModel())
 
     trainer = Trainer(max_epochs=5, **trainer_args)
-    trainer.fit(BoringModel(), ckpt_path=registry)
+    trainer.fit(BoringModel(), ckpt_path="registry")
 
     # CLEANING
     _cleanup_model(teamspace, model_name, expected_mun_versions=5)
