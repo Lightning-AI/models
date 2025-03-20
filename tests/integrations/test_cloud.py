@@ -3,6 +3,7 @@ from contextlib import redirect_stdout
 from io import StringIO
 
 import pytest
+from lightning_sdk import Teamspace
 from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
 from litmodels import download_model, upload_model
@@ -11,6 +12,18 @@ from tests.integrations import _SKIP_IF_LIGHTNING_BELLOW_2_5_1, _SKIP_IF_PYTORCH
 
 LIT_ORG = "lightning-ai"
 LIT_TEAMSPACE = "LitModels"
+
+
+def _cleanup_model(teamspace: Teamspace, model_name: str) -> None:
+    """Cleanup model from the teamspace."""
+    client = GridRestClient()
+    # cleaning created models as each test run shall have unique model name
+    model = client.models_store_get_model_by_name(
+        project_owner_name=teamspace.owner.name,
+        project_name=teamspace.name,
+        model_name=model_name,
+    )
+    client.models_store_delete_model(project_id=teamspace.id, model_id=model.id)
 
 
 @pytest.mark.cloud()
@@ -44,14 +57,7 @@ def test_upload_download_model(tmp_path):
         assert os.path.isfile(os.path.join(tmp_path, file))
 
     # CLEANING
-    client = GridRestClient()
-    # cleaning created models as each test run shall have unique model name
-    model = client.models_store_get_model_by_name(
-        project_owner_name=teamspace.owner.name,
-        project_name=teamspace.name,
-        model_name=model_name,
-    )
-    client.models_store_delete_model(project_id=teamspace.id, model_id=model.id)
+    _cleanup_model(teamspace, model_name)
 
 
 @pytest.mark.parametrize(
@@ -84,11 +90,4 @@ def test_lightning_default_checkpointing(importing, tmp_path):
     trainer.fit(BoringModel())
 
     # CLEANING
-    client = GridRestClient()
-    # cleaning created models as each test run shall have unique model name
-    model = client.models_store_get_model_by_name(
-        project_owner_name=teamspace.owner.name,
-        project_name=teamspace.name,
-        model_name=model_name,
-    )
-    client.models_store_delete_model(project_id=teamspace.id, model_id=model.id)
+    _cleanup_model(teamspace, model_name)
