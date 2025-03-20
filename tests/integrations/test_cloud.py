@@ -128,6 +128,7 @@ def test_lightning_plain_resume(trainer_method, registry, importing, tmp_path):
     # model name with random hash
     teamspace, org_team, model_name = _prepare_variables(f"resume_{trainer_method}")
     upload_model(model=checkpoint_path, name=f"{org_team}/{model_name}")
+    expected_num_versions = 1
 
     trainer_kwargs = {"model_registry": f"{org_team}/{model_name}"} if "<model>" not in registry else {}
     trainer = Trainer(
@@ -142,6 +143,8 @@ def test_lightning_plain_resume(trainer_method, registry, importing, tmp_path):
     registry = registry.replace("<model>", f"{org_team}/{model_name}")
     if trainer_method == "fit":
         trainer.fit(BoringModel(), ckpt_path=registry)
+        if trainer_kwargs:
+            expected_num_versions += 1
     elif trainer_method == "validate":
         trainer.validate(BoringModel(), ckpt_path=registry)
     elif trainer_method == "test":
@@ -152,7 +155,7 @@ def test_lightning_plain_resume(trainer_method, registry, importing, tmp_path):
         raise ValueError(f"Unknown trainer method: {trainer_method}")
 
     # CLEANING
-    _cleanup_model(teamspace, model_name, expected_num_versions=2 if trainer_kwargs else 1)
+    _cleanup_model(teamspace, model_name, expected_num_versions=expected_num_versions)
 
 
 @pytest.mark.parametrize(
