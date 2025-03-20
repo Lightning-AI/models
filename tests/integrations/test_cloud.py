@@ -22,7 +22,7 @@ def _prepare_variables(test_name: str) -> tuple[Teamspace, str, str]:
     return teamspace, org_team, model_name
 
 
-def _cleanup_model(teamspace: Teamspace, model_name: str, expected_mun_versions: Optional[int] = None) -> None:
+def _cleanup_model(teamspace: Teamspace, model_name: str, expected_num_versions: Optional[int] = None) -> None:
     """Cleanup model from the teamspace."""
     client = GridRestClient()
     # cleaning created models as each test run shall have unique model name
