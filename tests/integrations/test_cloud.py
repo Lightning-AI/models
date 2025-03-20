@@ -100,6 +100,7 @@ def test_lightning_default_checkpointing(importing, tmp_path):
     _cleanup_model(teamspace, model_name, expected_num_versions=2)
 
 
+@pytest.mark.parametrize("trainer_method", ["fit", "validate", "test", "predict"])
 @pytest.mark.parametrize(
     "registry", ["registry", "registry:version:v1", "registry:<model>", "registry:<model>:version:v1"]
 )
@@ -112,7 +113,7 @@ def test_lightning_default_checkpointing(importing, tmp_path):
 )
 @pytest.mark.cloud()
 # todo: mock env variables as it would run in studio
-def test_lightning_plain_resume(importing, registry, tmp_path):
+def test_lightning_plain_resume(trainer_method, registry, importing, tmp_path):
     if importing == "lightning":
         from lightning import Trainer
         from lightning.pytorch.demos.boring_classes import BoringModel
@@ -120,18 +121,35 @@ def test_lightning_plain_resume(importing, registry, tmp_path):
         from pytorch_lightning import Trainer
         from pytorch_lightning.demos.boring_classes import BoringModel
 
-    trainer = Trainer(max_epochs=1, default_root_dir=tmp_path)
+    trainer = Trainer(max_epochs=1, limit_train_batches=50, limit_val_batches=20, default_root_dir=tmp_path)
     trainer.fit(BoringModel())
     checkpoint_path = getattr(trainer.checkpoint_callback, "best_model_path")
 
     # model name with random hash
-    teamspace, org_team, model_name = _prepare_variables("resume")
+    teamspace, org_team, model_name = _prepare_variables(f"resume_{trainer_method}")
     upload_model(model=checkpoint_path, name=f"{org_team}/{model_name}")
 
     trainer_kwargs = {"model_registry": f"{org_team}/{model_name}"} if "<model>" not in registry else {}
-    trainer = Trainer(max_epochs=2, default_root_dir=tmp_path, **trainer_kwargs)
+    trainer = Trainer(
+        max_epochs=2,
+        default_root_dir=tmp_path,
+        limit_train_batches=10,
+        limit_val_batches=10,
+        limit_test_batches=10,
+        limit_predict_batches=10,
+        **trainer_kwargs,
+    )
     registry = registry.replace("<model>", f"{org_team}/{model_name}")
-    trainer.fit(BoringModel(), ckpt_path=registry)
+    if trainer_method == "fit":
+        trainer.fit(BoringModel(), ckpt_path=registry)
+    elif trainer_method == "validate":
+        trainer.validate(BoringModel(), ckpt_path=registry)
+    elif trainer_method == "test":
+        trainer.test(BoringModel(), ckpt_path=registry)
+    elif trainer_method == "predict":
+        trainer.predict(BoringModel(), ckpt_path=registry)
+    else:
+        raise ValueError(f"Unknown trainer method: {trainer_method}")
 
     # CLEANING
     _cleanup_model(teamspace, model_name, expected_num_versions=2 if trainer_kwargs else 1)
