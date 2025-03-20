@@ -63,7 +63,7 @@ def test_upload_download_model(tmp_path):
 )
 @pytest.mark.cloud()
 # todo: mock env variables as it would run in studio
-def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, importing, tmp_path):
+def test_lightning_default_checkpointing(importing, tmp_path):
     if importing == "lightning":
         from lightning import Trainer
         from lightning.pytorch.demos.boring_classes import BoringModel
