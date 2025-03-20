@@ -122,7 +122,7 @@ def test_lightning_resume(trainer_method, registry, importing, tmp_path):
     checkpoint_path = getattr(trainer.checkpoint_callback, "best_model_path")
 
     # model name with random hash
-    teamspace, org_team, model_name = _prepare_variables("resume")
+    teamspace, org_team, model_name = _prepare_variables(f"resume_{trainer_method}")
     upload_model(model=checkpoint_path, name=f"{org_team}/{model_name}")
 
     trainer_kwargs = {"model_registry": f"{org_team}/{model_name}"} if "<model>" not in registry else {}
