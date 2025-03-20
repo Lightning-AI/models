@@ -97,14 +97,14 @@ def test_lightning_default_checkpointing(importing, tmp_path):
 
 
 @pytest.mark.parametrize(
+    "registry", ["registry", "registry:version:v1", "registry:<model>", "registry:<model>:version:v1"]
+)
+@pytest.mark.parametrize(
     "importing",
     [
         pytest.param("lightning", marks=_SKIP_IF_LIGHTNING_BELLOW_2_5_1),
         pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1),
     ],
-)
-@pytest.mark.parametrize(
-    "registry", ["registry", "registry:version:v1", "registry:<model>", "registry:<model>:version:v1"]
 )
 @pytest.mark.cloud()
 # todo: mock env variables as it would run in studio
@@ -124,7 +124,8 @@ def test_lightning_resume(importing, registry, tmp_path):
     teamspace, org_team, model_name = _prepare_variables("resume")
     upload_model(model=checkpoint_path, name=f"{org_team}/{model_name}")
 
-    trainer = Trainer(max_epochs=2, default_root_dir=tmp_path)
+    trainer_kwargs = {"model_registry": f"{org_team}/{model_name}"} if "<model>" not in registry else {}
+    trainer = Trainer(max_epochs=2, default_root_dir=tmp_path, **trainer_kwargs)
     registry = registry.replace("<model>", f"{org_team}/{model_name}")
     trainer.fit(BoringModel(), ckpt_path=registry)
 
