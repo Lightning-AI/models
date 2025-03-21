@@ -1,4 +1,5 @@
 import os
+import platform
 from contextlib import redirect_stdout
 from io import StringIO
 from typing import Optional
@@ -38,7 +39,10 @@ def _cleanup_model(teamspace: Teamspace, model_name: str, expected_num_versions:
 
 
 @pytest.mark.cloud()
-@pytest.mark.parametrize("in_studio", [True, False])
+@pytest.mark.parametrize(
+    "in_studio",
+    [False, pytest.param(True, marks=pytest.mark.skipif(platform.system() != "Linux", reason="Studio is just Linux"))],
+)
 def test_upload_download_model(in_studio, monkeypatch, tmp_path):
     """Verify that the model is uploaded to the teamspace"""
     if in_studio:
@@ -83,7 +87,10 @@ def test_upload_download_model(in_studio, monkeypatch, tmp_path):
         pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1),
     ],
 )
-@pytest.mark.parametrize("in_studio", [True, False])
+@pytest.mark.parametrize(
+    "in_studio",
+    [False, pytest.param(True, marks=pytest.mark.skipif(platform.system() != "Linux", reason="Studio is just Linux"))],
+)
 @pytest.mark.cloud()
 def test_lightning_default_checkpointing(importing, in_studio, monkeypatch, tmp_path):
     if in_studio:
