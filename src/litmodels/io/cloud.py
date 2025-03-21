@@ -2,34 +2,18 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
 from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
+from lightning_sdk.models import _extend_model_name_with_teamspace, _parse_model_name_and_version
 from lightning_sdk.models import download_model as sdk_download_model
 from lightning_sdk.models import upload_model as sdk_upload_model
 
 if TYPE_CHECKING:
     from lightning_sdk.models import UploadedModelInfo
 
-# if module_available("lightning"):
-#     from lightning import LightningModule
-# elif module_available("pytorch_lightning"):
-#     from pytorch_lightning import LightningModule
-# else:
-#     LightningModule = None
 
 _SHOWED_MODEL_LINKS = []
-
-
-def _parse_name(name: str) -> Tuple[str, str, str]:
-    """Parse the name argument into its components."""
-    try:
-        org_name, teamspace_name, model_name = name.split("/")
-    except ValueError as err:
-        raise ValueError(
-            f"The name argument must be in the format 'organization/teamspace/model` but you provided '{name}'."
-        ) from err
-    return org_name, teamspace_name, model_name
 
 
 def _print_model_link(name: str, verbose: Union[bool, int]) -> None:
@@ -43,7 +27,9 @@ def _print_model_link(name: str, verbose: Union[bool, int]) -> None:
             - If set to 1, the link will be printed only once.
             - If set to 2, the link will be printed every time.
     """
-    org_name, teamspace_name, model_name = _parse_name(name)
+    name = _extend_model_name_with_teamspace(name)
+    org_name, teamspace_name, model_name, _ = _parse_model_name_and_version(name)
+
     url = f"{LIGHTNING_CLOUD_URL}/{org_name}/{teamspace_name}/models/{model_name}"
     msg = f"Model uploaded successfully. Link to the model: '{url}'"
     if int(verbose) > 1:

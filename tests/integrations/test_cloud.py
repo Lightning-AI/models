@@ -38,8 +38,14 @@ def _cleanup_model(teamspace: Teamspace, model_name: str, expected_num_versions:
 
 
 @pytest.mark.cloud()
-def test_upload_download_model(tmp_path):
+@pytest.mark.parametrize("in_studio", [True, False])
+def test_upload_download_model(in_studio, monkeypatch, tmp_path):
     """Verify that the model is uploaded to the teamspace"""
+    if in_studio:
+        # mock env variables as it would run in studio
+        monkeypatch.setenv("LIGHTNING_ORG", LIT_ORG)
+        monkeypatch.setenv("LIGHTNING_TEAMSPACE", LIT_TEAMSPACE)
+
     # create a dummy file
     file_path = tmp_path / "dummy.txt"
     with open(file_path, "w") as f:
@@ -47,10 +53,11 @@ def test_upload_download_model(tmp_path):
 
     # model name with random hash
     teamspace, org_team, model_name = _prepare_variables("upload_download")
+    model_registry = f"{org_team}/{model_name}" if not in_studio else model_name
 
     out = StringIO()
     with redirect_stdout(out):
-        upload_model(name=f"{org_team}/{model_name}", model=file_path)
+        upload_model(name=model_registry, model=file_path)
 
     # validate the output
     assert (
@@ -60,7 +67,7 @@ def test_upload_download_model(tmp_path):
     os.remove(file_path)
     assert not os.path.isfile(file_path)
 
-    model_files = download_model(name=f"{org_team}/{model_name}", download_dir=tmp_path)
+    model_files = download_model(name=model_registry, download_dir=tmp_path)
     assert model_files == ["dummy.txt"]
     for file in model_files:
         assert os.path.isfile(os.path.join(tmp_path, file))
@@ -76,9 +83,14 @@ def test_upload_download_model(tmp_path):
         pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1),
     ],
 )
+@pytest.mark.parametrize("in_studio", [True, False])
 @pytest.mark.cloud()
-# todo: mock env variables as it would run in studio
-def test_lightning_default_checkpointing(importing, tmp_path):
+def test_lightning_default_checkpointing(importing, in_studio, monkeypatch, tmp_path):
+    if in_studio:
+        # mock env variables as it would run in studio
+        monkeypatch.setenv("LIGHTNING_ORG", LIT_ORG)
+        monkeypatch.setenv("LIGHTNING_TEAMSPACE", LIT_TEAMSPACE)
+
     if importing == "lightning":
         from lightning import Trainer
         from lightning.pytorch.demos.boring_classes import BoringModel
@@ -88,11 +100,12 @@ def test_lightning_default_checkpointing(importing, tmp_path):
 
     # model name with random hash
     teamspace, org_team, model_name = _prepare_variables("default_checkpoint")
+    model_registry = f"{org_team}/{model_name}" if not in_studio else model_name
 
     trainer = Trainer(
         max_epochs=2,
         default_root_dir=tmp_path,
-        model_registry=f"{org_team}/{model_name}",
+        model_registry=model_registry,
     )
     trainer.fit(BoringModel())
 
