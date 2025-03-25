@@ -2,7 +2,7 @@ import pickle
 import tempfile
 from abc import ABC
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
 
 from litmodels import download_model, upload_model
 
@@ -24,7 +24,7 @@ class ModelRegistryMixin(ABC):
     @classmethod
     def pull_from_registry(
         cls, model_name: str, model_version: Optional[str] = None, temp_folder: Optional[str] = None
-    ) -> None:
+    ) -> object:
         """Pull the model from the registry.
 
         Args:
