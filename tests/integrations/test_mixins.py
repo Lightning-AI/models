@@ -28,4 +28,5 @@ def test_mixin_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
         model_name="dummy_model", model_version="v1", temp_folder=str(tmp_path)
     )
     # Verify that the unpickled instance has the expected value.
+    assert isinstance(loaded_dummy, DummyModel)
     assert loaded_dummy.value == 42
