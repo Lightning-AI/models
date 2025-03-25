@@ -116,10 +116,11 @@ class PyTorchRegistryMixin(ABC):
             model_name = self.__class__.__name__
         if temp_folder is None:
             temp_folder = tempfile.gettempdir()
-        torch_model_path = Path(temp_folder) / f"{model_name}.pth"
-        torch.save(self, torch_model_path)
+        torch_path = Path(temp_folder) / f"{model_name}.pth"
+        torch.save(self.state_dict(), torch_path)
+        # todo: dump also object creation arguments so we can dump it and load with model for object instantiation
         model_registry = f"{model_name}:{model_version}" if model_version else model_name
-        upload_model(name=model_registry, model=torch_model_path)
+        upload_model(name=model_registry, model=torch_path)
 
     @classmethod
     def pull_from_registry(
@@ -148,12 +149,16 @@ class PyTorchRegistryMixin(ABC):
             raise RuntimeError(f"No torch file found for model: {model_registry} with {files}")
         if len(torch_files) > 1:
             raise RuntimeError(f"Multiple torch files found for model: {model_registry} with {torch_files}")
-        torch_model_path = Path(temp_folder) / torch_files[0]
+        state_dict_path = Path(temp_folder) / torch_files[0]
         # ignore future warning about changed default
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=FutureWarning)
-            model = torch.load(torch_model_path, **(torch_load_kwargs if torch_load_kwargs else {}))
+            state_dict = torch.load(state_dict_path, **(torch_load_kwargs if torch_load_kwargs else {}))
 
-        if not isinstance(model, torch.nn.Module):
-            raise TypeError(f"The model must be a PyTorch `nn.Module` but got: {type(model)}")
-        return model
+        # Create a new model instance without calling __init__
+        instance = cls()  # todo: we need to add args used when created dumped model
+        if not isinstance(instance, torch.nn.Module):
+            raise TypeError(f"The model must be a PyTorch `nn.Module` but got: {type(instance)}")
+        # Now load the state dict on the instance
+        instance.load_state_dict(state_dict, strict=True)
+        return instance

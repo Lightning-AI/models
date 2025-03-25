@@ -34,7 +34,7 @@ def test_pickle_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
 
 
 class DummyTorchModel(nn.Module, PyTorchRegistryMixin):
-    def __init__(self, input_size=256):
+    def __init__(self, input_size=784):
         super().__init__()
         self.fc = nn.Linear(input_size, 10)
 
@@ -56,7 +56,7 @@ def test_pytorch_pull_updated(mock_download_model, mock_upload_model, tmp_path):
     expected_path = tmp_path / f"{dummy.__class__.__name__}.pth"
     mock_upload_model.assert_called_once_with(name="DummyTorchModel", model=expected_path)
 
-    torch.save(dummy, expected_path)
+    torch.save(dummy.state_dict(), expected_path)
     # Prepare mocking for pull_from_registry.
     mock_download_model.return_value = [f"{dummy.__class__.__name__}.pth"]
     loaded_dummy = DummyTorchModel.pull_from_registry(model_name="DummyTorchModel", temp_folder=str(tmp_path))
