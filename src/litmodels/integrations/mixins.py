@@ -2,7 +2,7 @@ import pickle
 import tempfile
 from abc import ABC
 from pathlib import Path
-from typing import Optional, Any
+from typing import Optional
 
 from litmodels import download_model, upload_model
 
