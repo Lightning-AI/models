@@ -45,7 +45,10 @@ def upload_model(
     # if LightningModule and isinstance(model, LightningModule):
     #     path = os.path.join(staging_dir, f"{model.__class__.__name__}.ckpt")
     #     model.save_checkpoint(path)
-    if torch and isinstance(model, Module):
+    if torch and isinstance(model, torch.jit.ScriptModule):
+        path = os.path.join(staging_dir, f"{model.__class__.__name__}.pt")
+        model.save(path)
+    elif torch and isinstance(model, Module):
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pth")
         torch.save(model.state_dict(), path)
     elif isinstance(model, str):

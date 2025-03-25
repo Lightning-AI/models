@@ -3,6 +3,7 @@ from unittest import mock
 
 import joblib
 import pytest
+import torch.jit as torch_jit
 from litmodels import download_model, load_model, upload_model
 from litmodels.io import upload_model_files
 from sklearn import svm
@@ -30,6 +31,7 @@ def test_download_wrong_model_name(name):
     [
         ("path/to/checkpoint", "path/to/checkpoint", False),
         # (BoringModel(), "%s/BoringModel.ckpt"),
+        (torch_jit.script(Module()), f"%s{os.path.sep}RecursiveScriptModule.pt", True),
         (Module(), f"%s{os.path.sep}Module.pth", True),
         (svm.SVC(), f"%s{os.path.sep}SVC.pkl", 1),
     ],
