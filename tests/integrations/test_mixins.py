@@ -3,7 +3,6 @@ from unittest import mock
 import torch
 from litmodels.integrations.mixins import PickleRegistryMixin, PyTorchRegistryMixin
 from torch import nn
-from litmodels.integrations.mixins import PickleRegistryMixin
 
 
 class DummyModel(PickleRegistryMixin):
