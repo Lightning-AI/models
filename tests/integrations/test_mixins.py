@@ -13,7 +13,7 @@ class DummyModel(PickleRegistryMixin):
 
 @mock.patch("litmodels.integrations.mixins.upload_model")
 @mock.patch("litmodels.integrations.mixins.download_model")
-def test_mixin_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
+def test_pickle_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
     # Create an instance of DummyModel and call push_to_registry.
     dummy = DummyModel(42)
     dummy.push_to_registry(model_version="v1", temp_folder=str(tmp_path))
