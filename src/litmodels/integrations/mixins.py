@@ -79,4 +79,7 @@ class PickleRegistryMixin(ABC):
             raise RuntimeError(f"Multiple pickle files found for model: {model_registry} with {pkl_files}")
         pkl_path = Path(temp_folder) / pkl_files[0]
         with open(pkl_path, "rb") as fp:
-            return pickle.load(fp)
+            obj = pickle.load(fp)
+        if not isinstance(obj, cls):
+            raise RuntimeError(f"Unpickled object is not of type {cls.__name__}: {type(obj)}")
+        return obj
