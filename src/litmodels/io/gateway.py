@@ -112,4 +112,6 @@ def load_model(name: str, download_dir: str = ".") -> Any:
     model_path = Path(os.path.join(download_dir, download_paths[0]))
     if model_path.suffix.lower() == ".pkl":
         return joblib.load(model_path)
+    if model_path.suffix.lower() == ".pt":
+        return torch.jit.load(model_path)
     raise NotImplementedError(f"Loading model from {model_path.suffix} is not supported yet.")
