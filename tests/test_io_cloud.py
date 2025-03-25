@@ -92,7 +92,7 @@ def test_load_model_pickle(mock_download_model, tmp_path):
 @mock.patch("litmodels.io.cloud.sdk_download_model")
 def test_load_model_torch_jit(mock_download_model, tmp_path):
     # create a dummy model file
-    model_file = tmp_path / "dummy_model.pt"
+    model_file = tmp_path / "dummy_model.ts"
     test_data = torch_jit.script(Module())
     test_data.save(model_file)
     mock_download_model.return_value = [str(model_file.name)]
