@@ -53,7 +53,7 @@ class PickleRegistryMixin(ABC):
             temp_folder = tempfile.gettempdir()
         pickle_path = Path(temp_folder) / f"{model_name}.pkl"
         with open(pickle_path, "wb") as fp:
-            pickle.dump(self, fp)
+            pickle.dump(self, fp, protocol=pickle.HIGHEST_PROTOCOL)
         model_registry = f"{model_name}:{model_version}" if model_version else model_name
         upload_model(name=model_registry, model=pickle_path)
 
