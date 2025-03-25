@@ -3,9 +3,12 @@ import tempfile
 import warnings
 from abc import ABC
 from pathlib import Path
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from litmodels import download_model, upload_model
+
+if TYPE_CHECKING:
+    import torch
 
 
 class ModelRegistryMixin(ABC):
@@ -129,7 +132,7 @@ class PyTorchRegistryMixin(ABC):
         model_version: Optional[str] = None,
         temp_folder: Optional[str] = None,
         torch_load_kwargs: Optional[dict] = None,
-    ) -> nn.Module:
+    ) -> "torch.nn.Module":
         """Pull the model from the registry.
 
         Args:
