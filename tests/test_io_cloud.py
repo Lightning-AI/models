@@ -3,6 +3,8 @@ from unittest import mock
 
 import joblib
 import pytest
+import torch
+import torch.jit as torch_jit
 from litmodels import download_model, load_model, upload_model
 from litmodels.io import upload_model_files
 from sklearn import svm
@@ -30,6 +32,7 @@ def test_download_wrong_model_name(name):
     [
         ("path/to/checkpoint", "path/to/checkpoint", False),
         # (BoringModel(), "%s/BoringModel.ckpt"),
+        (torch_jit.script(Module()), f"%s{os.path.sep}RecursiveScriptModule.ts", True),
         (Module(), f"%s{os.path.sep}Module.pth", True),
         (svm.SVC(), f"%s{os.path.sep}SVC.pkl", 1),
     ],
@@ -68,7 +71,7 @@ def test_download_model(mock_download_model):
 
 
 @mock.patch("litmodels.io.cloud.sdk_download_model")
-def test_load_model(mock_download_model, tmp_path):
+def test_load_model_pickle(mock_download_model, tmp_path):
     # create a dummy model file
     model_file = tmp_path / "dummy_model.pkl"
     test_data = svm.SVC()
@@ -84,3 +87,22 @@ def test_load_model(mock_download_model, tmp_path):
         name="org-name/teamspace/model-name", download_dir=str(tmp_path), progress_bar=True
     )
     assert isinstance(model, svm.SVC)
+
+
+@mock.patch("litmodels.io.cloud.sdk_download_model")
+def test_load_model_torch_jit(mock_download_model, tmp_path):
+    # create a dummy model file
+    model_file = tmp_path / "dummy_model.ts"
+    test_data = torch_jit.script(Module())
+    test_data.save(model_file)
+    mock_download_model.return_value = [str(model_file.name)]
+
+    # The lit-logger function is just a wrapper around the SDK function
+    model = load_model(
+        name="org-name/teamspace/model-name",
+        download_dir=str(tmp_path),
+    )
+    mock_download_model.assert_called_once_with(
+        name="org-name/teamspace/model-name", download_dir=str(tmp_path), progress_bar=True
+    )
+    assert isinstance(model, torch.jit.ScriptModule)

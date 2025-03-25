@@ -45,7 +45,10 @@ def upload_model(
     # if LightningModule and isinstance(model, LightningModule):
     #     path = os.path.join(staging_dir, f"{model.__class__.__name__}.ckpt")
     #     model.save_checkpoint(path)
-    if torch and isinstance(model, Module):
+    if torch and isinstance(model, torch.jit.ScriptModule):
+        path = os.path.join(staging_dir, f"{model.__class__.__name__}.ts")
+        model.save(path)
+    elif torch and isinstance(model, Module):
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pth")
         torch.save(model.state_dict(), path)
     elif isinstance(model, str):
@@ -109,4 +112,6 @@ def load_model(name: str, download_dir: str = ".") -> Any:
     model_path = Path(os.path.join(download_dir, download_paths[0]))
     if model_path.suffix.lower() == ".pkl":
         return joblib.load(model_path)
+    if model_path.suffix.lower() == ".ts":
+        return torch.jit.load(model_path)
     raise NotImplementedError(f"Loading model from {model_path.suffix} is not supported yet.")
