@@ -3,7 +3,7 @@ import tempfile
 import warnings
 from abc import ABC
 from pathlib import Path
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from litmodels import download_model, upload_model
 
