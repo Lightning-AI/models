@@ -129,7 +129,7 @@ class PyTorchRegistryMixin(ABC):
         model_version: Optional[str] = None,
         temp_folder: Optional[str] = None,
         torch_load_kwargs: Optional[dict] = None,
-    ) -> object:
+    ) -> nn.Module:
         """Pull the model from the registry.
 
         Args:
