@@ -89,7 +89,7 @@ class PickleRegistryMixin(ABC):
 class PyTorchRegistryMixin(ABC):
     """Mixin for PyTorch model registry integration."""
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization method to set up the model."""
         import torch
 
