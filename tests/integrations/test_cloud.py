@@ -10,8 +10,7 @@ from lightning_sdk import Teamspace
 from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
 from litmodels import download_model, upload_model
-from litmodels.integrations.mixins import PickleRegistryMixin
-from litmodels.integrations.mixins import PyTorchRegistryMixin
+from litmodels.integrations.mixins import PickleRegistryMixin, PyTorchRegistryMixin
 
 from tests.integrations import _SKIP_IF_LIGHTNING_BELLOW_2_5_1, _SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1
 
