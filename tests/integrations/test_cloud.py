@@ -274,3 +274,6 @@ def test_pytorch_mixin_push_and_pull():
     assert isinstance(loaded_dummy, DummyTorchModel)
     # Compare the outputs as a verification.
     assert torch.allclose(output_before, output_after), "Loaded model output differs from original."
+
+    # CLEANING
+    _cleanup_model(teamspace, model_name, expected_num_versions=1)
