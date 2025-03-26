@@ -102,7 +102,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
 class PyTorchRegistryMixin(ModelRegistryMixin):
     """Mixin for PyTorch model registry integration."""
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs) -> "torch.nn.Module":
         """Create a new instance of the class without calling __init__."""
         instance = super().__new__(cls)
 

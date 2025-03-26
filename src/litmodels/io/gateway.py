@@ -41,17 +41,17 @@ def upload_model(
     """
     if not staging_dir:
         staging_dir = tempfile.mkdtemp()
+    if isinstance(model, (str, Path)):
+        path = model  # type: ignore[assignment]
     # if LightningModule and isinstance(model, LightningModule):
     #     path = os.path.join(staging_dir, f"{model.__class__.__name__}.ckpt")
     #     model.save_checkpoint(path)
-    if torch and isinstance(model, torch.jit.ScriptModule):
+    elif torch and isinstance(model, torch.jit.ScriptModule):
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.ts")
         model.save(path)
     elif torch and isinstance(model, torch.nn.Module):
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pth")
         torch.save(model.state_dict(), path)
-    elif isinstance(model, (str, Path)):
-        path = model
     else:
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pkl")
         joblib.dump(model, path)
