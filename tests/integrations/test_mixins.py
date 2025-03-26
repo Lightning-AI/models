@@ -18,7 +18,7 @@ class DummyModel(PickleRegistryMixin):
 def test_pickle_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
     # Create an instance of DummyModel and call push_to_registry.
     dummy = DummyModel(42)
-    dummy.push_to_registry(model_version="v1", temp_folder=str(tmp_path))
+    dummy.push_to_registry(version="v1", temp_folder=str(tmp_path))
     # The expected registry name is "dummy_model:v1" and the file should be placed in the temp folder.
     expected_path = tmp_path / "DummyModel.pkl"
     mock_upload_model.assert_called_once_with(name="DummyModel:v1", model=expected_path)
