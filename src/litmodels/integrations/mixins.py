@@ -8,6 +8,8 @@ from abc import ABC
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Tuple
 
+from lightning_utilities.core.rank_zero import rank_zero_warn
+
 from litmodels.io.cloud import upload_model_files, download_model_files
 
 if TYPE_CHECKING:
@@ -136,29 +138,29 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
 
         name, model_name, temp_folder = self._setup(name, temp_folder)
 
-        def __new__(cls, *args, **kwargs):
-            instance = super().__new__(cls)
+        if self.__init_kwargs:
+            try:
+                # Save the model arguments to a JSON file
+                init_kwargs_path = Path(temp_folder) / f"{model_name}__init_kwargs.json"
+                with open(init_kwargs_path, "w") as fp:
+                    json.dump(self.__init_kwargs, fp)
+            except Exception as e:
+                raise RuntimeError(
+                    f"Failed to save model arguments: {e}."
+                    " Ensure the models arguments are JSON serializable or user `PickleRegistryMixin`."
+                ) from e
+        elif not hasattr(self, "__init_kwargs"):
+            rank_zero_warn(
+                "The child class is missing `__init_kwargs`."
+                " Ensure `PyTorchRegistryMixin` is first in the inheritance order"
+                " or call `PyTorchRegistryMixin.__init__` explicitly in the child class."
+            )
 
-            # Get __init__ signature excluding 'self'
-            init_sig = inspect.signature(cls.__init__)
-            params = list(init_sig.parameters.values())[1:]  # Skip self
-
-            # Create temporary signature for binding
-            temp_sig = init_sig.replace(parameters=params)
-
-            # Bind and apply defaults
-            bound_args = temp_sig.bind(*args, **kwargs)
-            bound_args.apply_defaults()
-
-            # Store unified kwargs
-            instance.__init_kwargs = bound_args.arguments
-            return instance
-
-        torch_path = Path(temp_folder) / f"{model_name}.pth"
-        torch.save(self.state_dict(), torch_path)
-        # todo: dump also object creation arguments so we can dump it and load with model for object instantiation
+        torch_state_dict_path = Path(temp_folder) / f"{model_name}.pth"
+        torch.save(self.state_dict(), torch_state_dict_path)
         model_registry = f"{name}:{version}" if version else name
-        upload_model_files(name=model_registry, path=torch_path)
+        # todo: consider created another temp folder and copy there these two files
+        upload_model_files(name=model_registry, path=temp_folder)
 
     @classmethod
     def pull_from_registry(
@@ -182,6 +184,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
             temp_folder = tempfile.mkdtemp()
         model_registry = f"{name}:{version}" if version else name
         files = download_model_files(name=model_registry, download_dir=temp_folder)
+
         torch_files = [f for f in files if f.endswith(".pth")]
         if not torch_files:
             raise RuntimeError(f"No torch file found for model: {model_registry} with {files}")
@@ -193,8 +196,18 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
             warnings.simplefilter("ignore", category=FutureWarning)
             state_dict = torch.load(state_dict_path, **(torch_load_kwargs if torch_load_kwargs else {}))
 
+        init_files = [fp for fp in files if fp.endswith("__init_kwargs.json")]
+        if not init_files:
+            init_kwargs = {}
+        elif len(init_files) > 1:
+            raise RuntimeError(f"Multiple init files found for model: {model_registry} with {init_files}")
+        else:
+            init_kwargs_path = Path(temp_folder) / init_files[0]
+            with open(init_kwargs_path, "r") as fp:
+                init_kwargs = json.load(fp)
+
         # Create a new model instance without calling __init__
-        instance = cls()  # todo: we need to add args used when created dumped model
+        instance = cls(**init_kwargs)
         if not isinstance(instance, torch.nn.Module):
             raise TypeError(f"The model must be a PyTorch `nn.Module` but got: {type(instance)}")
         # Now load the state dict on the instance

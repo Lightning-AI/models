@@ -242,7 +242,10 @@ def test_pickle_mixin_push_and_pull():
     _cleanup_model(teamspace, model_name, expected_num_versions=1)
 
 
-class DummyTorchModel(torch.nn.Module, PyTorchRegistryMixin):
+# This is a dummy model for PyTorch that uses the PyTorchRegistryMixin.
+# This mixin has to be first in the inheritance order.
+# Otherwise, `PyTorchRegistryMixin.__init__` nee to be called explicitly.
+class DummyTorchModel(PyTorchRegistryMixin, torch.nn.Module):
     def __init__(self, input_size: int, output_size: int = 10):
         # PyTorchRegistryMixin.__init__ will capture these arguments
         super().__init__()
