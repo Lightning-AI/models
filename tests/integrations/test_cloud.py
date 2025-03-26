@@ -224,7 +224,7 @@ class DummyModel(PickleRegistryMixin):
 @pytest.mark.cloud()
 def test_pickle_mixin_push_and_pull():
     # model name with random hash
-    teamspace, org_team, model_name = _prepare_variables("picklemixin")
+    teamspace, org_team, model_name = _prepare_variables("pickle_mixin")
     model_registry = f"{org_team}/{model_name}"
 
     # Create an instance of DummyModel and call push_to_registry.
