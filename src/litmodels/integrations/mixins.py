@@ -49,10 +49,10 @@ class PickleRegistryMixin(ModelRegistryMixin):
             version: The version of the model. If None, the latest version is used.
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
         """
-        if ":" in name:
-            raise ValueError(f"Invalid model name: '{name}'. It should not contain ':' associated with version.")
         if name is None:
             name = model_name = self.__class__.__name__
+        elif ":" in name:
+            raise ValueError(f"Invalid model name: '{name}'. It should not contain ':' associated with version.")
         else:
             model_name = name.split("/")[-1]
         if temp_folder is None:
