@@ -36,7 +36,7 @@ class ModelRegistryMixin(ABC):
         """
 
     def _setup(self, name: Optional[str] = None, temp_folder: Optional[str] = None) -> Tuple[str, str, str]:
-        """Setup method to be called after the model is created."""
+        """Parse and validate the model name and temporary folder."""
         if name is None:
             name = model_name = self.__class__.__name__
         elif ":" in name:
