@@ -1,6 +1,5 @@
 import inspect
 import json
-import os
 import pickle
 import tempfile
 import warnings
@@ -10,7 +9,7 @@ from typing import TYPE_CHECKING, Optional, Tuple
 
 from lightning_utilities.core.rank_zero import rank_zero_warn
 
-from litmodels.io.cloud import upload_model_files, download_model_files
+from litmodels.io.cloud import download_model_files, upload_model_files
 
 if TYPE_CHECKING:
     import torch
@@ -132,6 +131,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
         """
         import torch
+
         # Ensure that the model is in evaluation mode
         if not isinstance(self, torch.nn.Module):
             raise TypeError(f"The model must be a PyTorch `nn.Module` but got: {type(self)}")
@@ -203,7 +203,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
             raise RuntimeError(f"Multiple init files found for model: {model_registry} with {init_files}")
         else:
             init_kwargs_path = Path(temp_folder) / init_files[0]
-            with open(init_kwargs_path, "r") as fp:
+            with open(init_kwargs_path) as fp:
                 init_kwargs = json.load(fp)
 
         # Create a new model instance without calling __init__
