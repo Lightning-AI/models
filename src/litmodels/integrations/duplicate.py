@@ -31,7 +31,6 @@ def duplicate_hf_model(
 
     if not local_workdir:
         local_workdir = tempfile.mkdtemp()
-        os.makedirs(local_workdir)
     local_workdir = Path(local_workdir)
     model_name = hf_model.replace("/", "_")
 
