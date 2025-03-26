@@ -148,7 +148,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
             except Exception as e:
                 raise RuntimeError(
                     f"Failed to save model arguments: {e}."
-                    " Ensure the models arguments are JSON serializable or user `PickleRegistryMixin`."
+                    " Ensure the model's arguments are JSON serializable or use `PickleRegistryMixin`."
                 ) from e
         elif not hasattr(self, "__init_kwargs"):
             rank_zero_warn(
@@ -160,7 +160,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
         torch_state_dict_path = Path(temp_folder) / f"{model_name}.pth"
         torch.save(self.state_dict(), torch_state_dict_path)
         model_registry = f"{name}:{version}" if version else name
-        # todo: consider created another temp folder and copy there these two files
+        # todo: consider creating another temp folder and copying these two files
         upload_model_files(name=model_registry, path=temp_folder)
 
     @classmethod

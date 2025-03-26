@@ -244,7 +244,7 @@ def test_pickle_mixin_push_and_pull():
 
 # This is a dummy model for PyTorch that uses the PyTorchRegistryMixin.
 # This mixin has to be first in the inheritance order.
-# Otherwise, `PyTorchRegistryMixin.__init__` nee to be called explicitly.
+# Otherwise, `PyTorchRegistryMixin.__init__` need to be called explicitly.
 class DummyTorchModel(PyTorchRegistryMixin, torch.nn.Module):
     def __init__(self, input_size: int, output_size: int = 10):
         # PyTorchRegistryMixin.__init__ will capture these arguments
