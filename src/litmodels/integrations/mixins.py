@@ -26,9 +26,7 @@ class ModelRegistryMixin(ABC):
         """
 
     @classmethod
-    def pull_from_registry(
-        cls, name: str, version: Optional[str] = None, temp_folder: Optional[str] = None
-    ) -> object:
+    def pull_from_registry(cls, name: str, version: Optional[str] = None, temp_folder: Optional[str] = None) -> object:
         """Pull the model from the registry.
 
         Args:
@@ -67,9 +65,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
         upload_model(name=name, model=pickle_path)
 
     @classmethod
-    def pull_from_registry(
-        cls, name: str, version: Optional[str] = None, temp_folder: Optional[str] = None
-    ) -> object:
+    def pull_from_registry(cls, name: str, version: Optional[str] = None, temp_folder: Optional[str] = None) -> object:
         """Pull the model from the registry.
 
         Args:

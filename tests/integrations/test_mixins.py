@@ -26,9 +26,7 @@ def test_pickle_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
     # Set the mock to return the full path to the pickle file.
     mock_download_model.return_value = ["DummyModel.pkl"]
     # Call pull_from_registry and load the DummyModel instance.
-    loaded_dummy = DummyModel.pull_from_registry(
-        name="dummy_model", version="v1", temp_folder=str(tmp_path)
-    )
+    loaded_dummy = DummyModel.pull_from_registry(name="dummy_model", version="v1", temp_folder=str(tmp_path))
     # Verify that the unpickled instance has the expected value.
     assert loaded_dummy.value == 42
 
