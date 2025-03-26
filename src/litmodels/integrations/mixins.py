@@ -5,7 +5,7 @@ import tempfile
 import warnings
 from abc import ABC
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Tuple
+from typing import TYPE_CHECKING, Optional, Tuple, Union
 
 from lightning_utilities.core.rank_zero import rank_zero_warn
 
@@ -19,7 +19,7 @@ class ModelRegistryMixin(ABC):
     """Mixin for model registry integration."""
 
     def push_to_registry(
-        self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Optional[str] = None
+        self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Union[str, Path, None] = None
     ) -> None:
         """Push the model to the registry.
 
@@ -30,7 +30,7 @@ class ModelRegistryMixin(ABC):
         """
 
     @classmethod
-    def pull_from_registry(cls, name: str, version: Optional[str] = None, temp_folder: Optional[str] = None) -> object:
+    def pull_from_registry(cls, name: str, version: Optional[str] = None, temp_folder: Union[str, Path, None] = None) -> object:
         """Pull the model from the registry.
 
         Args:
@@ -39,7 +39,7 @@ class ModelRegistryMixin(ABC):
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
         """
 
-    def _setup(self, name: Optional[str] = None, temp_folder: Optional[str] = None) -> Tuple[str, str, str]:
+    def _setup(self, name: Optional[str] = None, temp_folder: Union[str, Path, None] = None) -> Tuple[str, str, str]:
         """Parse and validate the model name and temporary folder."""
         if name is None:
             name = model_name = self.__class__.__name__
@@ -56,7 +56,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
     """Mixin for pickle registry integration."""
 
     def push_to_registry(
-        self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Optional[str] = None
+        self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Union[str, Path, None] = None
     ) -> None:
         """Push the model to the registry.
 
@@ -74,7 +74,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
         upload_model_files(name=name, path=pickle_path)
 
     @classmethod
-    def pull_from_registry(cls, name: str, version: Optional[str] = None, temp_folder: Optional[str] = None) -> object:
+    def pull_from_registry(cls, name: str, version: Optional[str] = None, temp_folder: Union[str, Path, None] = None) -> object:
         """Pull the model from the registry.
 
         Args:
@@ -122,7 +122,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
         return instance
 
     def push_to_registry(
-        self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Optional[str] = None
+        self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Union[str, Path, None] = None
     ) -> None:
         """Push the model to the registry.
 
@@ -168,7 +168,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
         cls,
         name: str,
         version: Optional[str] = None,
-        temp_folder: Optional[str] = None,
+        temp_folder: Union[str, Path, None] = None,
         torch_load_kwargs: Optional[dict] = None,
     ) -> "torch.nn.Module":
         """Pull the model from the registry.

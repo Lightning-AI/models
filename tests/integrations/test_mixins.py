@@ -21,7 +21,7 @@ def test_pickle_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
     dummy.push_to_registry(version="v1", temp_folder=str(tmp_path))
     # The expected registry name is "dummy_model:v1" and the file should be placed in the temp folder.
     expected_path = tmp_path / "DummyModel.pkl"
-    mock_upload_model.assert_called_once_with(name="DummyModel:v1", model=expected_path)
+    mock_upload_model.assert_called_once_with(name="DummyModel:v1", path=expected_path)
 
     # Set the mock to return the full path to the pickle file.
     mock_download_model.return_value = ["DummyModel.pkl"]
@@ -31,7 +31,7 @@ def test_pickle_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
     assert loaded_dummy.value == 42
 
 
-class DummyTorchModel(nn.Module, PyTorchRegistryMixin):
+class DummyTorchModel(PyTorchRegistryMixin, nn.Module):
     def __init__(self, input_size: int, output_size: int = 10):
         # PyTorchRegistryMixin.__init__ will capture these arguments
         super().__init__()
@@ -52,12 +52,15 @@ def test_pytorch_push_and_pull(mock_download_model, mock_upload_model, tmp_path)
     output_before = dummy(input_tensor)
 
     dummy.push_to_registry(temp_folder=str(tmp_path))
-    expected_path = tmp_path / f"{dummy.__class__.__name__}.pth"
-    mock_upload_model.assert_called_once_with(name="DummyTorchModel", model=expected_path)
+    mock_upload_model.assert_called_once_with(name="DummyTorchModel", path=str(tmp_path))
 
-    torch.save(dummy.state_dict(), expected_path)
+    torch_file = f"{dummy.__class__.__name__}.pth"
+    torch.save(dummy.state_dict(), tmp_path / torch_file)
+    json_file = f"{dummy.__class__.__name__}__init_kwargs.json"
+    with open(tmp_path / json_file, "w") as fp:
+        fp.write('{"input_size": 784, "output_size": 10}')
     # Prepare mocking for pull_from_registry.
-    mock_download_model.return_value = [f"{dummy.__class__.__name__}.pth"]
+    mock_download_model.return_value = [torch_file, json_file]
     loaded_dummy = DummyTorchModel.pull_from_registry(name="DummyTorchModel", temp_folder=str(tmp_path))
     loaded_dummy.eval()
     output_after = loaded_dummy(input_tensor)
