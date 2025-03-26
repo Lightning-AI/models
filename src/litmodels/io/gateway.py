@@ -41,7 +41,6 @@ def upload_model(
     """
     if not staging_dir:
         staging_dir = tempfile.mkdtemp()
-        os.makedirs(staging_dir)
     # if LightningModule and isinstance(model, LightningModule):
     #     path = os.path.join(staging_dir, f"{model.__class__.__name__}.ckpt")
     #     model.save_checkpoint(path)
