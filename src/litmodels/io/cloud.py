@@ -2,6 +2,7 @@
 # Licensed under the Apache License, Version 2.0 (the "License");
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
+from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
 
 from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
@@ -41,7 +42,7 @@ def _print_model_link(name: str, verbose: Union[bool, int]) -> None:
 
 def upload_model_files(
     name: str,
-    path: str,
+    path: Union[str, Path],
     progress_bar: bool = True,
     cloud_account: Optional[str] = None,
     verbose: Union[bool, int] = 1,

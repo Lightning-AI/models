@@ -1,3 +1,6 @@
+import inspect
+import json
+import os
 import pickle
 import tempfile
 import warnings
@@ -5,7 +8,7 @@ from abc import ABC
 from pathlib import Path
 from typing import TYPE_CHECKING, Optional, Tuple
 
-from litmodels import download_model, upload_model
+from litmodels.io.cloud import upload_model_files, download_model_files
 
 if TYPE_CHECKING:
     import torch
@@ -67,7 +70,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
             pickle.dump(self, fp, protocol=pickle.HIGHEST_PROTOCOL)
         if version:
             name = f"{name}:{version}"
-        upload_model(name=name, model=pickle_path)
+        upload_model_files(name=name, path=pickle_path)
 
     @classmethod
     def pull_from_registry(cls, name: str, version: Optional[str] = None, temp_folder: Optional[str] = None) -> object:
@@ -81,7 +84,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
         if temp_folder is None:
             temp_folder = tempfile.mkdtemp()
         model_registry = f"{name}:{version}" if version else name
-        files = download_model(name=model_registry, download_dir=temp_folder)
+        files = download_model_files(name=model_registry, download_dir=temp_folder)
         pkl_files = [f for f in files if f.endswith(".pkl")]
         if not pkl_files:
             raise RuntimeError(f"No pickle file found for model: {model_registry} with {files}")
@@ -98,6 +101,24 @@ class PickleRegistryMixin(ModelRegistryMixin):
 class PyTorchRegistryMixin(ModelRegistryMixin):
     """Mixin for PyTorch model registry integration."""
 
+    def __new__(cls, *args, **kwargs):
+        instance = super().__new__(cls)
+
+        # Get __init__ signature excluding 'self'
+        init_sig = inspect.signature(cls.__init__)
+        params = list(init_sig.parameters.values())[1:]  # Skip self
+
+        # Create temporary signature for binding
+        temp_sig = init_sig.replace(parameters=params)
+
+        # Bind and apply defaults
+        bound_args = temp_sig.bind(*args, **kwargs)
+        bound_args.apply_defaults()
+
+        # Store unified kwargs
+        instance.__init_kwargs = bound_args.arguments
+        return instance
+
     def push_to_registry(
         self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Optional[str] = None
     ) -> None:
@@ -109,16 +130,35 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
         """
         import torch
-
+        # Ensure that the model is in evaluation mode
         if not isinstance(self, torch.nn.Module):
             raise TypeError(f"The model must be a PyTorch `nn.Module` but got: {type(self)}")
 
         name, model_name, temp_folder = self._setup(name, temp_folder)
+
+        def __new__(cls, *args, **kwargs):
+            instance = super().__new__(cls)
+
+            # Get __init__ signature excluding 'self'
+            init_sig = inspect.signature(cls.__init__)
+            params = list(init_sig.parameters.values())[1:]  # Skip self
+
+            # Create temporary signature for binding
+            temp_sig = init_sig.replace(parameters=params)
+
+            # Bind and apply defaults
+            bound_args = temp_sig.bind(*args, **kwargs)
+            bound_args.apply_defaults()
+
+            # Store unified kwargs
+            instance.__init_kwargs = bound_args.arguments
+            return instance
+
         torch_path = Path(temp_folder) / f"{model_name}.pth"
         torch.save(self.state_dict(), torch_path)
         # todo: dump also object creation arguments so we can dump it and load with model for object instantiation
         model_registry = f"{name}:{version}" if version else name
-        upload_model(name=model_registry, model=torch_path)
+        upload_model_files(name=model_registry, path=torch_path)
 
     @classmethod
     def pull_from_registry(
@@ -141,7 +181,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
         if temp_folder is None:
             temp_folder = tempfile.mkdtemp()
         model_registry = f"{name}:{version}" if version else name
-        files = download_model(name=model_registry, download_dir=temp_folder)
+        files = download_model_files(name=model_registry, download_dir=temp_folder)
         torch_files = [f for f in files if f.endswith(".pth")]
         if not torch_files:
             raise RuntimeError(f"No torch file found for model: {model_registry} with {files}")

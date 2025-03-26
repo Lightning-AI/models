@@ -13,8 +13,8 @@ class DummyModel(PickleRegistryMixin):
         return isinstance(other, DummyModel) and self.value == other.value
 
 
-@mock.patch("litmodels.integrations.mixins.upload_model")
-@mock.patch("litmodels.integrations.mixins.download_model")
+@mock.patch("litmodels.integrations.mixins.upload_model_files")
+@mock.patch("litmodels.integrations.mixins.download_model_files")
 def test_pickle_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
     # Create an instance of DummyModel and call push_to_registry.
     dummy = DummyModel(42)
@@ -32,17 +32,18 @@ def test_pickle_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
 
 
 class DummyTorchModel(nn.Module, PyTorchRegistryMixin):
-    def __init__(self, input_size=784):
+    def __init__(self, input_size: int, output_size: int = 10):
+        # PyTorchRegistryMixin.__init__ will capture these arguments
         super().__init__()
-        self.fc = nn.Linear(input_size, 10)
+        self.fc = nn.Linear(input_size, output_size)
 
     def forward(self, x):
         x = x.view(x.size(0), -1)
         return self.fc(x)
 
 
-@mock.patch("litmodels.integrations.mixins.upload_model")
-@mock.patch("litmodels.integrations.mixins.download_model")
+@mock.patch("litmodels.integrations.mixins.upload_model_files")
+@mock.patch("litmodels.integrations.mixins.download_model_files")
 def test_pytorch_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
     # Create an instance, push the model and record its forward output.
     dummy = DummyTorchModel(784)

@@ -243,9 +243,10 @@ def test_pickle_mixin_push_and_pull():
 
 
 class DummyTorchModel(torch.nn.Module, PyTorchRegistryMixin):
-    def __init__(self, input_size=784):
+    def __init__(self, input_size: int, output_size: int = 10):
+        # PyTorchRegistryMixin.__init__ will capture these arguments
         super().__init__()
-        self.fc = torch.nn.Linear(input_size, 10)
+        self.fc = torch.nn.Linear(input_size, output_size)
 
     def forward(self, x):
         x = x.view(x.size(0), -1)
