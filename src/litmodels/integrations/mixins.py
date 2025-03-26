@@ -3,7 +3,7 @@ import tempfile
 import warnings
 from abc import ABC
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, Tuple
 
 from litmodels import download_model, upload_model
 
@@ -35,6 +35,18 @@ class ModelRegistryMixin(ABC):
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
         """
 
+    def _setup(self, name: Optional[str] = None, temp_folder: Optional[str] = None) -> Tuple[str, str, str]:
+        """Setup method to be called after the model is created."""
+        if name is None:
+            name = model_name = self.__class__.__name__
+        elif ":" in name:
+            raise ValueError(f"Invalid model name: '{name}'. It should not contain ':' associated with version.")
+        else:
+            model_name = name.split("/")[-1]
+        if temp_folder is None:
+            temp_folder = tempfile.mkdtemp()
+        return name, model_name, temp_folder
+
 
 class PickleRegistryMixin(ModelRegistryMixin):
     """Mixin for pickle registry integration."""
@@ -49,14 +61,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
             version: The version of the model. If None, the latest version is used.
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
         """
-        if name is None:
-            name = model_name = self.__class__.__name__
-        elif ":" in name:
-            raise ValueError(f"Invalid model name: '{name}'. It should not contain ':' associated with version.")
-        else:
-            model_name = name.split("/")[-1]
-        if temp_folder is None:
-            temp_folder = tempfile.mkdtemp()
+        name, model_name, temp_folder = self._setup(name, temp_folder)
         pickle_path = Path(temp_folder) / f"{model_name}.pkl"
         with open(pickle_path, "wb") as fp:
             pickle.dump(self, fp, protocol=pickle.HIGHEST_PROTOCOL)
@@ -93,14 +98,6 @@ class PickleRegistryMixin(ModelRegistryMixin):
 class PyTorchRegistryMixin(ModelRegistryMixin):
     """Mixin for PyTorch model registry integration."""
 
-    def __post_init__(self) -> None:
-        """Post-initialization method to set up the model."""
-        import torch
-
-        # Ensure that the model is in evaluation mode
-        if not isinstance(self, torch.nn.Module):
-            raise TypeError(f"The model must be a PyTorch `nn.Module` but got: {type(self)}")
-
     def push_to_registry(
         self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Optional[str] = None
     ) -> None:
@@ -116,11 +113,8 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
         if not isinstance(self, torch.nn.Module):
             raise TypeError(f"The model must be a PyTorch `nn.Module` but got: {type(self)}")
 
-        if name is None:
-            name = self.__class__.__name__
-        if temp_folder is None:
-            temp_folder = tempfile.mkdtemp()
-        torch_path = Path(temp_folder) / f"{name}.pth"
+        name, model_name, temp_folder = self._setup(name, temp_folder)
+        torch_path = Path(temp_folder) / f"{model_name}.pth"
         torch.save(self.state_dict(), torch_path)
         # todo: dump also object creation arguments so we can dump it and load with model for object instantiation
         model_registry = f"{name}:{version}" if version else name
