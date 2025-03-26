@@ -43,7 +43,7 @@ class DummyTorchModel(nn.Module, PyTorchRegistryMixin):
 
 @mock.patch("litmodels.integrations.mixins.upload_model")
 @mock.patch("litmodels.integrations.mixins.download_model")
-def test_pytorch_pull_updated(mock_download_model, mock_upload_model, tmp_path):
+def test_pytorch_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
     # Create an instance, push the model and record its forward output.
     dummy = DummyTorchModel(784)
     dummy.eval()

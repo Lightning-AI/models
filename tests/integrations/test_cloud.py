@@ -5,11 +5,13 @@ from io import StringIO
 from typing import Optional
 
 import pytest
+import torch
 from lightning_sdk import Teamspace
 from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
 from litmodels import download_model, upload_model
 from litmodels.integrations.mixins import PickleRegistryMixin
+from litmodels.integrations.mixins import PyTorchRegistryMixin
 
 from tests.integrations import _SKIP_IF_LIGHTNING_BELLOW_2_5_1, _SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1
 
@@ -239,3 +241,36 @@ def test_pickle_mixin_push_and_pull():
 
     # CLEANING
     _cleanup_model(teamspace, model_name, expected_num_versions=1)
+
+
+class DummyTorchModel(torch.nn.Module, PyTorchRegistryMixin):
+    def __init__(self, input_size=784):
+        super().__init__()
+        self.fc = torch.nn.Linear(input_size, 10)
+
+    def forward(self, x):
+        x = x.view(x.size(0), -1)
+        return self.fc(x)
+
+
+@pytest.mark.cloud()
+def test_pytorch_mixin_push_and_pull():
+    # model name with random hash
+    teamspace, org_team, model_name = _prepare_variables("torch_mixin")
+    model_registry = f"{org_team}/{model_name}"
+
+    # Create an instance, push the model and record its forward output.
+    dummy = DummyTorchModel(784)
+    dummy.eval()
+    input_tensor = torch.randn(1, 784)
+    output_before = dummy(input_tensor)
+
+    dummy.push_to_registry(model_registry)
+
+    loaded_dummy = DummyTorchModel.pull_from_registry(model_registry)
+    loaded_dummy.eval()
+    output_after = loaded_dummy(input_tensor)
+
+    assert isinstance(loaded_dummy, DummyTorchModel)
+    # Compare the outputs as a verification.
+    assert torch.allclose(output_before, output_after), "Loaded model output differs from original."
