@@ -27,7 +27,7 @@ def test_pickle_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
     mock_download_model.return_value = ["DummyModel.pkl"]
     # Call pull_from_registry and load the DummyModel instance.
     loaded_dummy = DummyModel.pull_from_registry(
-        model_name="dummy_model", model_version="v1", temp_folder=str(tmp_path)
+        name="dummy_model", version="v1", temp_folder=str(tmp_path)
     )
     # Verify that the unpickled instance has the expected value.
     assert loaded_dummy.value == 42
@@ -59,7 +59,7 @@ def test_pytorch_pull_updated(mock_download_model, mock_upload_model, tmp_path):
     torch.save(dummy.state_dict(), expected_path)
     # Prepare mocking for pull_from_registry.
     mock_download_model.return_value = [f"{dummy.__class__.__name__}.pth"]
-    loaded_dummy = DummyTorchModel.pull_from_registry(model_name="DummyTorchModel", temp_folder=str(tmp_path))
+    loaded_dummy = DummyTorchModel.pull_from_registry(name="DummyTorchModel", temp_folder=str(tmp_path))
     loaded_dummy.eval()
     output_after = loaded_dummy(input_tensor)
 

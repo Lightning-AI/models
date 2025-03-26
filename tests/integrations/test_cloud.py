@@ -9,6 +9,7 @@ from lightning_sdk import Teamspace
 from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
 from litmodels import download_model, upload_model
+from litmodels.integrations.mixins import PickleRegistryMixin
 
 from tests.integrations import _SKIP_IF_LIGHTNING_BELLOW_2_5_1, _SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1
 
@@ -213,3 +214,28 @@ def test_lightning_checkpoint_ddp(importing, tmp_path):
 
     # CLEANING
     _cleanup_model(teamspace, model_name, expected_num_versions=2)
+
+
+class DummyModel(PickleRegistryMixin):
+    def __init__(self, value):
+        self.value = value
+
+
+@pytest.mark.cloud()
+def test_picklemixin_push_and_pull():
+    # model name with random hash
+    teamspace, org_team, model_name = _prepare_variables("picklemixin")
+    model_registry = f"{org_team}/{model_name}"
+
+    # Create an instance of DummyModel and call push_to_registry.
+    dummy = DummyModel(42)
+    dummy.push_to_registry(model_registry)
+
+    # Call pull_from_registry and load the DummyModel instance.
+    loaded_dummy = DummyModel.pull_from_registry(model_registry)
+    # Verify that the unpickled instance has the expected value.
+    assert isinstance(loaded_dummy, DummyModel)
+    assert loaded_dummy.value == 42
+
+    # CLEANING
+    _cleanup_model(teamspace, model_name, expected_num_versions=1)

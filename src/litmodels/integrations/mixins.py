@@ -15,66 +15,71 @@ class ModelRegistryMixin(ABC):
     """Mixin for model registry integration."""
 
     def push_to_registry(
-        self, model_name: Optional[str] = None, model_version: Optional[str] = None, temp_folder: Optional[str] = None
+        self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Optional[str] = None
     ) -> None:
         """Push the model to the registry.
 
         Args:
-            model_name: The name of the model. If not use the class name.
-            model_version: The version of the model. If None, the latest version is used.
+            name: The name of the model. If not use the class name.
+            version: The version of the model. If None, the latest version is used.
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
         """
 
     @classmethod
     def pull_from_registry(
-        cls, model_name: str, model_version: Optional[str] = None, temp_folder: Optional[str] = None
+        cls, name: str, version: Optional[str] = None, temp_folder: Optional[str] = None
     ) -> object:
         """Pull the model from the registry.
 
         Args:
-            model_name: The name of the model.
-            model_version: The version of the model. If None, the latest version is used.
+            name: The name of the model.
+            version: The version of the model. If None, the latest version is used.
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
         """
 
 
-class PickleRegistryMixin(ABC):
+class PickleRegistryMixin(ModelRegistryMixin):
     """Mixin for pickle registry integration."""
 
     def push_to_registry(
-        self, model_name: Optional[str] = None, model_version: Optional[str] = None, temp_folder: Optional[str] = None
+        self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Optional[str] = None
     ) -> None:
         """Push the model to the registry.
 
         Args:
-            model_name: The name of the model. If not use the class name.
-            model_version: The version of the model. If None, the latest version is used.
+            name: The name of the model. If not use the class name.
+            version: The version of the model. If None, the latest version is used.
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
         """
-        if model_name is None:
-            model_name = self.__class__.__name__
+        if ":" in name:
+            raise ValueError(f"Invalid model name: '{name}'. It should not contain ':' associated with version.")
+        if name is None:
+            name = model_name = self.__class__.__name__
+        else:
+            model_name = name.split("/")[-1]
         if temp_folder is None:
-            temp_folder = tempfile.gettempdir()
+            temp_folder = tempfile.mkdtemp()
         pickle_path = Path(temp_folder) / f"{model_name}.pkl"
         with open(pickle_path, "wb") as fp:
             pickle.dump(self, fp, protocol=pickle.HIGHEST_PROTOCOL)
-        model_registry = f"{model_name}:{model_version}" if model_version else model_name
-        upload_model(name=model_registry, model=pickle_path)
+        if version:
+            name = f"{name}:{version}"
+        upload_model(name=name, model=pickle_path)
 
     @classmethod
     def pull_from_registry(
-        cls, model_name: str, model_version: Optional[str] = None, temp_folder: Optional[str] = None
+        cls, name: str, version: Optional[str] = None, temp_folder: Optional[str] = None
     ) -> object:
         """Pull the model from the registry.
 
         Args:
-            model_name: The name of the model.
-            model_version: The version of the model. If None, the latest version is used.
+            name: The name of the model.
+            version: The version of the model. If None, the latest version is used.
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
         """
         if temp_folder is None:
-            temp_folder = tempfile.gettempdir()
-        model_registry = f"{model_name}:{model_version}" if model_version else model_name
+            temp_folder = tempfile.mkdtemp()
+        model_registry = f"{name}:{version}" if version else name
         files = download_model(name=model_registry, download_dir=temp_folder)
         pkl_files = [f for f in files if f.endswith(".pkl")]
         if not pkl_files:
@@ -89,7 +94,7 @@ class PickleRegistryMixin(ABC):
         return obj
 
 
-class PyTorchRegistryMixin(ABC):
+class PyTorchRegistryMixin(ModelRegistryMixin):
     """Mixin for PyTorch model registry integration."""
 
     def __post_init__(self) -> None:
@@ -101,13 +106,13 @@ class PyTorchRegistryMixin(ABC):
             raise TypeError(f"The model must be a PyTorch `nn.Module` but got: {type(self)}")
 
     def push_to_registry(
-        self, model_name: Optional[str] = None, model_version: Optional[str] = None, temp_folder: Optional[str] = None
+        self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Optional[str] = None
     ) -> None:
         """Push the model to the registry.
 
         Args:
-            model_name: The name of the model. If not use the class name.
-            model_version: The version of the model. If None, the latest version is used.
+            name: The name of the model. If not use the class name.
+            version: The version of the model. If None, the latest version is used.
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
         """
         import torch
@@ -115,37 +120,37 @@ class PyTorchRegistryMixin(ABC):
         if not isinstance(self, torch.nn.Module):
             raise TypeError(f"The model must be a PyTorch `nn.Module` but got: {type(self)}")
 
-        if model_name is None:
-            model_name = self.__class__.__name__
+        if name is None:
+            name = self.__class__.__name__
         if temp_folder is None:
-            temp_folder = tempfile.gettempdir()
-        torch_path = Path(temp_folder) / f"{model_name}.pth"
+            temp_folder = tempfile.mkdtemp()
+        torch_path = Path(temp_folder) / f"{name}.pth"
         torch.save(self.state_dict(), torch_path)
         # todo: dump also object creation arguments so we can dump it and load with model for object instantiation
-        model_registry = f"{model_name}:{model_version}" if model_version else model_name
+        model_registry = f"{name}:{version}" if version else name
         upload_model(name=model_registry, model=torch_path)
 
     @classmethod
     def pull_from_registry(
         cls,
-        model_name: str,
-        model_version: Optional[str] = None,
+        name: str,
+        version: Optional[str] = None,
         temp_folder: Optional[str] = None,
         torch_load_kwargs: Optional[dict] = None,
     ) -> "torch.nn.Module":
         """Pull the model from the registry.
 
         Args:
-            model_name: The name of the model.
-            model_version: The version of the model. If None, the latest version is used.
+            name: The name of the model.
+            version: The version of the model. If None, the latest version is used.
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
             torch_load_kwargs: Additional arguments to pass to `torch.load()`.
         """
         import torch
 
         if temp_folder is None:
-            temp_folder = tempfile.gettempdir()
-        model_registry = f"{model_name}:{model_version}" if model_version else model_name
+            temp_folder = tempfile.mkdtemp()
+        model_registry = f"{name}:{version}" if version else name
         files = download_model(name=model_registry, download_dir=temp_folder)
         torch_files = [f for f in files if f.endswith(".pth")]
         if not torch_files:
