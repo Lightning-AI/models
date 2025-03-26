@@ -103,6 +103,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
     """Mixin for PyTorch model registry integration."""
 
     def __new__(cls, *args, **kwargs):
+        """Create a new instance of the class without calling __init__."""
         instance = super().__new__(cls)
 
         # Get __init__ signature excluding 'self'
