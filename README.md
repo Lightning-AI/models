@@ -173,6 +173,7 @@ These mixins can be integrated directly into your model classes.
 2. **PyTorchRegistryMixin**: For PyTorch models, preserving both weights and constructor arguments
 
 Using these mixins provides several advantages:
+
 - Direct integration into your model classes
 - Simplified save/load workflow
 - Automatic handling of model metadata and constructor arguments
@@ -185,11 +186,13 @@ Add the mixin to your class for seamless registry integration:
 ```python
 from litmodels.integrations.mixins import PickleRegistryMixin
 
+
 class MyModel(PickleRegistryMixin):
     def __init__(self, param1, param2):
         self.param1 = param1
         self.param2 = param2
         # Your model initialization code
+
 
 # Create and push a model instance
 model = MyModel(param1=42, param2="hello")
@@ -207,15 +210,17 @@ This mixin preserves both the model architecture and weights:
 import torch
 from litmodels.integrations.mixins import PyTorchRegistryMixin
 
+
 # Important: PyTorchRegistryMixin must be first in the inheritance order
 class MyTorchModel(PyTorchRegistryMixin, torch.nn.Module):
     def __init__(self, input_size, hidden_size=128):
         super().__init__()
         self.linear = torch.nn.Linear(input_size, hidden_size)
         self.activation = torch.nn.ReLU()
-        
+
     def forward(self, x):
         return self.activation(self.linear(x))
+
 
 # Create and push the model
 model = MyTorchModel(input_size=784)
