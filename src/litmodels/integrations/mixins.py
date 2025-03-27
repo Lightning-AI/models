@@ -5,7 +5,7 @@ import tempfile
 import warnings
 from abc import ABC
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Tuple, Union, Any
+from typing import TYPE_CHECKING, Any, Optional, Tuple, Union
 
 from lightning_utilities.core.rank_zero import rank_zero_warn
 
