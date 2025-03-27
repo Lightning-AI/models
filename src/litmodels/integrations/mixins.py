@@ -167,6 +167,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
         torch.save(self.state_dict(), torch_state_dict_path)
         model_registry = f"{name}:{version}" if version else name
         # todo: consider creating another temp folder and copying these two files
+        # todo: updating SDK to support uploading just specific files
         upload_model_files(name=model_registry, path=temp_folder)
 
     @classmethod
