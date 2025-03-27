@@ -1,5 +1,6 @@
 from unittest import mock
 
+import pytest
 import torch
 from litmodels.integrations.mixins import PickleRegistryMixin, PyTorchRegistryMixin
 from torch import nn
@@ -31,7 +32,7 @@ def test_pickle_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
     assert loaded_dummy.value == 42
 
 
-class DummyTorchModel(PyTorchRegistryMixin, nn.Module):
+class DummyTorchModelFirst(PyTorchRegistryMixin, nn.Module):
     def __init__(self, input_size: int, output_size: int = 10):
         # PyTorchRegistryMixin.__init__ will capture these arguments
         super().__init__()
@@ -42,17 +43,29 @@ class DummyTorchModel(PyTorchRegistryMixin, nn.Module):
         return self.fc(x)
 
 
+class DummyTorchModelSecond(nn.Module, PyTorchRegistryMixin):
+    def __init__(self, input_size: int, output_size: int = 10):
+        PyTorchRegistryMixin.__init__(input_size, output_size)
+        super().__init__()
+        self.fc = nn.Linear(input_size, output_size)
+
+    def forward(self, x):
+        x = x.view(x.size(0), -1)
+        return self.fc(x)
+
+
+@pytest.mark.parametrize("torch_class", [DummyTorchModelFirst, DummyTorchModelSecond])
 @mock.patch("litmodels.integrations.mixins.upload_model_files")
 @mock.patch("litmodels.integrations.mixins.download_model_files")
-def test_pytorch_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
+def test_pytorch_push_and_pull(mock_download_model, mock_upload_model, torch_class, tmp_path):
     # Create an instance, push the model and record its forward output.
-    dummy = DummyTorchModel(784)
+    dummy = torch_class(784)
     dummy.eval()
     input_tensor = torch.randn(1, 784)
     output_before = dummy(input_tensor)
 
     dummy.push_to_registry(temp_folder=str(tmp_path))
-    mock_upload_model.assert_called_once_with(name="DummyTorchModel", path=str(tmp_path))
+    mock_upload_model.assert_called_once_with(name=torch_class.__name__, path=str(tmp_path))
 
     torch_file = f"{dummy.__class__.__name__}.pth"
     torch.save(dummy.state_dict(), tmp_path / torch_file)
@@ -61,10 +74,10 @@ def test_pytorch_push_and_pull(mock_download_model, mock_upload_model, tmp_path)
         fp.write('{"input_size": 784, "output_size": 10}')
     # Prepare mocking for pull_from_registry.
     mock_download_model.return_value = [torch_file, json_file]
-    loaded_dummy = DummyTorchModel.pull_from_registry(name="DummyTorchModel", temp_folder=str(tmp_path))
+    loaded_dummy = torch_class.pull_from_registry(name=torch_class.__name__, temp_folder=str(tmp_path))
     loaded_dummy.eval()
     output_after = loaded_dummy(input_tensor)
 
-    assert isinstance(loaded_dummy, DummyTorchModel)
+    assert isinstance(loaded_dummy, torch_class)
     # Compare the outputs as a verification.
     assert torch.allclose(output_before, output_after), "Loaded model output differs from original."
