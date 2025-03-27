@@ -165,7 +165,7 @@ trainer.fit(
 ## Model Registry Mixins
 
 Lightning Models provides mixin classes that simplify pushing models to and pulling models from the registry.
-These mixins can be integrated directly into your model classes.
+These mixins can be integrated directly into the model classes.
 
 ### Available Mixins
 
@@ -174,14 +174,14 @@ These mixins can be integrated directly into your model classes.
 
 Using these mixins provides several advantages:
 
-- Direct integration into your model classes
+- Direct integration into the model classes
 - Simplified save/load workflow
 - Automatic handling of model metadata and constructor arguments
 - Version management support
 
 ### Using PickleRegistryMixin
 
-Add the mixin to your class for seamless registry integration:
+Add the mixin to a Python class for seamless registry integration:
 
 ```python
 from litmodels.integrations.mixins import PickleRegistryMixin
