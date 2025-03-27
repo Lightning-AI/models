@@ -42,7 +42,7 @@ def upload_model(
     if not staging_dir:
         staging_dir = tempfile.mkdtemp()
     if isinstance(model, (str, Path)):
-        path = model  # type: ignore[assignment]
+        path = model
     # if LightningModule and isinstance(model, LightningModule):
     #     path = os.path.join(staging_dir, f"{model.__class__.__name__}.ckpt")
     #     model.save_checkpoint(path)
@@ -106,7 +106,7 @@ def load_model(name: str, download_dir: str = ".") -> Any:
     download_paths = [p for p in download_paths if Path(p).suffix.lower() not in {".md", ".txt", ".rst"}]
     if len(download_paths) > 1:
         raise NotImplementedError("Downloaded model with multiple files is not supported yet.")
-    model_path = Path(os.path.join(download_dir, download_paths[0]))
+    model_path = Path(download_dir) / download_paths[0]
     if model_path.suffix.lower() == ".pkl":
         return joblib.load(model_path)
     if model_path.suffix.lower() == ".ts":

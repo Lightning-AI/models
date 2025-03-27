@@ -5,7 +5,7 @@ import tempfile
 import warnings
 from abc import ABC
 from pathlib import Path
-from typing import TYPE_CHECKING, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Optional, Tuple, Union, Any
 
 from lightning_utilities.core.rank_zero import rank_zero_warn
 
@@ -41,7 +41,9 @@ class ModelRegistryMixin(ABC):
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
         """
 
-    def _setup(self, name: Optional[str] = None, temp_folder: Union[str, Path, None] = None) -> Tuple[str, str, str]:
+    def _setup(
+        self, name: Optional[str] = None, temp_folder: Union[str, Path, None] = None
+    ) -> Tuple[str, str, Union[str, Path]]:
         """Parse and validate the model name and temporary folder."""
         if name is None:
             name = model_name = self.__class__.__name__
@@ -106,7 +108,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
 class PyTorchRegistryMixin(ModelRegistryMixin):
     """Mixin for PyTorch model registry integration."""
 
-    def __new__(cls, *args, **kwargs) -> "torch.nn.Module":
+    def __new__(cls, *args: Any, **kwargs: Any) -> "torch.nn.Module":
         """Create a new instance of the class without calling __init__."""
         instance = super().__new__(cls)
 
