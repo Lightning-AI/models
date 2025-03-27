@@ -179,7 +179,7 @@ Using these mixins provides several advantages:
 - Automatic handling of model metadata and constructor arguments
 - Version management support
 
-### Using PickleRegistryMixin
+### Using `PickleRegistryMixin`
 
 Add the mixin to a Python class for seamless registry integration:
 
@@ -202,7 +202,7 @@ model.push_to_registry(name="my-org/my-team/my-model")
 loaded_model = MyModel.pull_from_registry(name="my-org/my-team/my-model")
 ```
 
-### Using PyTorchRegistryMixin
+### Using `PyTorchRegistryMixin`
 
 This mixin preserves both the model architecture and weights:
 
