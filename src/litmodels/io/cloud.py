@@ -72,7 +72,7 @@ def upload_model_files(
 
 def download_model_files(
     name: str,
-    download_dir: str = ".",
+    download_dir: Union[str, Path] = ".",
     progress_bar: bool = True,
 ) -> Union[str, List[str]]:
     """Download a checkpoint from the model store.
