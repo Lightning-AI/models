@@ -192,6 +192,7 @@ class MyModel(PickleRegistryMixin):
         self.param1 = param1
         self.param2 = param2
         # Your model initialization code
+        ...
 
 
 # Create and push a model instance
