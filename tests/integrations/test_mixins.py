@@ -64,14 +64,18 @@ def test_pytorch_push_and_pull(mock_download_model, mock_upload_model, torch_cla
     input_tensor = torch.randn(1, 784)
     output_before = dummy(input_tensor)
 
-    dummy.push_to_registry(temp_folder=str(tmp_path))
-    mock_upload_model.assert_called_once_with(name=torch_class.__name__, path=str(tmp_path))
-
     torch_file = f"{dummy.__class__.__name__}.pth"
     torch.save(dummy.state_dict(), tmp_path / torch_file)
     json_file = f"{dummy.__class__.__name__}__init_kwargs.json"
-    with open(tmp_path / json_file, "w") as fp:
+    json_path = tmp_path / json_file
+    with open(json_path, "w") as fp:
         fp.write('{"input_size": 784, "output_size": 10}')
+
+    dummy.push_to_registry(temp_folder=str(tmp_path))
+    mock_upload_model.assert_called_once_with(
+        name=torch_class.__name__, path=[tmp_path / f"{torch_class.__name__}.pth", json_path]
+    )
+
     # Prepare mocking for pull_from_registry.
     mock_download_model.return_value = [torch_file, json_file]
     loaded_dummy = torch_class.pull_from_registry(name=torch_class.__name__, temp_folder=str(tmp_path))
