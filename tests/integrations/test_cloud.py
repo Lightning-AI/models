@@ -12,10 +12,12 @@ from lightning_sdk.utils.resolve import _resolve_teamspace
 from litmodels import download_model, upload_model
 from litmodels.integrations.mixins import PickleRegistryMixin, PyTorchRegistryMixin
 
-from tests.integrations import _SKIP_IF_LIGHTNING_BELLOW_2_5_1, _SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1
-
-LIT_ORG = "lightning-ai"
-LIT_TEAMSPACE = "LitModels"
+from tests.integrations import (
+    _SKIP_IF_LIGHTNING_BELLOW_2_5_1,
+    _SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1,
+    LIT_ORG,
+    LIT_TEAMSPACE,
+)
 
 
 def _prepare_variables(test_name: str) -> tuple[Teamspace, str, str]:

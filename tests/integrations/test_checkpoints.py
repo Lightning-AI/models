@@ -1,10 +1,11 @@
+import os
 import pickle
 import re
 from unittest import mock
 
 import pytest
 
-from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHTNING_MISSING
+from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHTNING_MISSING, LIT_ORG, LIT_TEAMSPACE
 
 
 @pytest.mark.parametrize(
@@ -14,9 +15,12 @@ from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHT
         pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_MISSING),
     ],
 )
+@pytest.mark.parametrize("with_model_name", [True, False])
+@mock.patch("litmodels.integrations.checkpoints.LitModelCheckpointMixin._datetime_stamp", return_value="20250102-1213")
+@mock.patch.dict(os.environ, {"LIGHTNING_ORG": LIT_ORG, "LIGHTNING_TEAMSPACE": LIT_TEAMSPACE})
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
 @mock.patch("litmodels.integrations.checkpoints.Auth")
-def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, importing, tmp_path):
+def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch, importing, with_model_name, tmp_path):
     if importing == "lightning":
         from lightning import Trainer
         from lightning.pytorch.callbacks import ModelCheckpoint
@@ -31,19 +35,22 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, importing, 
     # Validate inheritance
     assert issubclass(LitModelCheckpoint, ModelCheckpoint)
 
-    mock_upload_model.return_value.name = "org-name/teamspace/model-name"
+    ckpt_args = {"model_name": "org-name/teamspace/model-name"} if with_model_name else {}
+    expected_model_registry = ckpt_args.get(
+        "model_name", f"{LIT_ORG}/{LIT_TEAMSPACE}/BoringModel-{LitModelCheckpoint._datetime_stamp}"
+    )
+    mock_upload_model.return_value.name = expected_model_registry
 
     trainer = Trainer(
         max_epochs=2,
-        callbacks=LitModelCheckpoint(model_name="org-name/teamspace/model-name"),
+        callbacks=LitModelCheckpoint(**ckpt_args),
     )
     trainer.fit(BoringModel())
 
-    # expected_path = model_path % str(tmpdir) if "%" in model_path else model_path
-    assert mock_upload_model.call_count == 2
+    assert mock_auth.call_count == 1
     assert mock_upload_model.call_args_list == [
-        mock.call(name="org-name/teamspace/model-name", path=mock.ANY, progress_bar=True, cloud_account=None),
-        mock.call(name="org-name/teamspace/model-name", path=mock.ANY, progress_bar=True, cloud_account=None),
+        mock.call(name=expected_model_registry, path=mock.ANY, progress_bar=True, cloud_account=None),
+        mock.call(name=expected_model_registry, path=mock.ANY, progress_bar=True, cloud_account=None),
     ]
 
     # Verify paths match the expected pattern
