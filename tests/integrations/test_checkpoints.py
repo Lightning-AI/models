@@ -17,10 +17,10 @@ from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHT
 )
 @pytest.mark.parametrize("with_model_name", [True, False])
 @mock.patch("litmodels.integrations.checkpoints.LitModelCheckpointMixin._datetime_stamp", return_value="20250102-1213")
-@mock.patch.dict(os.environ, {"LIGHTNING_ORG": LIT_ORG, "LIGHTNING_TEAMSPACE": LIT_TEAMSPACE})
+@mock.patch("lightning_sdk.models._resolve_teamspace", return_value=mock.MagicMock(owner=mock.MagicMock(name="my-org"), name="dream-team"))
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
 @mock.patch("litmodels.integrations.checkpoints.Auth")
-def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch, importing, with_model_name, tmp_path):
+def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, mock_resolve_teamspace, mock_datetime_stamp, importing, with_model_name, tmp_path):
     if importing == "lightning":
         from lightning import Trainer
         from lightning.pytorch.callbacks import ModelCheckpoint
@@ -37,8 +37,10 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch
 
     ckpt_args = {"model_name": "org-name/teamspace/model-name"} if with_model_name else {}
     expected_model_registry = ckpt_args.get(
-        "model_name", f"{LIT_ORG}/{LIT_TEAMSPACE}/BoringModel-{LitModelCheckpoint._datetime_stamp}"
+        "model_name", f"BoringModel_{LitModelCheckpoint._datetime_stamp}"
     )
+    # if not with_model_name:
+    #     monkeypatch.setattr("lightning_sdk.models._extend_model_name_with_teamspace", lambda n: f"my-org/dream-team/{n}")
     mock_upload_model.return_value.name = expected_model_registry
 
     trainer = Trainer(
@@ -52,6 +54,9 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch
         mock.call(name=expected_model_registry, path=mock.ANY, progress_bar=True, cloud_account=None),
         mock.call(name=expected_model_registry, path=mock.ANY, progress_bar=True, cloud_account=None),
     ]
+    called_name_related_mocks = 0 if with_model_name else 1
+    mock_datetime_stamp.call_count == called_name_related_mocks
+    mock_resolve_teamspace.call_count == called_name_related_mocks
 
     # Verify paths match the expected pattern
     for call_args in mock_upload_model.call_args_list:
