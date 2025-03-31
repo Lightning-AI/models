@@ -3,7 +3,7 @@
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Union, Dict
+from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
 from lightning_sdk.models import _extend_model_name_with_teamspace, _parse_model_name_and_version

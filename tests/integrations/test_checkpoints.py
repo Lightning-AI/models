@@ -40,7 +40,7 @@ def test_lightning_checkpoint_callback(
     mock_upload_model.return_value.name = expected_model_registry
     monkeypatch.setattr(
         "lightning_sdk.utils.resolve._resolve_teamspace",
-        mock.MagicMock(return_value=mock.MagicMock(owner=mock.MagicMock(name="my-org"), name="dream-team"))
+        mock.MagicMock(return_value=mock.MagicMock(owner=mock.MagicMock(name="my-org"), name="dream-team")),
     )
 
     trainer = Trainer(
