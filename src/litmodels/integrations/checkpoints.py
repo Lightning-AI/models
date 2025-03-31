@@ -27,6 +27,7 @@ class LitModelCheckpointMixin(ABC):
 
     # mainly ofr mocking reasons
     _datetime_stamp: str = datetime.now().strftime("%Y%m%d-%H%M")
+    model_name: Optional[str] = None
 
     def __init__(self, model_name: Optional[str]) -> None:
         """Initialize with model name."""
@@ -46,6 +47,11 @@ class LitModelCheckpointMixin(ABC):
     def _upload_model(self, filepath: str) -> None:
         # todo: uploading on background so training does nt stops
         # todo: use filename as version but need to validate that such version does not exists yet
+        if not self.model_name:
+            raise RuntimeError(
+                "Model name is not specified neither updated by `setup` method via Trainer."
+                " Please set the model name before uploading or ensure that `setup` method is called."
+            )
         upload_model(name=self.model_name, model=filepath)
 
     def _update_model_name(self, pl_model: "pl.LightningModule") -> None:
@@ -73,10 +79,12 @@ if _LIGHTNING_AVAILABLE:
             LitModelCheckpointMixin.__init__(self, model_name)
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:
+            """Setup the checkpoint callback."""
             super().setup(trainer, pl_module, stage)
             self._update_model_name(pl_module)
 
         def _save_checkpoint(self, trainer: "pl.Trainer", filepath: str) -> None:
+            """Extend the save checkpoint method to upload the model."""
             super()._save_checkpoint(trainer, filepath)
             if trainer.is_global_zero:  # Only upload from the main process
                 self._upload_model(filepath)
@@ -99,10 +107,12 @@ if _PYTORCHLIGHTNING_AVAILABLE:
             LitModelCheckpointMixin.__init__(self, model_name)
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:
+            """Setup the checkpoint callback."""
             super().setup(trainer, pl_module, stage)
             self._update_model_name(pl_module)
 
         def _save_checkpoint(self, trainer: "pl.Trainer", filepath: str) -> None:
+            """Extend the save checkpoint method to upload the model."""
             super()._save_checkpoint(trainer, filepath)
             if trainer.is_global_zero:  # Only upload from the main process
                 self._upload_model(filepath)
