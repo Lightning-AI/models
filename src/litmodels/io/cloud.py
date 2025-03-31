@@ -42,7 +42,7 @@ def _print_model_link(name: str, verbose: Union[bool, int]) -> None:
 
 def upload_model_files(
     name: str,
-    path: Union[str, Path],
+    path: Union[str, Path, List[Union[str, Path]]],
     progress_bar: bool = True,
     cloud_account: Optional[str] = None,
     verbose: Union[bool, int] = 1,
