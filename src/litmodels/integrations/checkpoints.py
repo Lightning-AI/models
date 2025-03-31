@@ -17,8 +17,10 @@ if _PYTORCHLIGHTNING_AVAILABLE:
 
 
 if TYPE_CHECKING:
-    if _LIGHTNING_AVAILABLE or _PYTORCHLIGHTNING_AVAILABLE:
+    if _LIGHTNING_AVAILABLE:
         import lightning.pytorch as pl
+    if _PYTORCHLIGHTNING_AVAILABLE:
+        import pytorch_lightning as pl
 
 
 # Base class to be inherited
