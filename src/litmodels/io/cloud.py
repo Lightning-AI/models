@@ -3,7 +3,7 @@
 #     http://www.apache.org/licenses/LICENSE-2.0
 #
 from pathlib import Path
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union, Dict
 
 from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
 from lightning_sdk.models import _extend_model_name_with_teamspace, _parse_model_name_and_version
@@ -92,3 +92,26 @@ def download_model_files(
         download_dir=download_dir,
         progress_bar=progress_bar,
     )
+
+
+def _list_available_teamspaces() -> Dict[str, dict]:
+    """List available teamspaces for the authenticated user.
+
+    Returns:
+        Dict with teamspace names as keys and their details as values.
+    """
+    from lightning_sdk.api import OrgApi, UserApi
+    from lightning_sdk.utils import resolve as sdk_resolvers
+
+    org_api = OrgApi()
+    user = sdk_resolvers._get_authed_user()
+    teamspaces = {}
+    for ts in UserApi()._get_all_teamspace_memberships(""):
+        if ts.owner_type == "organization":
+            org = org_api._get_org_by_id(ts.owner_id)
+            teamspaces[f"{org.name}/{ts.name}"] = {"name": ts.name, "org": org.name}
+        elif ts.owner_type == "user":  # todo: check also the name
+            teamspaces[f"{user.name}/{ts.name}"] = {"name": ts.name, "user": user}
+        else:
+            raise RuntimeError(f"Unknown organization type {ts.organization_type}")
+    return teamspaces

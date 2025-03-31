@@ -14,16 +14,12 @@ from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHT
         pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_MISSING),
     ],
 )
-@pytest.mark.parametrize("with_model_name", [True, False])
+@pytest.mark.parametrize("model_name", [None, "org-name/teamspace/model-name"])
 @mock.patch("litmodels.integrations.checkpoints.LitModelCheckpointMixin._datetime_stamp", return_value="20250102-1213")
-@mock.patch(
-    "lightning_sdk.models._resolve_teamspace",
-    return_value=mock.MagicMock(owner=mock.MagicMock(name="my-org"), name="dream-team"),
-)
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
 @mock.patch("litmodels.integrations.checkpoints.Auth")
 def test_lightning_checkpoint_callback(
-    mock_auth, mock_upload_model, mock_resolve_teamspace, mock_datetime_stamp, importing, with_model_name, tmp_path
+    mock_auth, mock_upload_model, mock_datetime_stamp, monkeypatch, importing, model_name, tmp_path
 ):
     if importing == "lightning":
         from lightning import Trainer
@@ -39,9 +35,13 @@ def test_lightning_checkpoint_callback(
     # Validate inheritance
     assert issubclass(LitModelCheckpoint, ModelCheckpoint)
 
-    ckpt_args = {"model_name": "org-name/teamspace/model-name"} if with_model_name else {}
+    ckpt_args = {"model_name": model_name} if model_name else {}
     expected_model_registry = ckpt_args.get("model_name", f"BoringModel_{LitModelCheckpoint._datetime_stamp}")
     mock_upload_model.return_value.name = expected_model_registry
+    monkeypatch.setattr(
+        "lightning_sdk.utils.resolve._resolve_teamspace",
+        mock.MagicMock(return_value=mock.MagicMock(owner=mock.MagicMock(name="my-org"), name="dream-team"))
+    )
 
     trainer = Trainer(
         max_epochs=2,
@@ -54,7 +54,7 @@ def test_lightning_checkpoint_callback(
         mock.call(name=expected_model_registry, path=mock.ANY, progress_bar=True, cloud_account=None),
         mock.call(name=expected_model_registry, path=mock.ANY, progress_bar=True, cloud_account=None),
     ]
-    called_name_related_mocks = 0 if with_model_name else 1
+    called_name_related_mocks = 1
     mock_datetime_stamp.call_count == called_name_related_mocks
     mock_resolve_teamspace.call_count == called_name_related_mocks
 
