@@ -93,7 +93,7 @@ def test_upload_download_model(in_studio, monkeypatch, tmp_path):
 )
 @pytest.mark.parametrize(
     "in_studio",
-    [False, pytest.param(True, marks=pytest.mark.skipif(platform.system() != "Linux", reason="Studio is just Linux"))],
+    [False, pytest.param(True, marks=pytest.mark.skipif(platform.system() == "Windows", reason="studio is not Windows"))],
 )
 @pytest.mark.cloud()
 def test_lightning_default_checkpointing(importing, in_studio, monkeypatch, tmp_path):

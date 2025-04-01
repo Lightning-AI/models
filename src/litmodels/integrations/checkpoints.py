@@ -82,7 +82,7 @@ class LitModelCheckpointMixin(ABC):
             teamspace = _resolve_teamspace(None, None, None)
             if teamspace:
                 # case you use default model name and teamspace determined from env. variables aka running in studio
-                self.model_registry = f"{teamspace.owner}/{teamspace.name}/{self.model_registry}"
+                self.model_registry = f"{teamspace.owner.name}/{teamspace.name}/{self.model_registry}"
             else:  # try to load default users teamspace
                 ts_names = list(_list_available_teamspaces().keys())
                 if len(ts_names) == 1:

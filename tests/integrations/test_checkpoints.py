@@ -54,8 +54,8 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch
         mock.MagicMock(return_value=expected_boring_model),
     )
     if model_name is None or model_name == "model-in-studio":
-        mock_teamspace = mock.Mock()
-        mock_teamspace.owner = expected_org
+        mock_teamspace = mock.Mock(owner=mock.Mock())
+        mock_teamspace.owner.name = expected_org
         mock_teamspace.name = expected_teamspace
 
         monkeypatch.setattr(
