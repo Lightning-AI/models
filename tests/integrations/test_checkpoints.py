@@ -19,9 +19,7 @@ from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHT
 )
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
 @mock.patch("litmodels.integrations.checkpoints.Auth")
-def test_lightning_checkpoint_callback(
-    mock_auth, mock_upload_model, mock_default_name, monkeypatch, importing, model_name, tmp_path
-):
+def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch, importing, model_name, tmp_path):
     if importing == "lightning":
         from lightning import Trainer
         from lightning.pytorch.callbacks import ModelCheckpoint
@@ -42,14 +40,19 @@ def test_lightning_checkpoint_callback(
         "model-in-studio": {"org": "my-org", "teamspace": "dream-team", "model": "model-in-studio"},
         "model-user-only-project": {"org": "my-org", "teamspace": "default-ts", "model": "model-user-only-project"},
     }
+    expected_boring_model = "BoringModel_20250102-1213"
     expected_model_registry = all_model_registry.get(
         model_name,
-        {"org": "org-name", "teamspace": "teamspace", "model": f"BoringModel_{LitModelCheckpoint._datetime_stamp}"},
+        {"org": "org-name", "teamspace": "teamspace", "model": expected_boring_model},
     )
     expected_org = expected_model_registry["org"]
     expected_teamspace = expected_model_registry["teamspace"]
     expected_model = expected_model_registry["model"]
     mock_upload_model.return_value.name = f"{expected_org}/{expected_teamspace}/{expected_model}"
+    monkeypatch.setattr(
+        "litmodels.integrations.checkpoints.LitModelCheckpointMixin.default_model_name",
+        mock.MagicMock(return_value=expected_boring_model),
+    )
     if model_name is None or model_name == "model-in-studio":
         mock_teamspace = mock.Mock()
         mock_teamspace.owner = expected_org
@@ -79,7 +82,6 @@ def test_lightning_checkpoint_callback(
         cloud_account=None,
     )
     assert mock_upload_model.call_args_list == [expected_call] * 2
-    assert mock_datetime_stamp.call_count == 1
 
     # Verify paths match the expected pattern
     for call_args in mock_upload_model.call_args_list:

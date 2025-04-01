@@ -61,6 +61,7 @@ class LitModelCheckpointMixin(ABC):
         upload_model(name=self.model_registry, model=filepath)
 
     def default_model_name(self, pl_model: "pl.LightningModule") -> str:
+        """Generate a default model name based on the class name and timestamp."""
         return pl_model.__class__.__name__ + f"_{self._datetime_stamp}"
 
     def _update_model_name(self, pl_model: "pl.LightningModule") -> None:
@@ -87,7 +88,7 @@ class LitModelCheckpointMixin(ABC):
             else:  # try to load default users teamspace
                 ts_names = list(_list_available_teamspaces().keys())
                 if len(ts_names) == 1:
-                    self.model_registry = f"{ts_names[0]}/{default_model_name}"
+                    self.model_registry = f"{ts_names[0]}/{self.model_registry}"
                 else:
                     options = "\n\t".join(ts_names)
                     raise RuntimeError(
