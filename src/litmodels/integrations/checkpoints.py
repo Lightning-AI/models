@@ -30,9 +30,8 @@ class LitModelCheckpointMixin(ABC):
     """Mixin class for LitModel checkpoint functionality."""
 
     _auth: Auth  # preserve the auth object for later use
-    # mainly ofr mocking reasons
-    _datetime_stamp: str = datetime.now().strftime("%Y%m%d-%H%M")
-    model_name: Optional[str] = None
+    _datetime_stamp: str
+    model_registry: Optional[str] = None
 
     def __init__(self, model_name: Optional[str]) -> None:
         """Initialize with model name."""
@@ -40,8 +39,9 @@ class LitModelCheckpointMixin(ABC):
             rank_zero_warn(
                 "The model is not defined so we will continue with LightningModule names and timestamp of now"
             )
+        self._datetime_stamp = datetime.now().strftime("%Y%m%d-%H%M")
         # remove any / from beginning and end of the name
-        self.model_name = model_name.strip("/") if model_name else None
+        self.model_registry = model_name.strip("/") if model_name else None
 
         try:  # authenticate before anything else starts
             self._auth = Auth()
@@ -53,45 +53,48 @@ class LitModelCheckpointMixin(ABC):
     def _upload_model(self, filepath: str) -> None:
         # todo: uploading on background so training does nt stops
         # todo: use filename as version but need to validate that such version does not exists yet
-        if not self.model_name:
+        if not self.model_registry:
             raise RuntimeError(
                 "Model name is not specified neither updated by `setup` method via Trainer."
                 " Please set the model name before uploading or ensure that `setup` method is called."
             )
-        upload_model(name=self.model_name, model=filepath)
+        upload_model(name=self.model_registry, model=filepath)
+
+    def default_model_name(self, pl_model: "pl.LightningModule") -> str:
+        return pl_model.__class__.__name__ + f"_{self._datetime_stamp}"
 
     def _update_model_name(self, pl_model: "pl.LightningModule") -> None:
         """Update the model name if not already set."""
-        count_slashes_in_name = self.model_name.count("/") if self.model_name else 0
-        default_model_name = pl_model.__class__.__name__ + f"_{self._datetime_stamp}"
+        count_slashes_in_name = self.model_registry.count("/") if self.model_registry else 0
+        default_model_name = self.default_model_name(pl_model)
         if count_slashes_in_name > 2:
             raise ValueError(
-                f"Invalid model name: '{self.model_name}'. It should not contain more than two '/' character."
+                f"Invalid model name: '{self.model_registry}'. It should not contain more than two '/' character."
             )
-        elif count_slashes_in_name == 2:
+        if count_slashes_in_name == 2:
             # user has defined the model name in the format 'organization/teamspace/modelname'
             return
-        elif count_slashes_in_name == 1:
+        if count_slashes_in_name == 1:
             # user had defined only the teamspace name
-            self.model_name = f"{self.model_name}/{default_model_name}"
+            self.model_registry = f"{self.model_registry}/{default_model_name}"
         elif count_slashes_in_name == 0:
-            if not self.model_name:
-                self.model_name = default_model_name
+            if not self.model_registry:
+                self.model_registry = default_model_name
             teamspace = _resolve_teamspace(None, None, None)
             if teamspace:
                 # case you use default model name and teamspace determined from env. variables aka running in studio
-                self.model_name = default_model_name
+                self.model_registry = f"{teamspace.owner}/{teamspace.name}/{self.model_registry}"
             else:  # try to load default users teamspace
                 ts_names = list(_list_available_teamspaces().keys())
                 if len(ts_names) == 1:
-                    self.model_name = f"{ts_names[0]}/{default_model_name}"
+                    self.model_registry = f"{ts_names[0]}/{default_model_name}"
                 else:
                     options = "\n\t".join(ts_names)
                     raise RuntimeError(
                         f"Teamspace is not defined and there are multiple teamspaces available:\n{options}"
                     )
         else:
-            raise RuntimeError(f"Invalid model name: '{self.model_name}'")
+            raise RuntimeError(f"Invalid model name: '{self.model_registry}'")
 
 
 # Create specific implementations

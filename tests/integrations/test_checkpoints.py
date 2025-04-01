@@ -14,12 +14,13 @@ from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHT
         pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_MISSING),
     ],
 )
-@pytest.mark.parametrize("model_name", [None, "org-name/teamspace/model-name"])
-@mock.patch("litmodels.integrations.checkpoints.LitModelCheckpointMixin._datetime_stamp", return_value="20250102-1213")
+@pytest.mark.parametrize(
+    "model_name", [None, "org-name/teamspace/model-name", "model-in-studio", "model-user-only-project"]
+)
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
 @mock.patch("litmodels.integrations.checkpoints.Auth")
 def test_lightning_checkpoint_callback(
-    mock_auth, mock_upload_model, mock_datetime_stamp, monkeypatch, importing, model_name, tmp_path
+    mock_auth, mock_upload_model, mock_default_name, monkeypatch, importing, model_name, tmp_path
 ):
     if importing == "lightning":
         from lightning import Trainer
@@ -36,12 +37,33 @@ def test_lightning_checkpoint_callback(
     assert issubclass(LitModelCheckpoint, ModelCheckpoint)
 
     ckpt_args = {"model_name": model_name} if model_name else {}
-    expected_model_registry = ckpt_args.get("model_name", f"BoringModel_{LitModelCheckpoint._datetime_stamp}")
-    mock_upload_model.return_value.name = expected_model_registry
-    monkeypatch.setattr(
-        "lightning_sdk.utils.resolve._resolve_teamspace",
-        mock.MagicMock(return_value=mock.MagicMock(owner=mock.MagicMock(name="my-org"), name="dream-team")),
+    all_model_registry = {
+        "org-name/teamspace/model-name": {"org": "org-name", "teamspace": "teamspace", "model": "model-name"},
+        "model-in-studio": {"org": "my-org", "teamspace": "dream-team", "model": "model-in-studio"},
+        "model-user-only-project": {"org": "my-org", "teamspace": "default-ts", "model": "model-user-only-project"},
+    }
+    expected_model_registry = all_model_registry.get(
+        model_name,
+        {"org": "org-name", "teamspace": "teamspace", "model": f"BoringModel_{LitModelCheckpoint._datetime_stamp}"},
     )
+    expected_org = expected_model_registry["org"]
+    expected_teamspace = expected_model_registry["teamspace"]
+    expected_model = expected_model_registry["model"]
+    mock_upload_model.return_value.name = f"{expected_org}/{expected_teamspace}/{expected_model}"
+    if model_name is None or model_name == "model-in-studio":
+        mock_teamspace = mock.Mock()
+        mock_teamspace.owner = expected_org
+        mock_teamspace.name = expected_teamspace
+
+        monkeypatch.setattr(
+            "litmodels.integrations.checkpoints._resolve_teamspace", mock.MagicMock(return_value=mock_teamspace)
+        )
+    elif model_name == "model-user-only-project":
+        monkeypatch.setattr("litmodels.integrations.checkpoints._resolve_teamspace", mock.MagicMock(return_value=None))
+        monkeypatch.setattr(
+            "litmodels.integrations.checkpoints._list_available_teamspaces",
+            mock.MagicMock(return_value={f"{expected_org}/{expected_teamspace}": {}}),
+        )
 
     trainer = Trainer(
         max_epochs=2,
@@ -50,13 +72,14 @@ def test_lightning_checkpoint_callback(
     trainer.fit(BoringModel())
 
     assert mock_auth.call_count == 1
-    assert mock_upload_model.call_args_list == [
-        mock.call(name=expected_model_registry, path=mock.ANY, progress_bar=True, cloud_account=None),
-        mock.call(name=expected_model_registry, path=mock.ANY, progress_bar=True, cloud_account=None),
-    ]
-    called_name_related_mocks = 1
-    mock_datetime_stamp.call_count == called_name_related_mocks
-    mock_resolve_teamspace.call_count == called_name_related_mocks
+    expected_call = mock.call(
+        name=f"{expected_org}/{expected_teamspace}/{expected_model}",
+        path=mock.ANY,
+        progress_bar=True,
+        cloud_account=None,
+    )
+    assert mock_upload_model.call_args_list == [expected_call] * 2
+    assert mock_datetime_stamp.call_count == 1
 
     # Verify paths match the expected pattern
     for call_args in mock_upload_model.call_args_list:
