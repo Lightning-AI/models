@@ -29,7 +29,6 @@ if TYPE_CHECKING:
 class LitModelCheckpointMixin(ABC):
     """Mixin class for LitModel checkpoint functionality."""
 
-    _auth: Auth  # preserve the auth object for later use
     _datetime_stamp: str
     model_registry: Optional[str] = None
 
@@ -44,8 +43,7 @@ class LitModelCheckpointMixin(ABC):
         self.model_registry = model_name.strip("/") if model_name else None
 
         try:  # authenticate before anything else starts
-            self._auth = Auth()
-            self._auth.authenticate()
+            Auth().authenticate()
         except Exception:
             raise ConnectionError("Unable to authenticate with Lightning Cloud. Check your credentials.")
 
