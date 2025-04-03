@@ -5,8 +5,7 @@ from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
 from litmodels.integrations.duplicate import duplicate_hf_model
 
-LIT_ORG = "lightning-ai"
-LIT_TEAMSPACE = "LitModels"
+from tests.integrations import LIT_ORG, LIT_TEAMSPACE
 
 
 @pytest.mark.cloud()
