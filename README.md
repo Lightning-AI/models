@@ -197,10 +197,10 @@ class MyModel(PickleRegistryMixin):
 
 # Create and push a model instance
 model = MyModel(param1=42, param2="hello")
-model.push_to_registry(name="my-org/my-team/my-model")
+model.upload_model(name="my-org/my-team/my-model")
 
 # Later, pull the model
-loaded_model = MyModel.pull_from_registry(name="my-org/my-team/my-model")
+loaded_model = MyModel.download_model(name="my-org/my-team/my-model")
 ```
 
 ### Using `PyTorchRegistryMixin`
@@ -225,8 +225,8 @@ class MyTorchModel(PyTorchRegistryMixin, torch.nn.Module):
 
 # Create and push the model
 model = MyTorchModel(input_size=784)
-model.push_to_registry(name="my-org/my-team/torch-model")
+model.upload_model(name="my-org/my-team/torch-model")
 
 # Pull the model with the same architecture
-loaded_model = MyTorchModel.pull_from_registry(name="my-org/my-team/torch-model")
+loaded_model = MyTorchModel.download_model(name="my-org/my-team/torch-model")
 ```

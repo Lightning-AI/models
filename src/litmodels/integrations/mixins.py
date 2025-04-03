@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class ModelRegistryMixin(ABC):
     """Mixin for model registry integration."""
 
-    def push_to_registry(
+    def upload_model(
         self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Union[str, Path, None] = None
     ) -> None:
         """Push the model to the registry.
@@ -30,7 +30,7 @@ class ModelRegistryMixin(ABC):
         """
 
     @classmethod
-    def pull_from_registry(
+    def download_model(
         cls, name: str, version: Optional[str] = None, temp_folder: Union[str, Path, None] = None
     ) -> object:
         """Pull the model from the registry.
@@ -59,7 +59,7 @@ class ModelRegistryMixin(ABC):
 class PickleRegistryMixin(ModelRegistryMixin):
     """Mixin for pickle registry integration."""
 
-    def push_to_registry(
+    def upload_model(
         self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Union[str, Path, None] = None
     ) -> None:
         """Push the model to the registry.
@@ -78,7 +78,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
         upload_model_files(name=name, path=pickle_path)
 
     @classmethod
-    def pull_from_registry(
+    def download_model(
         cls, name: str, version: Optional[str] = None, temp_folder: Union[str, Path, None] = None
     ) -> object:
         """Pull the model from the registry.
@@ -127,7 +127,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
         instance.__init_kwargs = bound_args.arguments
         return instance
 
-    def push_to_registry(
+    def upload_model(
         self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Union[str, Path, None] = None
     ) -> None:
         """Push the model to the registry.
@@ -171,7 +171,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
         upload_model_files(name=model_registry, path=[torch_state_dict_path, init_kwargs_path])
 
     @classmethod
-    def pull_from_registry(
+    def download_model(
         cls,
         name: str,
         version: Optional[str] = None,

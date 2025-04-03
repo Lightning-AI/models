@@ -235,10 +235,10 @@ def test_pickle_mixin_push_and_pull():
 
     # Create an instance of DummyModel and call push_to_registry.
     dummy = DummyModel(42)
-    dummy.push_to_registry(model_registry)
+    dummy.upload_model(model_registry)
 
     # Call pull_from_registry and load the DummyModel instance.
-    loaded_dummy = DummyModel.pull_from_registry(model_registry)
+    loaded_dummy = DummyModel.download_model(model_registry)
     # Verify that the unpickled instance has the expected value.
     assert isinstance(loaded_dummy, DummyModel)
     assert loaded_dummy.value == 42
@@ -273,9 +273,9 @@ def test_pytorch_mixin_push_and_pull():
     input_tensor = torch.randn(1, 784)
     output_before = dummy(input_tensor)
 
-    dummy.push_to_registry(model_registry)
+    dummy.upload_model(model_registry)
 
-    loaded_dummy = DummyTorchModel.pull_from_registry(model_registry)
+    loaded_dummy = DummyTorchModel.download_model(model_registry)
     loaded_dummy.eval()
     output_after = loaded_dummy(input_tensor)
 
