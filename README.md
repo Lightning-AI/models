@@ -1,4 +1,4 @@
-from litmodels.integrations import LightningModelCheckpoint<div align='center'>
+<div align='center'>
 
 # Effortless Model Management for Your Development ⚡
 
