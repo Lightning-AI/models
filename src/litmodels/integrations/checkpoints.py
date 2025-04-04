@@ -72,7 +72,7 @@ class ModelManager:
         self._worker = threading.Thread(target=self._worker_loop, daemon=True)
         self._worker.start()
 
-    def _worker_loop(self):
+    def _worker_loop(self) -> None:
         while True:
             task = self.task_queue.get()
             if task is None:
@@ -101,19 +101,19 @@ class ModelManager:
                 rank_zero_warn(f"Unknown task: {task}")
             self.task_queue.task_done()
 
-    def queue_upload(self, registry_name: str, filepath: str):
+    def queue_upload(self, registry_name: str, filepath: str) -> None:
         """Queue an upload task."""
         self.upload_count += 1
         self.task_queue.put((Action.UPLOAD, (registry_name, filepath)))
         rank_zero_debug(f"Queued upload: {filepath} (pending uploads: {self.upload_count})")
 
-    def queue_remove(self, trainer: "pl.Trainer", filepath: str):
+    def queue_remove(self, trainer: "pl.Trainer", filepath: str) -> None:
         """Queue a removal task."""
         self.remove_count += 1
         self.task_queue.put((Action.REMOVE, (trainer, filepath)))
         rank_zero_debug(f"Queued removal: {filepath} (pending removals: {self.remove_count})")
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         """Shut down the manager and wait for all tasks to complete."""
         self.task_queue.put(None)
         self.task_queue.join()
