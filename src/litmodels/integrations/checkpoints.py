@@ -30,48 +30,68 @@ if TYPE_CHECKING:
 
 # Create a singleton upload manager
 @lru_cache(maxsize=None)
-def get_upload_manager():
+def get_model_manager():
     """Get or create the singleton upload manager."""
-    return ModelUploadManager()
+    return ModelManager()
 
 
-class ModelUploadManager:
-    """Manages asynchronous model uploads in a background thread."""
+class ModelManager:
+    """Manages uploads and removals with a single queue but separate counters."""
 
     def __init__(self):
-        """Initialize the upload manager with a queue and worker thread."""
-        self.queue = queue.Queue()
-        self.pending_count = 0
-        self._lock = threading.Lock()
-        self._worker = threading.Thread(target=self._upload_worker, daemon=True)
+        """Initialize the ModelManager with a task queue and counters."""
+        self.task_queue = queue.Queue()
+        self.upload_count = 0
+        self.remove_count = 0
+        self._worker = threading.Thread(target=self._worker_loop, daemon=True)
         self._worker.start()
 
-    def _upload_worker(self):
-        """Worker thread that processes uploads from the queue."""
+    def _worker_loop(self):
         while True:
-            task = self.queue.get()
+            task = self.task_queue.get()
             if task is None:
-                break  # Signal to exit
-
-            registry_name, filepath = task
-            try:  # Actual upload happens here
-                upload_model(name=registry_name, model=filepath)
-                rank_zero_debug(f"Successfully uploaded model: {registry_name}")
-            except Exception as ex:
-                rank_zero_warn(f"Failed to upload model {registry_name} with {filepath}:\n{ex}")
-            finally:
-                # Decrement the pending count and mark the task as done
-                with self._lock:
-                    self.pending_count -= 1
-                # Notify that the task is done
-                self.queue.task_done()
+                self.task_queue.task_done()
+                break
+            action, detail = task
+            if action == "upload":
+                registry_name, filepath = detail
+                try:
+                    upload_model(registry_name, filepath)
+                    rank_zero_debug(f"Finished uploading: {filepath}")
+                except Exception as ex:
+                    rank_zero_warn(f"Upload failed {filepath}: {ex}")
+                finally:
+                    self.upload_count -= 1
+            elif action == "remove":
+                trainer, filepath = detail
+                try:
+                    trainer.strategy.remove_checkpoint(filepath)
+                    rank_zero_debug(f"Removed file: {filepath}")
+                except Exception as ex:
+                    rank_zero_warn(f"Removal failed {filepath}: {ex}")
+                finally:
+                    self.remove_count -= 1
+            else:
+                rank_zero_warn(f"Unknown task: {task}")
+            self.task_queue.task_done()
 
     def queue_upload(self, registry_name: str, filepath: str):
-        """Queue a model for background upload."""
-        with self._lock:
-            self.pending_count += 1
-        self.queue.put((registry_name, filepath))
-        rank_zero_debug(f"Queued model {registry_name} for upload. Pending uploads: {self.pending_count}")
+        """Queue an upload task."""
+        self.upload_count += 1
+        self.task_queue.put(("upload", (registry_name, filepath)))
+        rank_zero_debug(f"Queued upload: {filepath} (pending uploads: {self.upload_count})")
+
+    def queue_remove(self, trainer: "pl.Trainer", filepath: str):
+        """Queue a removal task."""
+        self.remove_count += 1
+        self.task_queue.put(("remove", (trainer, filepath)))
+        rank_zero_debug(f"Queued removal: {filepath} (pending removals: {self.remove_count})")
+
+    def shutdown(self):
+        """Shut down the manager and wait for all tasks to complete."""
+        self.task_queue.put(None)
+        self.task_queue.join()
+        rank_zero_debug("Manager shut down.")
 
 
 # Base class to be inherited
@@ -105,7 +125,12 @@ class LitModelCheckpointMixin(ABC):
                 " Please set the model name before uploading or ensure that `setup` method is called."
             )
         # Add to queue instead of uploading directly
-        get_upload_manager().queue_upload(self.model_registry, filepath)
+        get_model_manager().queue_upload(self.model_registry, filepath)
+
+    @rank_zero_only
+    def _remove_model(self, trainer: "pl.Trainer", filepath: str) -> None:
+        """Remove the local version of the model if requested."""
+        get_model_manager().queue_remove(trainer, filepath)
 
     def default_model_name(self, pl_model: "pl.LightningModule") -> str:
         """Generate a default model name based on the class name and timestamp."""
@@ -177,13 +202,12 @@ if _LIGHTNING_AVAILABLE:
             """Extend the on_fit_end method to ensure all uploads are completed."""
             super().on_fit_end(trainer, pl_module)
             # Wait for all uploads to finish
-            get_upload_manager().queue.join()
+            get_model_manager().shutdown()
 
         def _remove_checkpoint(self, trainer: "pl.Trainer", filepath: str) -> None:
             """Extend the remove checkpoint method to remove the model from the registry."""
-            # super()._remove_checkpoint(trainer, filepath)
-            # todo: need to implement another queue for removing the model from the registry after upload has finished
-            pass
+            if trainer.is_global_zero:  # Only remove from the main process
+                self._remove_model(trainer, filepath)
 
 
 if _PYTORCHLIGHTNING_AVAILABLE:
@@ -217,10 +241,9 @@ if _PYTORCHLIGHTNING_AVAILABLE:
             """Extend the on_fit_end method to ensure all uploads are completed."""
             super().on_fit_end(trainer, pl_module)
             # Wait for all uploads to finish
-            get_upload_manager().queue.join()
+            get_model_manager().shutdown()
 
         def _remove_checkpoint(self, trainer: "pl.Trainer", filepath: str) -> None:
             """Extend the remove checkpoint method to remove the model from the registry."""
-            # super()._remove_checkpoint(trainer, filepath)
-            # todo: need to implement another queue for removing the model from the registry after upload has finished
-            pass
+            if trainer.is_global_zero:  # Only remove from the main process
+                self._remove_model(trainer, filepath)
