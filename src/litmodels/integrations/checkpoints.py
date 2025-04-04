@@ -46,6 +46,7 @@ class Action(StrEnum):
 
 class ModelManager:
     """Manages uploads and removals with a single queue but separate counters."""
+
     task_queue: queue.Queue
 
     def __init__(self) -> None:
