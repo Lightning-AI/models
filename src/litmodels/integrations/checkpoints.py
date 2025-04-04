@@ -1,10 +1,13 @@
+import queue
+import threading
 from abc import ABC
 from datetime import datetime
+from functools import lru_cache
 from typing import TYPE_CHECKING, Any, Optional
 
 from lightning_sdk.lightning_cloud.login import Auth
 from lightning_sdk.utils.resolve import _resolve_teamspace
-from lightning_utilities.core.rank_zero import rank_zero_only, rank_zero_warn
+from lightning_utilities.core.rank_zero import rank_zero_only, rank_zero_warn, rank_zero_debug
 
 from litmodels import upload_model
 from litmodels.integrations.imports import _LIGHTNING_AVAILABLE, _PYTORCHLIGHTNING_AVAILABLE
@@ -23,6 +26,51 @@ if TYPE_CHECKING:
         import lightning.pytorch as pl
     if _PYTORCHLIGHTNING_AVAILABLE:
         import pytorch_lightning as pl
+
+
+# Create a singleton upload manager
+@lru_cache(maxsize=None)
+def get_upload_manager():
+    """Get or create the singleton upload manager."""
+    return ModelUploadManager()
+
+
+class ModelUploadManager:
+    """Manages asynchronous model uploads in a background thread."""
+
+    def __init__(self):
+        self.queue = queue.Queue()
+        self.pending_count = 0
+        self._lock = threading.Lock()
+        self._worker = threading.Thread(target=self._upload_worker, daemon=True)
+        self._worker.start()
+
+    def _upload_worker(self):
+        """Worker thread that processes uploads from the queue."""
+        while True:
+            task = self.queue.get()
+            if task is None:
+                break  # Signal to exit
+
+            registry_name, filepath = task
+            try:  # Actual upload happens here
+                upload_model(name=registry_name, model=filepath)
+                rank_zero_debug(f"Successfully uploaded model: {registry_name}")
+            except Exception as ex:
+                rank_zero_warn(f"Failed to upload model {registry_name} with {filepath}:\n{ex}")
+            finally:
+                # Decrement the pending count and mark the task as done
+                with self._lock:
+                    self.pending_count -= 1
+                # Notify that the task is done
+                self.queue.task_done()
+
+    def queue_upload(self, registry_name: str, filepath: str):
+        """Queue a model for background upload."""
+        with self._lock:
+            self.pending_count += 1
+        self.queue.put((registry_name, filepath))
+        rank_zero_debug(f"Queued model {registry_name} for upload. Pending uploads: {self.pending_count}")
 
 
 # Base class to be inherited
@@ -49,14 +97,14 @@ class LitModelCheckpointMixin(ABC):
 
     @rank_zero_only
     def _upload_model(self, filepath: str) -> None:
-        # todo: uploading on background so training does nt stops
         # todo: use filename as version but need to validate that such version does not exists yet
         if not self.model_registry:
             raise RuntimeError(
                 "Model name is not specified neither updated by `setup` method via Trainer."
                 " Please set the model name before uploading or ensure that `setup` method is called."
             )
-        upload_model(name=self.model_registry, model=filepath)
+        # Add to queue instead of uploading directly
+        get_upload_manager().queue_upload(self.model_registry, filepath)
 
     def default_model_name(self, pl_model: "pl.LightningModule") -> str:
         """Generate a default model name based on the class name and timestamp."""
@@ -124,6 +172,12 @@ if _LIGHTNING_AVAILABLE:
             if trainer.is_global_zero:  # Only upload from the main process
                 self._upload_model(filepath)
 
+        def on_fit_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+            """Extend the on_fit_end method to ensure all uploads are completed."""
+            super().on_fit_end(trainer, pl_module)
+            # Wait for all uploads to finish
+            get_upload_manager().queue.join()
+
 
 if _PYTORCHLIGHTNING_AVAILABLE:
 
@@ -151,3 +205,9 @@ if _PYTORCHLIGHTNING_AVAILABLE:
             super()._save_checkpoint(trainer, filepath)
             if trainer.is_global_zero:  # Only upload from the main process
                 self._upload_model(filepath)
+
+        def on_fit_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
+            """Extend the on_fit_end method to ensure all uploads are completed."""
+            super().on_fit_end(trainer, pl_module)
+            # Wait for all uploads to finish
+            get_upload_manager().queue.join()
