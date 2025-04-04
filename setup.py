@@ -59,7 +59,7 @@ setup(
     author=about.__author__,
     author_email=about.__author_email__,
     url=about.__homepage__,
-    download_url="https://github.com/Lightning-AI/models",
+    download_url="https://github.com/Lightning-AI/litModels",
     license=about.__license__,
     packages=find_packages(where="src"),
     package_dir={"": "src"},
@@ -73,9 +73,9 @@ setup(
     install_requires=_load_requirements(),
     extras_require=_prepare_extras(),
     project_urls={
-        "Bug Tracker": "https://github.com/Lightning-AI/models/issues",
-        "Documentation": "https://lightning-ai.github.io/models/",
-        "Source Code": "https://github.com/Lightning-AI/models",
+        "Bug Tracker": "https://github.com/Lightning-AI/litModels/issues",
+        "Documentation": "https://lightning-ai.github.io/litModels/",
+        "Source Code": "https://github.com/Lightning-AI/litModels",
     },
     classifiers=[
         "Environment :: Console",

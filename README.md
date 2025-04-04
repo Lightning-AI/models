@@ -10,7 +10,7 @@
 📦 [Examples](#saving-and-loading-models)
 📚 [Documentation](https://lightning.ai/docs/overview/model-registry)
 💬 [Get help on Discord](https://discord.com/invite/XncpTy7DSt)
-📋 [License: Apache 2.0](https://github.com/Lightning-AI/models/blob/main/LICENSE)
+📋 [License: Apache 2.0](https://github.com/Lightning-AI/litModels/blob/main/LICENSE)
 
 </div>
 
@@ -37,7 +37,7 @@ pip install -U litmodels
 Or install directly from source:
 
 ```bash
-pip install https://github.com/Lightning-AI/models/archive/refs/heads/main.zip
+pip install https://github.com/Lightning-AI/litModels/archive/refs/heads/main.zip
 ```
 
 ## Saving and Loading Models
