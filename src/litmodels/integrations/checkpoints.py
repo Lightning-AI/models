@@ -46,6 +46,7 @@ class Action(StrEnum):
 
 class ModelManager:
     """Manages uploads and removals with a single queue but separate counters."""
+    task_queue: queue.Queue
 
     def __init__(self) -> None:
         """Initialize the ModelManager with a task queue and counters."""
@@ -62,7 +63,7 @@ class ModelManager:
         del state["_worker"]
         return state
 
-    def __setstate__(self, state) -> None:
+    def __setstate__(self, state: dict) -> None:
         """Set the state of the ModelManager after unpickling."""
         self.__dict__.update(state)
         import queue
