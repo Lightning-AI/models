@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from lightning_sdk.lightning_cloud.login import Auth
 from lightning_sdk.utils.resolve import _resolve_teamspace
+from lightning_utilities import StrEnum
 from lightning_utilities.core.rank_zero import rank_zero_debug, rank_zero_only, rank_zero_warn
 
 from litmodels import upload_model
@@ -34,6 +35,11 @@ def get_model_manager():
     """Get or create the singleton upload manager."""
     return ModelManager()
 
+# enumerate the possible actions
+class Action(StrEnum):
+    UPLOAD = "upload"
+    REMOVE = "remove"
+
 
 class ModelManager:
     """Manages uploads and removals with a single queue but separate counters."""
@@ -53,7 +59,7 @@ class ModelManager:
                 self.task_queue.task_done()
                 break
             action, detail = task
-            if action == "upload":
+            if action == Action.UPLOAD:
                 registry_name, filepath = detail
                 try:
                     upload_model(registry_name, filepath)
@@ -62,7 +68,7 @@ class ModelManager:
                     rank_zero_warn(f"Upload failed {filepath}: {ex}")
                 finally:
                     self.upload_count -= 1
-            elif action == "remove":
+            elif action == Action.REMOVE:
                 trainer, filepath = detail
                 try:
                     trainer.strategy.remove_checkpoint(filepath)
@@ -78,13 +84,13 @@ class ModelManager:
     def queue_upload(self, registry_name: str, filepath: str):
         """Queue an upload task."""
         self.upload_count += 1
-        self.task_queue.put(("upload", (registry_name, filepath)))
+        self.task_queue.put((Action.UPLOAD, (registry_name, filepath)))
         rank_zero_debug(f"Queued upload: {filepath} (pending uploads: {self.upload_count})")
 
     def queue_remove(self, trainer: "pl.Trainer", filepath: str):
         """Queue a removal task."""
         self.remove_count += 1
-        self.task_queue.put(("remove", (trainer, filepath)))
+        self.task_queue.put((Action.REMOVE, (trainer, filepath)))
         rank_zero_debug(f"Queued removal: {filepath} (pending removals: {self.remove_count})")
 
     def shutdown(self):
