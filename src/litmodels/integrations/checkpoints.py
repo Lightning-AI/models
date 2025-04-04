@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 # Create a singleton upload manager
 @lru_cache(maxsize=None)
-def get_model_manager():
+def get_model_manager() -> "ModelManager":
     """Get or create the singleton upload manager."""
     return ModelManager()
 
@@ -47,7 +47,7 @@ class Action(StrEnum):
 class ModelManager:
     """Manages uploads and removals with a single queue but separate counters."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the ModelManager with a task queue and counters."""
         self.task_queue = queue.Queue()
         self.upload_count = 0
@@ -55,14 +55,14 @@ class ModelManager:
         self._worker = threading.Thread(target=self._worker_loop, daemon=True)
         self._worker.start()
 
-    def __getstate__(self):
+    def __getstate__(self) -> dict:
         """Get the state of the ModelManager for pickling."""
         state = self.__dict__.copy()
         del state["task_queue"]
         del state["_worker"]
         return state
 
-    def __setstate__(self, state):
+    def __setstate__(self, state) -> None:
         """Set the state of the ModelManager after unpickling."""
         self.__dict__.update(state)
         import queue
