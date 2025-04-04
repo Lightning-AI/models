@@ -3,8 +3,16 @@ import re
 from unittest import mock
 
 import pytest
+from litmodels.integrations.checkpoints import get_model_manager
 
 from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHTNING_MISSING
+
+
+@pytest.fixture(autouse=True)
+def reset_model_manager():
+    get_model_manager.cache_clear()
+    # Optionally, call it once to initialize immediately
+    return get_model_manager()
 
 
 @pytest.mark.parametrize(
@@ -104,4 +112,5 @@ def test_lightning_checkpointing_pickleable(mock_auth, importing):
         from litmodels.integrations.checkpoints import PytorchLightningModelCheckpoint as LitModelCheckpoint
 
     ckpt = LitModelCheckpoint(model_name="org-name/teamspace/model-name")
+    assert mock_auth.call_count == 1
     pickle.dumps(ckpt)

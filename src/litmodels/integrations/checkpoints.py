@@ -35,8 +35,11 @@ def get_model_manager():
     """Get or create the singleton upload manager."""
     return ModelManager()
 
+
 # enumerate the possible actions
 class Action(StrEnum):
+    """Enumeration of possible actions for the ModelManager."""
+
     UPLOAD = "upload"
     REMOVE = "remove"
 
@@ -49,6 +52,23 @@ class ModelManager:
         self.task_queue = queue.Queue()
         self.upload_count = 0
         self.remove_count = 0
+        self._worker = threading.Thread(target=self._worker_loop, daemon=True)
+        self._worker.start()
+
+    def __getstate__(self):
+        """Get the state of the ModelManager for pickling."""
+        state = self.__dict__.copy()
+        del state["task_queue"]
+        del state["_worker"]
+        return state
+
+    def __setstate__(self, state):
+        """Set the state of the ModelManager after unpickling."""
+        self.__dict__.update(state)
+        import queue
+        import threading
+
+        self.task_queue = queue.Queue()
         self._worker = threading.Thread(target=self._worker_loop, daemon=True)
         self._worker.start()
 
@@ -106,6 +126,7 @@ class LitModelCheckpointMixin(ABC):
 
     _datetime_stamp: str
     model_registry: Optional[str] = None
+    _model_manager: ModelManager
 
     def __init__(self, model_name: Optional[str]) -> None:
         """Initialize with model name."""
@@ -121,6 +142,8 @@ class LitModelCheckpointMixin(ABC):
             Auth().authenticate()
         except Exception:
             raise ConnectionError("Unable to authenticate with Lightning Cloud. Check your credentials.")
+
+        self._model_manager = ModelManager()
 
     @rank_zero_only
     def _upload_model(self, filepath: str) -> None:
@@ -195,18 +218,18 @@ if _LIGHTNING_AVAILABLE:
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:
             """Setup the checkpoint callback."""
-            super().setup(trainer, pl_module, stage)
+            _LightningModelCheckpoint.setup(self, trainer, pl_module, stage)
             self._update_model_name(pl_module)
 
         def _save_checkpoint(self, trainer: "pl.Trainer", filepath: str) -> None:
             """Extend the save checkpoint method to upload the model."""
-            super()._save_checkpoint(trainer, filepath)
+            _LightningModelCheckpoint._save_checkpoint(self, trainer, filepath)
             if trainer.is_global_zero:  # Only upload from the main process
                 self._upload_model(filepath)
 
         def on_fit_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
             """Extend the on_fit_end method to ensure all uploads are completed."""
-            super().on_fit_end(trainer, pl_module)
+            _LightningModelCheckpoint.on_fit_end(self, trainer, pl_module)
             # Wait for all uploads to finish
             get_model_manager().shutdown()
 
@@ -234,18 +257,18 @@ if _PYTORCHLIGHTNING_AVAILABLE:
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:
             """Setup the checkpoint callback."""
-            super().setup(trainer, pl_module, stage)
+            _PytorchLightningModelCheckpoint.setup(self, trainer, pl_module, stage)
             self._update_model_name(pl_module)
 
         def _save_checkpoint(self, trainer: "pl.Trainer", filepath: str) -> None:
             """Extend the save checkpoint method to upload the model."""
-            super()._save_checkpoint(trainer, filepath)
+            _PytorchLightningModelCheckpoint._save_checkpoint(self, trainer, filepath)
             if trainer.is_global_zero:  # Only upload from the main process
                 self._upload_model(filepath)
 
         def on_fit_end(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule") -> None:
             """Extend the on_fit_end method to ensure all uploads are completed."""
-            super().on_fit_end(trainer, pl_module)
+            _PytorchLightningModelCheckpoint.on_fit_end(self, trainer, pl_module)
             # Wait for all uploads to finish
             get_model_manager().shutdown()
 
