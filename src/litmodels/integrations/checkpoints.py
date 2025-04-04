@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Any, Optional
 
 from lightning_sdk.lightning_cloud.login import Auth
 from lightning_sdk.utils.resolve import _resolve_teamspace
-from lightning_utilities.core.rank_zero import rank_zero_only, rank_zero_warn, rank_zero_debug
+from lightning_utilities.core.rank_zero import rank_zero_debug, rank_zero_only, rank_zero_warn
 
 from litmodels import upload_model
 from litmodels.integrations.imports import _LIGHTNING_AVAILABLE, _PYTORCHLIGHTNING_AVAILABLE
@@ -39,6 +39,7 @@ class ModelUploadManager:
     """Manages asynchronous model uploads in a background thread."""
 
     def __init__(self):
+        """Initialize the upload manager with a queue and worker thread."""
         self.queue = queue.Queue()
         self.pending_count = 0
         self._lock = threading.Lock()
@@ -178,6 +179,12 @@ if _LIGHTNING_AVAILABLE:
             # Wait for all uploads to finish
             get_upload_manager().queue.join()
 
+        def _remove_checkpoint(self, trainer: "pl.Trainer", filepath: str) -> None:
+            """Extend the remove checkpoint method to remove the model from the registry."""
+            # super()._remove_checkpoint(trainer, filepath)
+            # todo: need to implement another queue for removing the model from the registry after upload has finished
+            pass
+
 
 if _PYTORCHLIGHTNING_AVAILABLE:
 
@@ -211,3 +218,9 @@ if _PYTORCHLIGHTNING_AVAILABLE:
             super().on_fit_end(trainer, pl_module)
             # Wait for all uploads to finish
             get_upload_manager().queue.join()
+
+        def _remove_checkpoint(self, trainer: "pl.Trainer", filepath: str) -> None:
+            """Extend the remove checkpoint method to remove the model from the registry."""
+            # super()._remove_checkpoint(trainer, filepath)
+            # todo: need to implement another queue for removing the model from the registry after upload has finished
+            pass
