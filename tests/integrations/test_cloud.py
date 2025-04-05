@@ -11,6 +11,7 @@ from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
 from litmodels import download_model, upload_model
 from litmodels.integrations.mixins import PickleRegistryMixin, PyTorchRegistryMixin
+from litmodels.io.cloud import _list_available_teamspaces
 
 from tests.integrations import (
     _SKIP_IF_LIGHTNING_BELLOW_2_5_1,
@@ -285,3 +286,10 @@ def test_pytorch_mixin_push_and_pull():
 
     # CLEANING
     _cleanup_model(teamspace, model_name, expected_num_versions=1)
+
+
+@pytest.mark.cloud()
+def test_list_available_teamspaces():
+    teams = _list_available_teamspaces()
+    assert len(teams) > 0
+    assert f"{LIT_ORG}/{LIT_TEAMSPACE}" in teams
