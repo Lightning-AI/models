@@ -21,12 +21,14 @@ ______________________________________________________________________
 Save, load, host, and share models without slowing down training.    
 **LitModels** minimizes training slowdowns from checkpoint saving. Share public links on Lightning AI or your own cloud with enterprise-grade access controls.
 
+<div align="center">
+
 <pre>
-✅ Checkpoint without slowing training.    
-✅ Instant model loading anywhere.    
-✅ Share with secure, link-based access.
-✅ Host on Lightning or your own cloud.    
+✅ Checkpoint without slowing training.  ✅ Granular access controls.           
+✅ Load models anywhere.                 ✅ Host on Lightning or your own cloud.
 </pre>
+
+</div>
 
 # Quick start
 
