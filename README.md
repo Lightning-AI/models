@@ -4,16 +4,6 @@
 
 <img alt="Lightning" src="https://pl-public-data.s3.us-east-1.amazonaws.com/assets_lightning/LitModels.png" width="800px" style="max-width: 100%;">
 
-<div align="center">
-  <div style="text-align: center;">
-    <a target="_blank" href="#quick-start" style="margin: 0 10px;">Quick start</a> •
-    <a target="_blank" href="#examples" style="margin: 0 10px;">Examples</a> •
-    <a target="_blank" href="#features" style="margin: 0 10px;">Features</a> •
-    <a target="_blank" href="#performance" style="margin: 0 10px;">Performance</a> •
-    <a target="_blank" href="#community" style="margin: 0 10px;">Community</a> •
-    <a target="_blank" href="https://lightning.ai/docs/overview/model-registry" style="margin: 0 10px;">Docs</a>
-  </div>
-</div>
 </div>
 
 ______________________________________________________________________
@@ -27,6 +17,22 @@ Save, load, host, and share models without slowing down training.
 ✅ Checkpoint without slowing training.  ✅ Granular access controls.           
 ✅ Load models anywhere.                 ✅ Host on Lightning or your own cloud.
 </pre>
+
+[![Discord](https://img.shields.io/discord/1077906959069626439?label=Get%20help%20on%20Discord)](https://discord.gg/WajDThKAur)
+![CI testing](https://github.com/Lightning-AI/LitModels/actions/workflows/ci-testing.yml/badge.svg?event=push)
+![Cloud integration](https://github.com/Lightning-AI/LitModels/actions/workflows/ci-cloud.yml/badge.svg?event=push)
+[![codecov](https://codecov.io/gh/Lightning-AI/LitModels/graph/badge.svg?token=MQ0PN2cxKo)](https://codecov.io/gh/Lightning-AI/LitModels)
+[![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/Lightning-AI/LitModels/blob/main/LICENSE)
+
+
+<div style="text-align: center;">
+    <a target="_blank" href="#quick-start" style="margin: 0 10px;">Quick start</a> •
+    <a target="_blank" href="#examples" style="margin: 0 10px;">Examples</a> •
+    <a target="_blank" href="#features" style="margin: 0 10px;">Features</a> •
+    <a target="_blank" href="#performance" style="margin: 0 10px;">Performance</a> •
+    <a target="_blank" href="#community" style="margin: 0 10px;">Community</a> •
+    <a target="_blank" href="https://lightning.ai/docs/overview/model-registry" style="margin: 0 10px;">Docs</a>
+</div>
 
 </div>
 
