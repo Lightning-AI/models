@@ -1,6 +1,6 @@
 <div align='center'>
 
-# Save and share AI model checkpoints Lightning fast ⚡
+# Save, share and host AI model checkpoints Lightning fast ⚡
 
 <img alt="Lightning" src="https://pl-public-data.s3.us-east-1.amazonaws.com/assets_lightning/LitModels.png" width="800px" style="max-width: 100%;">
 
