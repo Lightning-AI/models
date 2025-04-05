@@ -24,7 +24,6 @@ Save, load, host, and share models without slowing down training.
 [![codecov](https://codecov.io/gh/Lightning-AI/LitModels/graph/badge.svg?token=MQ0PN2cxKo)](https://codecov.io/gh/Lightning-AI/LitModels)
 [![license](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://github.com/Lightning-AI/LitModels/blob/main/LICENSE)
 
-
 <div style="text-align: center;">
     <a target="_blank" href="#quick-start" style="margin: 0 10px;">Quick start</a> •
     <a target="_blank" href="#examples" style="margin: 0 10px;">Examples</a> •
