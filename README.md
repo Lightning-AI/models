@@ -18,7 +18,7 @@
 
 ______________________________________________________________________
 
-Save, load, host, and share models without slowing down training.    
+Save, load, host, and share models without slowing down training.
 **LitModels** minimizes training slowdowns from checkpoint saving. Share public links on Lightning AI or your own cloud with enterprise-grade access controls.
 
 <div align="center">
@@ -39,16 +39,17 @@ pip install litmodels
 ```
 
 Toy example ([see real examples](#examples)):
+
 ```python
 import litmodels as lm
 import torch
 
 # save a model
 model = torch.nn.Module()
-upload_model(model=model, name='model-name')
+upload_model(model=model, name="model-name")
 
 # load a model
-model = load_model(name='model-name')
+model = load_model(name="model-name")
 ```
 
 # Examples
@@ -56,7 +57,8 @@ model = load_model(name='model-name')
 <details>
   <summary>PyTorch</summary>
 
-Save model:   
+Save model:
+
 ```python
 import torch
 from litmodels import load_model, upload_model
@@ -66,6 +68,7 @@ upload_model(model=model, name="your_org/your_team/torch-model")
 ```
 
 Load model:
+
 ```python
 model_ = load_model(name="your_org/your_team/torch-model")
 ```
@@ -76,6 +79,7 @@ model_ = load_model(name="your_org/your_team/torch-model")
   <summary>PyTorch Lightning</summary>
 
 Save model:
+
 ```python
 from lightning import Trainer
 from litmodels import upload_model
@@ -93,6 +97,7 @@ upload_model(model=checkpoint_path, name="<organization>/<teamspace>/<model-name
 ```
 
 Load model:
+
 ```python
 from lightning import Trainer
 from litmodels import download_model
@@ -116,7 +121,8 @@ trainer.fit(BoringModel(), ckpt_path=checkpoint_path)
 <details>
   <summary>SKLearn</summary>
 
-Save model: 
+Save model:
+
 ```python
 from sklearn import datasets, model_selection, svm
 from litmodels import upload_model
@@ -139,6 +145,7 @@ upload_model(model=model, name="your_org/your_team/sklearn-svm-model")
 ```
 
 Use model:
+
 ```python
 from litmodels import load_model
 
@@ -156,6 +163,7 @@ print(f"Prediction: {prediction}")
 </details>
 
 # Features
+
 <details>
     <summary>PyTorch Lightning Callback</summary>
 
@@ -195,6 +203,7 @@ trainer.fit(
 Why is this useful???
 
 Save model:
+
 ```python
 from litmodels.integrations.mixins import PickleRegistryMixin
 
@@ -213,10 +222,11 @@ model.upload_model(name="my-org/my-team/my-model")
 ```
 
 Load model:
+
 ```python
 loaded_model = MyModel.download_model(name="my-org/my-team/my-model")
 ```
-    
+
 </details>
 
 <details>
@@ -225,9 +235,11 @@ loaded_model = MyModel.download_model(name="my-org/my-team/my-model")
 why is this useful? why do i need this?
 
 Save model:
+
 ```python
 import torch
 from litmodels.integrations.mixins import PyTorchRegistryMixin
+
 
 # Important: PyTorchRegistryMixin must be first in the inheritance order
 class MyTorchModel(PyTorchRegistryMixin, torch.nn.Module):
@@ -239,14 +251,15 @@ class MyTorchModel(PyTorchRegistryMixin, torch.nn.Module):
     def forward(self, x):
         return self.activation(self.linear(x))
 
+
 # Create and push the model
 model = MyTorchModel(input_size=784)
 model.upload_model(name="my-org/my-team/torch-model")
 ```
 
 Use the model:
-```python
 
+```python
 # Pull the model with the same architecture
 loaded_model = MyTorchModel.download_model(name="my-org/my-team/torch-model")
 ```
@@ -254,9 +267,10 @@ loaded_model = MyTorchModel.download_model(name="my-org/my-team/torch-model")
 </details>
 
 # Performance
+
 TODO: show the chart between not using this vs using this and the impact on training (the GPU utilization side-by-side)... also, what are tangible speed ups in training and inference.
 
 # Community
 
-💬 [Get help on Discord](https://discord.com/invite/XncpTy7DSt)    
-📋 [License: Apache 2.0](https://github.com/Lightning-AI/litModels/blob/main/LICENSE)    
+💬 [Get help on Discord](https://discord.com/invite/XncpTy7DSt)
+📋 [License: Apache 2.0](https://github.com/Lightning-AI/litModels/blob/main/LICENSE)
