@@ -41,3 +41,18 @@ jobs:
         run: |
           coverage run --source litmodels -m pytest src tests -v -m cloud
         timeout-minutes: 15
+
+      - name: Statistics
+        run: |
+          coverage report
+          coverage xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          flags: integrations
+          env_vars: OS,PYTHON
+          name: codecov-umbrella
+          fail_ci_if_error: false
