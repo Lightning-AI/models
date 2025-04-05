@@ -24,7 +24,7 @@ Save, load, host, and share models without slowing down training.
 <div align="center">
 
 <pre>
-✅ Checkpoint without slowing training.  ✅ Granular access controls.           
+✅ Checkpoint without slowing training.  ✅ Granular access controls.
 ✅ Load models anywhere.                 ✅ Host on Lightning or your own cloud.
 </pre>
 
