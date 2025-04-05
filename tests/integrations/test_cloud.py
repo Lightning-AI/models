@@ -1,6 +1,5 @@
 import os
 import platform
-import re
 from contextlib import redirect_stdout
 from io import StringIO
 from typing import Optional
