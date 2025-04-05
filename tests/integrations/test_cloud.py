@@ -1,5 +1,6 @@
 import os
 import platform
+import re
 from contextlib import redirect_stdout
 from io import StringIO
 from typing import Optional
@@ -292,4 +293,5 @@ def test_pytorch_mixin_push_and_pull():
 def test_list_available_teamspaces():
     teams = _list_available_teamspaces()
     assert len(teams) > 0
-    assert f"{LIT_ORG}/{LIT_TEAMSPACE}" in teams
+    # using sanitized teamspace name
+    assert f"{LIT_ORG}/oss-litmodels" in teams
