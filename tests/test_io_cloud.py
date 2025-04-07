@@ -5,10 +5,11 @@ import joblib
 import pytest
 import torch
 import torch.jit as torch_jit
-from litmodels import download_model, load_model, upload_model
-from litmodels.io import upload_model_files
 from sklearn import svm
 from torch.nn import Module
+
+from litmodels import download_model, load_model, upload_model
+from litmodels.io import upload_model_files
 
 
 @pytest.mark.parametrize(

@@ -1,4 +1,5 @@
 import pytest
+
 from litmodels.integrations.imports import (
     _LIGHTNING_AVAILABLE,
     _LIGHTNING_GREATER_EQUAL_2_5_1,

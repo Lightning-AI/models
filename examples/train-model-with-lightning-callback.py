@@ -4,6 +4,7 @@ Train a model with a Lightning callback that uploads the best model to the cloud
 
 from lightning import Trainer
 from lightning.pytorch.demos.boring_classes import BoringModel
+
 from litmodels.integrations import LightningModelCheckpoint
 
 # Define the model name - this should be unique to your model

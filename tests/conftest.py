@@ -1,6 +1,7 @@
 """Pytest configuration for integration tests."""
 
 import pytest
+
 from litmodels.integrations.checkpoints import get_model_manager
 
 

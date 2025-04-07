@@ -6,6 +6,7 @@ import os
 
 from lightning import Trainer
 from lightning.pytorch.demos.boring_classes import BoringModel
+
 from litmodels import download_model
 
 # Define the model name - this should be unique to your model

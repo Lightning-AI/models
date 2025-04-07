@@ -3,12 +3,12 @@ import os
 import pytest
 from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
-from litmodels.integrations.duplicate import duplicate_hf_model
 
+from litmodels.integrations.duplicate import duplicate_hf_model
 from tests.integrations import LIT_ORG, LIT_TEAMSPACE
 
 
-@pytest.mark.cloud()
+@pytest.mark.cloud
 def test_duplicate_hf_model(tmp_path):
     """Verify that the HF model can be duplicated to the teamspace"""
 

@@ -1,6 +1,7 @@
-import litmodels
 import torch
 from lightning.pytorch.demos.boring_classes import BoringModel
+
+import litmodels
 
 if __name__ == "__main__":
     # Define your model

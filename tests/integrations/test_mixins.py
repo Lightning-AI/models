@@ -2,8 +2,9 @@ from unittest import mock
 
 import pytest
 import torch
-from litmodels.integrations.mixins import PickleRegistryMixin, PyTorchRegistryMixin
 from torch import nn
+
+from litmodels.integrations.mixins import PickleRegistryMixin, PyTorchRegistryMixin
 
 
 class DummyModel(PickleRegistryMixin):

@@ -24,12 +24,14 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch
         from lightning import Trainer
         from lightning.pytorch.callbacks import ModelCheckpoint
         from lightning.pytorch.demos.boring_classes import BoringModel
+
         from litmodels.integrations.checkpoints import LightningModelCheckpoint as LitModelCheckpoint
     elif importing == "pytorch_lightning":
-        from litmodels.integrations.checkpoints import PytorchLightningModelCheckpoint as LitModelCheckpoint
         from pytorch_lightning import Trainer
         from pytorch_lightning.callbacks import ModelCheckpoint
         from pytorch_lightning.demos.boring_classes import BoringModel
+
+        from litmodels.integrations.checkpoints import PytorchLightningModelCheckpoint as LitModelCheckpoint
 
     # Validate inheritance
     assert issubclass(LitModelCheckpoint, ModelCheckpoint)

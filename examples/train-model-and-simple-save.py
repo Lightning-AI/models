@@ -4,6 +4,7 @@ This example demonstrates how to train a model and upload it to the cloud using 
 
 from lightning import Trainer
 from lightning.pytorch.demos.boring_classes import BoringModel
+
 from litmodels import upload_model
 
 # Define the model name - this should be unique to your model

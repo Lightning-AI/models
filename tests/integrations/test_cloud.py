@@ -9,10 +9,10 @@ import torch
 from lightning_sdk import Teamspace
 from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
+
 from litmodels import download_model, upload_model
 from litmodels.integrations.mixins import PickleRegistryMixin, PyTorchRegistryMixin
 from litmodels.io.cloud import _list_available_teamspaces
-
 from tests.integrations import (
     _SKIP_IF_LIGHTNING_BELLOW_2_5_1,
     _SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1,
@@ -43,7 +43,7 @@ def _cleanup_model(teamspace: Teamspace, model_name: str, expected_num_versions:
     client.models_store_delete_model(project_id=model.project_id, model_id=model.id)
 
 
-@pytest.mark.cloud()
+@pytest.mark.cloud
 @pytest.mark.parametrize(
     "in_studio",
     [False, pytest.param(True, marks=pytest.mark.skipif(platform.system() != "Linux", reason="Studio is just Linux"))],
@@ -99,7 +99,7 @@ def test_upload_download_model(in_studio, monkeypatch, tmp_path):
         pytest.param(True, marks=pytest.mark.skipif(platform.system() == "Windows", reason="studio is not Windows")),
     ],
 )
-@pytest.mark.cloud()
+@pytest.mark.cloud
 def test_lightning_default_checkpointing(importing, in_studio, monkeypatch, tmp_path):
     if in_studio:
         # mock env variables as it would run in studio
@@ -139,7 +139,7 @@ def test_lightning_default_checkpointing(importing, in_studio, monkeypatch, tmp_
         pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1),
     ],
 )
-@pytest.mark.cloud()
+@pytest.mark.cloud
 # todo: mock env variables as it would run in studio
 def test_lightning_plain_resume(trainer_method, registry, importing, tmp_path):
     if importing == "lightning":
@@ -193,7 +193,7 @@ def test_lightning_plain_resume(trainer_method, registry, importing, tmp_path):
         pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1),
     ],
 )
-@pytest.mark.cloud()
+@pytest.mark.cloud
 def test_lightning_checkpoint_ddp(importing, tmp_path):
     if importing == "lightning":
         from lightning import Trainer
@@ -228,7 +228,7 @@ class DummyModel(PickleRegistryMixin):
         self.value = value
 
 
-@pytest.mark.cloud()
+@pytest.mark.cloud
 def test_pickle_mixin_push_and_pull():
     # model name with random hash
     teamspace, org_team, model_name = _prepare_variables("pickle_mixin")
@@ -262,7 +262,7 @@ class DummyTorchModel(PyTorchRegistryMixin, torch.nn.Module):
         return self.fc(x)
 
 
-@pytest.mark.cloud()
+@pytest.mark.cloud
 def test_pytorch_mixin_push_and_pull():
     # model name with random hash
     teamspace, org_team, model_name = _prepare_variables("torch_mixin")
@@ -288,7 +288,7 @@ def test_pytorch_mixin_push_and_pull():
     _cleanup_model(teamspace, model_name, expected_num_versions=1)
 
 
-@pytest.mark.cloud()
+@pytest.mark.cloud
 def test_list_available_teamspaces():
     teams = _list_available_teamspaces()
     assert len(teams) > 0
