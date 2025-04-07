@@ -8,7 +8,7 @@ from tests.integrations import LIT_ORG, LIT_TEAMSPACE
 
 
 @mock.patch("litmodels.integrations.duplicate.snapshot_download")
-@mock.patch("litmodels.integrations.duplicate.upload_model")
+@mock.patch("litmodels.integrations.duplicate.upload_model_files")
 def test_duplicate_hf_model(mock_upload_model, mock_snapshot_download, tmp_path):
     """Verify that the HF model can be duplicated to the teamspace"""
 
@@ -31,7 +31,7 @@ def test_duplicate_hf_model(mock_upload_model, mock_snapshot_download, tmp_path)
     )
     mock_upload_model.assert_called_with(
         name=f"{org_team}/{model_name}",
-        model=tmp_path / hf_model.replace("/", "_"),
+        path=tmp_path / hf_model.replace("/", "_"),
         metadata={"hf_model": hf_model, "litModels_integration": "duplicate_hf_model"},
         verbose=1,
     )

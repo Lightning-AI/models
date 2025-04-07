@@ -2,6 +2,7 @@ import os
 from unittest import mock
 
 import joblib
+import litmodels
 import pytest
 import torch
 import torch.jit as torch_jit
@@ -55,6 +56,7 @@ def test_upload_model(mock_upload_model, tmp_path, model, model_path, verbose):
         name="org-name/teamspace/model-name",
         cloud_account="cluster_id",
         progress_bar=True,
+        metadata={"litModels": litmodels.__version__},
     )
 
 

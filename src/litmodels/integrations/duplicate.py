@@ -6,7 +6,7 @@ from typing import Optional
 
 from lightning_utilities import module_available
 
-from litmodels import upload_model
+from litmodels.io import upload_model_files
 
 if module_available("huggingface_hub"):
     from huggingface_hub import snapshot_download
@@ -65,5 +65,5 @@ def duplicate_hf_model(
     if not metadata:
         metadata = {}
     metadata.update({"litModels_integration": "duplicate_hf_model", "hf_model": hf_model})
-    model = upload_model(name=lit_model, model=local_workdir / model_name, verbose=verbose, metadata=metadata)
+    model = upload_model_files(name=lit_model, path=local_workdir / model_name, verbose=verbose, metadata=metadata)
     return model.name
