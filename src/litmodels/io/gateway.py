@@ -1,7 +1,7 @@
 import os
 import tempfile
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Optional, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
 import joblib
 from lightning_utilities import module_available
@@ -24,6 +24,7 @@ def upload_model(
     cloud_account: Optional[str] = None,
     staging_dir: Optional[str] = None,
     verbose: Union[bool, int] = 1,
+    metadata: Optional[Dict[str, str]] = None,
 ) -> "UploadedModelInfo":
     """Upload a checkpoint to the model store.
 
@@ -37,6 +38,7 @@ def upload_model(
         staging_dir: A directory where the model can be saved temporarily. If not provided, a temporary directory will
             be created and used.
         verbose: Whether to print some additional information about the uploaded model.
+        metadata: Optional metadata to attach to the model. If not provided, a default metadata will be used.
 
     """
     if not staging_dir:
@@ -62,6 +64,7 @@ def upload_model(
         progress_bar=progress_bar,
         cloud_account=cloud_account,
         verbose=verbose,
+        metadata=metadata,
     )
 
 

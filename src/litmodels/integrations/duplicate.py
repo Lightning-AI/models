@@ -4,11 +4,22 @@ import tempfile
 from pathlib import Path
 from typing import Optional
 
+from lightning_utilities import module_available
+
 from litmodels import upload_model
+
+if module_available("huggingface_hub"):
+    from huggingface_hub import snapshot_download
+else:
+    snapshot_download = None
 
 
 def duplicate_hf_model(
-    hf_model: str, lit_model: Optional[str] = None, local_workdir: Optional[str] = None, verbose: int = 1
+    hf_model: str,
+    lit_model: Optional[str] = None,
+    local_workdir: Optional[str] = None,
+    verbose: int = 1,
+    metadata: Optional[dict] = None,
 ) -> str:
     """Downloads the model from Hugging Face and uploads it to Lightning Cloud.
 
@@ -18,13 +29,12 @@ def duplicate_hf_model(
         local_workdir:
             The local working directory to use for the duplication process. If not set a temp folder will be created.
         verbose: Shot a progress bar for the upload.
+        metadata: Optional metadata to attach to the model. If not provided, a default metadata will be used.
 
     Returns:
         The name of the duplicated model in Lightning Cloud.
     """
-    try:
-        from huggingface_hub import snapshot_download
-    except ModuleNotFoundError:
+    if not snapshot_download:
         raise ModuleNotFoundError(
             "Hugging Face Hub is not installed. Please install it with `pip install huggingface_hub`."
         )
@@ -52,5 +62,8 @@ def duplicate_hf_model(
     # Upload the model to Lightning Cloud
     if not lit_model:
         lit_model = model_name
-    model = upload_model(name=lit_model, model=local_workdir / model_name, verbose=verbose)
+    if not metadata:
+        metadata = {}
+    metadata.update({"litModels_integration": "duplicate_hf_model", "hf_model": hf_model})
+    model = upload_model(name=lit_model, model=local_workdir / model_name, verbose=verbose, metadata=metadata)
     return model.name

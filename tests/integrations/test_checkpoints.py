@@ -2,6 +2,7 @@ import pickle
 import re
 from unittest import mock
 
+import litmodels
 import pytest
 
 from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHTNING_MISSING
@@ -80,6 +81,7 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch
         path=mock.ANY,
         progress_bar=True,
         cloud_account=None,
+        metadata={"litModels_integration": LitModelCheckpoint.__name__, "litModels": litmodels.__version__},
     )
     assert mock_upload_model.call_args_list == [expected_call] * 2
 

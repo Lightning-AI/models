@@ -1,3 +1,4 @@
+import inspect
 import queue
 import threading
 from abc import ABC
@@ -82,9 +83,9 @@ class ModelManager:
                 break
             action, detail = task
             if action == Action.UPLOAD:
-                registry_name, filepath = detail
+                registry_name, filepath, metadata = detail
                 try:
-                    upload_model(registry_name, filepath)
+                    upload_model(name=registry_name, model=filepath, metadata=metadata)
                     rank_zero_debug(f"Finished uploading: {filepath}")
                 except Exception as ex:
                     rank_zero_warn(f"Upload failed {filepath}: {ex}")
@@ -103,10 +104,10 @@ class ModelManager:
                 rank_zero_warn(f"Unknown task: {task}")
             self.task_queue.task_done()
 
-    def queue_upload(self, registry_name: str, filepath: str) -> None:
+    def queue_upload(self, registry_name: str, filepath: str, metadata: Optional[dict] = None) -> None:
         """Queue an upload task."""
         self.upload_count += 1
-        self.task_queue.put((Action.UPLOAD, (registry_name, filepath)))
+        self.task_queue.put((Action.UPLOAD, (registry_name, filepath, metadata)))
         rank_zero_debug(f"Queued upload: {filepath} (pending uploads: {self.upload_count})")
 
     def queue_remove(self, trainer: "pl.Trainer", filepath: str) -> None:
@@ -148,15 +149,22 @@ class LitModelCheckpointMixin(ABC):
         self._model_manager = ModelManager()
 
     @rank_zero_only
-    def _upload_model(self, filepath: str) -> None:
+    def _upload_model(self, filepath: str, metadata: Optional[dict] = None) -> None:
         # todo: use filename as version but need to validate that such version does not exists yet
         if not self.model_registry:
             raise RuntimeError(
                 "Model name is not specified neither updated by `setup` method via Trainer."
                 " Please set the model name before uploading or ensure that `setup` method is called."
             )
+        if not metadata:
+            metadata = {}
+        # Add the integration name to the metadata
+        mro = inspect.getmro(type(self))
+        abc_index = mro.index(LitModelCheckpointMixin)
+        ckpt_class = mro[abc_index - 1]
+        metadata.update({"litModels_integration": ckpt_class.__name__})
         # Add to queue instead of uploading directly
-        get_model_manager().queue_upload(self.model_registry, filepath)
+        get_model_manager().queue_upload(registry_name=self.model_registry, filepath=filepath, metadata=metadata)
 
     @rank_zero_only
     def _remove_model(self, trainer: "pl.Trainer", filepath: str) -> None:

@@ -10,6 +10,7 @@ from lightning_sdk import Teamspace
 from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
 from litmodels import download_model, upload_model
+from litmodels.integrations.duplicate import duplicate_hf_model
 from litmodels.integrations.mixins import PickleRegistryMixin, PyTorchRegistryMixin
 from litmodels.io.cloud import _list_available_teamspaces
 
@@ -286,6 +287,26 @@ def test_pytorch_mixin_push_and_pull():
 
     # CLEANING
     _cleanup_model(teamspace, model_name, expected_num_versions=1)
+
+
+@pytest.mark.cloud()
+def test_duplicate_real_hf_model(tmp_path):
+    """Verify that the HF model can be duplicated to the teamspace"""
+
+    # model name with random hash
+    model_name = f"litmodels_hf_model+{os.urandom(8).hex()}"
+    teamspace = _resolve_teamspace(org=LIT_ORG, teamspace=LIT_TEAMSPACE, user=None)
+    org_team = f"{teamspace.owner.name}/{teamspace.name}"
+
+    duplicate_hf_model(hf_model="google/t5-efficient-tiny", lit_model=f"{org_team}/{model_name}")
+
+    client = GridRestClient()
+    model = client.models_store_get_model_by_name(
+        project_owner_name=teamspace.owner.name,
+        project_name=teamspace.name,
+        model_name=model_name,
+    )
+    client.models_store_delete_model(project_id=teamspace.id, model_id=model.id)
 
 
 @pytest.mark.cloud()

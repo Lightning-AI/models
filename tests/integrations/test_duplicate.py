@@ -1,15 +1,15 @@
 import os
+from unittest import mock
 
-import pytest
-from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
 from litmodels.integrations.duplicate import duplicate_hf_model
 
 from tests.integrations import LIT_ORG, LIT_TEAMSPACE
 
 
-@pytest.mark.cloud()
-def test_duplicate_hf_model(tmp_path):
+@mock.patch("litmodels.integrations.duplicate.snapshot_download")
+@mock.patch("litmodels.integrations.duplicate.upload_model")
+def test_duplicate_hf_model(mock_upload_model, mock_snapshot_download, tmp_path):
     """Verify that the HF model can be duplicated to the teamspace"""
 
     # model name with random hash
@@ -17,12 +17,21 @@ def test_duplicate_hf_model(tmp_path):
     teamspace = _resolve_teamspace(org=LIT_ORG, teamspace=LIT_TEAMSPACE, user=None)
     org_team = f"{teamspace.owner.name}/{teamspace.name}"
 
-    duplicate_hf_model(hf_model="google/t5-efficient-tiny", lit_model=f"{org_team}/{model_name}")
+    hf_model = "google/t5-efficient-tiny"
+    duplicate_hf_model(hf_model=hf_model, lit_model=f"{org_team}/{model_name}", local_workdir=str(tmp_path))
 
-    client = GridRestClient()
-    model = client.models_store_get_model_by_name(
-        project_owner_name=teamspace.owner.name,
-        project_name=teamspace.name,
-        model_name=model_name,
+    mock_snapshot_download.assert_called_with(
+        repo_id=hf_model,
+        revision="main",
+        repo_type="model",
+        local_dir=tmp_path / hf_model.replace("/", "_"),
+        local_dir_use_symlinks=True,
+        ignore_patterns=[".cache*"],
+        max_workers=os.cpu_count(),
     )
-    client.models_store_delete_model(project_id=teamspace.id, model_id=model.id)
+    mock_upload_model.assert_called_with(
+        name=f"{org_team}/{model_name}",
+        model=tmp_path / hf_model.replace("/", "_"),
+        metadata={"hf_model": hf_model, "litModels_integration": "duplicate_hf_model"},
+        verbose=1,
+    )
