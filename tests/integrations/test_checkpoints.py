@@ -2,9 +2,9 @@ import pickle
 import re
 from unittest import mock
 
-import litmodels
 import pytest
 
+import litmodels
 from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHTNING_MISSING
 
 

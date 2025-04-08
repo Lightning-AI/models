@@ -2,13 +2,13 @@ import os
 from unittest import mock
 
 import joblib
-import litmodels
 import pytest
 import torch
 import torch.jit as torch_jit
 from sklearn import svm
 from torch.nn import Module
 
+import litmodels
 from litmodels import download_model, load_model, upload_model
 from litmodels.io import upload_model_files
 
