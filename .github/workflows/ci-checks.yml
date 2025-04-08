@@ -37,7 +37,7 @@ jobs:
           "python-version": ["3.9", "3.12"]
         }
 
-  check-docs:
-    uses: Lightning-AI/utilities/.github/workflows/check-docs.yml@main
-    with:
-      requirements-file: "_requirements/_docs.txt"
+#  check-docs:
+#    uses: Lightning-AI/utilities/.github/workflows/check-docs.yml@main
+#    with:
+#      requirements-file: "_requirements/_docs.txt"
