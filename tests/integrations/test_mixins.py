@@ -23,7 +23,9 @@ def test_pickle_push_and_pull(mock_download_model, mock_upload_model, tmp_path):
     dummy.upload_model(version="v1", temp_folder=str(tmp_path))
     # The expected registry name is "dummy_model:v1" and the file should be placed in the temp folder.
     expected_path = tmp_path / "DummyModel.pkl"
-    mock_upload_model.assert_called_once_with(name="DummyModel:v1", path=expected_path)
+    mock_upload_model.assert_called_once_with(
+        name="DummyModel:v1", path=expected_path, metadata={"litModels_integration": "PickleRegistryMixin"}
+    )
 
     # Set the mock to return the full path to the pickle file.
     mock_download_model.return_value = ["DummyModel.pkl"]
@@ -74,7 +76,9 @@ def test_pytorch_push_and_pull(mock_download_model, mock_upload_model, torch_cla
 
     dummy.upload_model(temp_folder=str(tmp_path))
     mock_upload_model.assert_called_once_with(
-        name=torch_class.__name__, path=[tmp_path / f"{torch_class.__name__}.pth", json_path]
+        name=torch_class.__name__,
+        path=[tmp_path / f"{torch_class.__name__}.pth", json_path],
+        metadata={"litModels_integration": "PyTorchRegistryMixin"},
     )
 
     # Prepare mocking for pull_from_registry.

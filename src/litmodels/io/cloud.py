@@ -10,6 +10,8 @@ from lightning_sdk.models import _extend_model_name_with_teamspace, _parse_model
 from lightning_sdk.models import download_model as sdk_download_model
 from lightning_sdk.models import upload_model as sdk_upload_model
 
+import litmodels
+
 if TYPE_CHECKING:
     from lightning_sdk.models import UploadedModelInfo
 
@@ -46,6 +48,7 @@ def upload_model_files(
     progress_bar: bool = True,
     cloud_account: Optional[str] = None,
     verbose: Union[bool, int] = 1,
+    metadata: Optional[Dict[str, str]] = None,
 ) -> "UploadedModelInfo":
     """Upload a local checkpoint file to the model store.
 
@@ -57,13 +60,18 @@ def upload_model_files(
         cloud_account: The name of the cloud account to store the Model in. Only required if it can't be determined
             automatically.
         verbose: Whether to print a link to the uploaded model. If set to 0, no link will be printed.
+        metadata: Optional metadata to attach to the model. If not provided, a default metadata will be used.
 
     """
+    if not metadata:
+        metadata = {}
+    metadata.update({"litModels": litmodels.__version__})
     info = sdk_upload_model(
         name=name,
         path=path,
         progress_bar=progress_bar,
         cloud_account=cloud_account,
+        metadata=metadata,
     )
     if verbose:
         _print_model_link(name, verbose)

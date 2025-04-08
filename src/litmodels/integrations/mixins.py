@@ -5,7 +5,7 @@ import tempfile
 import warnings
 from abc import ABC
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union
 
 from lightning_utilities.core.rank_zero import rank_zero_warn
 
@@ -55,12 +55,29 @@ class ModelRegistryMixin(ABC):
             temp_folder = tempfile.mkdtemp()
         return name, model_name, temp_folder
 
+    def _upload_model_files(
+        self, name: str, path: Union[str, Path, List[Union[str, Path]]], metadata: Optional[dict] = None
+    ) -> None:
+        """Upload the model files to the registry."""
+        if not metadata:
+            metadata = {}
+        # Add the integration name to the metadata
+        mro = inspect.getmro(type(self))
+        abc_index = mro.index(ModelRegistryMixin)
+        mixin_class = mro[abc_index - 1]
+        metadata.update({"litModels_integration": mixin_class.__name__})
+        upload_model_files(name=name, path=path, metadata=metadata)
+
 
 class PickleRegistryMixin(ModelRegistryMixin):
     """Mixin for pickle registry integration."""
 
     def upload_model(
-        self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Union[str, Path, None] = None
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        temp_folder: Union[str, Path, None] = None,
+        metadata: Optional[dict] = None,
     ) -> None:
         """Push the model to the registry.
 
@@ -68,6 +85,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
             name: The name of the model. If not use the class name.
             version: The version of the model. If None, the latest version is used.
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
+            metadata: Optional metadata to attach to the model. If not provided, a default metadata will be used.
         """
         name, model_name, temp_folder = self._setup(name, temp_folder)
         pickle_path = Path(temp_folder) / f"{model_name}.pkl"
@@ -75,7 +93,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
             pickle.dump(self, fp, protocol=pickle.HIGHEST_PROTOCOL)
         if version:
             name = f"{name}:{version}"
-        upload_model_files(name=name, path=pickle_path)
+        self._upload_model_files(name=name, path=pickle_path, metadata=metadata)
 
     @classmethod
     def download_model(
@@ -128,7 +146,11 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
         return instance
 
     def upload_model(
-        self, name: Optional[str] = None, version: Optional[str] = None, temp_folder: Union[str, Path, None] = None
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        temp_folder: Union[str, Path, None] = None,
+        metadata: Optional[dict] = None,
     ) -> None:
         """Push the model to the registry.
 
@@ -136,6 +158,7 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
             name: The name of the model. If not use the class name.
             version: The version of the model. If None, the latest version is used.
             temp_folder: The temporary folder to save the model. If None, a default temporary folder is used.
+            metadata: Optional metadata to attach to the model. If not provided, a default metadata will be used.
         """
         import torch
 
@@ -145,17 +168,18 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
 
         name, model_name, temp_folder = self._setup(name, temp_folder)
 
+        init_kwargs_path = None
         if self.__init_kwargs:
             try:
                 # Save the model arguments to a JSON file
                 init_kwargs_path = Path(temp_folder) / f"{model_name}__init_kwargs.json"
                 with open(init_kwargs_path, "w") as fp:
                     json.dump(self.__init_kwargs, fp)
-            except Exception as e:
+            except Exception as ex:
                 raise RuntimeError(
-                    f"Failed to save model arguments: {e}."
+                    f"Failed to save model arguments: {ex}."
                     " Ensure the model's arguments are JSON serializable or use `PickleRegistryMixin`."
-                ) from e
+                ) from ex
         elif not hasattr(self, "__init_kwargs"):
             rank_zero_warn(
                 "The child class is missing `__init_kwargs`."
@@ -168,7 +192,10 @@ class PyTorchRegistryMixin(ModelRegistryMixin):
         model_registry = f"{name}:{version}" if version else name
         # todo: consider creating another temp folder and copying these two files
         # todo: updating SDK to support uploading just specific files
-        upload_model_files(name=model_registry, path=[torch_state_dict_path, init_kwargs_path])
+        uploaded_files = [torch_state_dict_path]
+        if init_kwargs_path:
+            uploaded_files.append(init_kwargs_path)
+        self._upload_model_files(name=model_registry, path=uploaded_files, metadata=metadata)
 
     @classmethod
     def download_model(

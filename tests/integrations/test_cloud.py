@@ -9,10 +9,11 @@ import torch
 from lightning_sdk import Teamspace
 from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
-
 from litmodels import download_model, upload_model
+from litmodels.integrations.duplicate import duplicate_hf_model
 from litmodels.integrations.mixins import PickleRegistryMixin, PyTorchRegistryMixin
 from litmodels.io.cloud import _list_available_teamspaces
+
 from tests.integrations import (
     _SKIP_IF_LIGHTNING_BELLOW_2_5_1,
     _SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1,
@@ -43,7 +44,7 @@ def _cleanup_model(teamspace: Teamspace, model_name: str, expected_num_versions:
     client.models_store_delete_model(project_id=model.project_id, model_id=model.id)
 
 
-@pytest.mark.cloud
+@pytest.mark.cloud()
 @pytest.mark.parametrize(
     "in_studio",
     [False, pytest.param(True, marks=pytest.mark.skipif(platform.system() != "Linux", reason="Studio is just Linux"))],
@@ -99,7 +100,7 @@ def test_upload_download_model(in_studio, monkeypatch, tmp_path):
         pytest.param(True, marks=pytest.mark.skipif(platform.system() == "Windows", reason="studio is not Windows")),
     ],
 )
-@pytest.mark.cloud
+@pytest.mark.cloud()
 def test_lightning_default_checkpointing(importing, in_studio, monkeypatch, tmp_path):
     if in_studio:
         # mock env variables as it would run in studio
@@ -139,7 +140,7 @@ def test_lightning_default_checkpointing(importing, in_studio, monkeypatch, tmp_
         pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1),
     ],
 )
-@pytest.mark.cloud
+@pytest.mark.cloud()
 # todo: mock env variables as it would run in studio
 def test_lightning_plain_resume(trainer_method, registry, importing, tmp_path):
     if importing == "lightning":
@@ -193,7 +194,7 @@ def test_lightning_plain_resume(trainer_method, registry, importing, tmp_path):
         pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1),
     ],
 )
-@pytest.mark.cloud
+@pytest.mark.cloud()
 def test_lightning_checkpoint_ddp(importing, tmp_path):
     if importing == "lightning":
         from lightning import Trainer
@@ -228,7 +229,7 @@ class DummyModel(PickleRegistryMixin):
         self.value = value
 
 
-@pytest.mark.cloud
+@pytest.mark.cloud()
 def test_pickle_mixin_push_and_pull():
     # model name with random hash
     teamspace, org_team, model_name = _prepare_variables("pickle_mixin")
@@ -262,7 +263,7 @@ class DummyTorchModel(PyTorchRegistryMixin, torch.nn.Module):
         return self.fc(x)
 
 
-@pytest.mark.cloud
+@pytest.mark.cloud()
 def test_pytorch_mixin_push_and_pull():
     # model name with random hash
     teamspace, org_team, model_name = _prepare_variables("torch_mixin")
@@ -288,7 +289,27 @@ def test_pytorch_mixin_push_and_pull():
     _cleanup_model(teamspace, model_name, expected_num_versions=1)
 
 
-@pytest.mark.cloud
+@pytest.mark.cloud()
+def test_duplicate_real_hf_model(tmp_path):
+    """Verify that the HF model can be duplicated to the teamspace"""
+
+    # model name with random hash
+    model_name = f"litmodels_hf_model+{os.urandom(8).hex()}"
+    teamspace = _resolve_teamspace(org=LIT_ORG, teamspace=LIT_TEAMSPACE, user=None)
+    org_team = f"{teamspace.owner.name}/{teamspace.name}"
+
+    duplicate_hf_model(hf_model="google/t5-efficient-tiny", lit_model=f"{org_team}/{model_name}")
+
+    client = GridRestClient()
+    model = client.models_store_get_model_by_name(
+        project_owner_name=teamspace.owner.name,
+        project_name=teamspace.name,
+        model_name=model_name,
+    )
+    client.models_store_delete_model(project_id=teamspace.id, model_id=model.id)
+
+
+@pytest.mark.cloud()
 def test_list_available_teamspaces():
     teams = _list_available_teamspaces()
     assert len(teams) > 0
