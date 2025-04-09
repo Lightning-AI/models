@@ -3,10 +3,10 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-import joblib
 from lightning_utilities import module_available
 
 from litmodels.io.cloud import download_model_files, upload_model_files
+from litmodels.io.utils import dump_pickle, load_pickle
 
 if module_available("torch"):
     import torch
@@ -56,15 +56,7 @@ def upload_model(
         torch.save(model.state_dict(), path)
     else:
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pkl")
-        if module_available("joblib"):
-            import joblib
-
-            joblib.dump(model, filename=path, compress=7)
-        else:
-            import pickle
-
-            with open(path, "wb") as fp:
-                pickle.dump(model, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dump_pickle(moel=model, path=path)
 
     return upload_model_files(
         path=path,
@@ -119,7 +111,7 @@ def load_model(name: str, download_dir: str = ".") -> Any:
         raise NotImplementedError("Downloaded model with multiple files is not supported yet.")
     model_path = Path(download_dir) / download_paths[0]
     if model_path.suffix.lower() == ".pkl":
-        return joblib.load(model_path)
+        return load_pickle(model_path)
     if model_path.suffix.lower() == ".ts":
         return torch.jit.load(model_path)
     raise NotImplementedError(f"Loading model from {model_path.suffix} is not supported yet.")
