@@ -56,7 +56,7 @@ def upload_model(
         torch.save(model.state_dict(), path)
     else:
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pkl")
-        dump_pickle(moel=model, path=path)
+        dump_pickle(model=model, path=path)
 
     return upload_model_files(
         path=path,
@@ -111,7 +111,7 @@ def load_model(name: str, download_dir: str = ".") -> Any:
         raise NotImplementedError("Downloaded model with multiple files is not supported yet.")
     model_path = Path(download_dir) / download_paths[0]
     if model_path.suffix.lower() == ".pkl":
-        return load_pickle(model_path)
+        return load_pickle(path=model_path)
     if model_path.suffix.lower() == ".ts":
         return torch.jit.load(model_path)
     raise NotImplementedError(f"Loading model from {model_path.suffix} is not supported yet.")
