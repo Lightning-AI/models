@@ -1,14 +1,13 @@
+import pickle
 from pathlib import Path
 from typing import Any, Union
 
 from lightning_utilities import module_available
-import pickle
 
 if module_available("joblib"):
     import joblib
 else:
     joblib = None
-
 
 
 def dump_pickle(model: Any, path: Union[str, Path]) -> None:
@@ -36,6 +35,5 @@ def load_pickle(path: Union[str, Path]) -> Any:
     """
     if joblib is not None:
         return joblib.load(path)
-    else:
-        with open(path, "rb") as fp:
-            return pickle.load(fp)
+    with open(path, "rb") as fp:
+        return pickle.load(fp)
