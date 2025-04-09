@@ -1,6 +1,5 @@
 import inspect
 import json
-import pickle
 import tempfile
 import warnings
 from abc import ABC
@@ -10,6 +9,7 @@ from typing import TYPE_CHECKING, Any, List, Optional, Tuple, Union
 from lightning_utilities.core.rank_zero import rank_zero_warn
 
 from litmodels.io.cloud import download_model_files, upload_model_files
+from litmodels.io.utils import dump_pickle, load_pickle
 
 if TYPE_CHECKING:
     import torch
@@ -89,8 +89,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
         """
         name, model_name, temp_folder = self._setup(name, temp_folder)
         pickle_path = Path(temp_folder) / f"{model_name}.pkl"
-        with open(pickle_path, "wb") as fp:
-            pickle.dump(self, fp, protocol=pickle.HIGHEST_PROTOCOL)
+        dump_pickle(model=self, path=pickle_path)
         if version:
             name = f"{name}:{version}"
         self._upload_model_files(name=name, path=pickle_path, metadata=metadata)
@@ -116,8 +115,7 @@ class PickleRegistryMixin(ModelRegistryMixin):
         if len(pkl_files) > 1:
             raise RuntimeError(f"Multiple pickle files found for model: {model_registry} with {pkl_files}")
         pkl_path = Path(temp_folder) / pkl_files[0]
-        with open(pkl_path, "rb") as fp:
-            obj = pickle.load(fp)
+        obj = load_pickle(path=pkl_path)
         if not isinstance(obj, cls):
             raise RuntimeError(f"Unpickled object is not of type {cls.__name__}: {type(obj)}")
         return obj
