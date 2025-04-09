@@ -56,7 +56,15 @@ def upload_model(
         torch.save(model.state_dict(), path)
     else:
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pkl")
-        joblib.dump(model, path)
+        if module_available("joblib"):
+            import joblib
+
+            joblib.dump(model, filename=path, compress=7)
+        else:
+            import pickle
+
+            with open(path, "wb") as fp:
+                pickle.dump(model, fp, protocol=pickle.HIGHEST_PROTOCOL)
 
     return upload_model_files(
         path=path,
