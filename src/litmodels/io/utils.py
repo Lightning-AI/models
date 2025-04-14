@@ -3,11 +3,16 @@ from pathlib import Path
 from typing import Any, Union
 
 from lightning_utilities import module_available
+from lightning_utilities.core.imports import RequirementCache
 
-if module_available("joblib"):
+_JOBLIB_AVAILABLE = module_available("joblib")
+_PYTORCH_AVAILABLE = module_available("torch")
+_TENSORFLOW_AVAILABLE = module_available("tensorflow")
+_KERAS_AVAILABLE = RequirementCache("tensorflow >=2.0.0")
+
+if _JOBLIB_AVAILABLE:
     import joblib
-else:
-    joblib = None
+
 
 
 def dump_pickle(model: Any, path: Union[str, Path]) -> None:
@@ -17,7 +22,7 @@ def dump_pickle(model: Any, path: Union[str, Path]) -> None:
         model: The model to be pickled.
         path: The path where the model will be saved.
     """
-    if joblib is not None:
+    if _JOBLIB_AVAILABLE:
         joblib.dump(model, filename=path, compress=7)
     else:
         with open(path, "wb") as fp:
@@ -33,7 +38,7 @@ def load_pickle(path: Union[str, Path]) -> Any:
     Returns:
         The unpickled model.
     """
-    if joblib is not None:
+    if _JOBLIB_AVAILABLE:
         return joblib.load(path)
     with open(path, "rb") as fp:
         return pickle.load(fp)

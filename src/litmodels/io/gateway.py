@@ -3,7 +3,7 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from lightning_utilities import module_available
+from lightning_utilities.core.imports import module_available, RequirementCache
 
 from litmodels.io.cloud import download_model_files, upload_model_files
 from litmodels.io.utils import dump_pickle, load_pickle
@@ -12,6 +12,12 @@ if module_available("torch"):
     import torch
 else:
     torch = None
+
+if RequirementCache("tensorflow >=2.0.0"):
+    import tensorflow as tf
+    from tensorflow import keras
+else:
+    tf, keras = None, None
 
 if TYPE_CHECKING:
     from lightning_sdk.models import UploadedModelInfo
@@ -54,6 +60,9 @@ def upload_model(
     elif torch and isinstance(model, torch.nn.Module):
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pth")
         torch.save(model.state_dict(), path)
+    elif keras and isinstance(model, keras.models.Model):
+        path = os.path.join(staging_dir, f"{model.__class__.__name__}.keras")
+        model.save(path)
     else:
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pkl")
         dump_pickle(model=model, path=path)
@@ -110,8 +119,10 @@ def load_model(name: str, download_dir: str = ".") -> Any:
     if len(download_paths) > 1:
         raise NotImplementedError("Downloaded model with multiple files is not supported yet.")
     model_path = Path(download_dir) / download_paths[0]
-    if model_path.suffix.lower() == ".pkl":
-        return load_pickle(path=model_path)
     if model_path.suffix.lower() == ".ts":
         return torch.jit.load(model_path)
+    if model_path.suffix.lower() == ".keras":
+        return keras.models.load_model(model_path)
+    if model_path.suffix.lower() == ".pkl":
+        return load_pickle(path=model_path)
     raise NotImplementedError(f"Loading model from {model_path.suffix} is not supported yet.")

@@ -11,6 +11,7 @@ from torch.nn import Module
 import litmodels
 from litmodels import download_model, load_model, upload_model
 from litmodels.io import upload_model_files
+from litmodels.io.utils import _KERAS_AVAILABLE
 
 
 @pytest.mark.parametrize(
@@ -109,3 +110,30 @@ def test_load_model_torch_jit(mock_download_model, tmp_path):
         name="org-name/teamspace/model-name", download_dir=str(tmp_path), progress_bar=True
     )
     assert isinstance(model, torch.jit.ScriptModule)
+
+
+@pytest.mark.skipif(not _KERAS_AVAILABLE, reason="TensorFlow/Keras is not available")
+@mock.patch("litmodels.io.cloud.sdk_download_model")
+def test_load_model_tf_keras(mock_download_model, tmp_path):
+    from tensorflow import keras
+    # create a dummy model file
+    model_file = tmp_path / "dummy_model.keras"
+    # Define the model
+    model = keras.Sequential([
+        keras.layers.Dense(10, input_shape=(784,), name='dense_1'),
+        keras.layers.Dense(10, name='dense_2')
+    ])
+    model.compile(optimizer='adam', loss='categorical_crossentropy')
+    model.save(model_file)
+    # prepare mocked SDK download function
+    mock_download_model.return_value = [str(model_file.name)]
+
+    # The lit-logger function is just a wrapper around the SDK function
+    model = load_model(
+        name="org-name/teamspace/model-name",
+        download_dir=str(tmp_path),
+    )
+    mock_download_model.assert_called_once_with(
+        name="org-name/teamspace/model-name", download_dir=str(tmp_path), progress_bar=True
+    )
+    assert isinstance(model, keras.models.Model)
