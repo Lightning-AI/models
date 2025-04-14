@@ -205,9 +205,9 @@ trainer.fit(
 <details>
     <summary>Save any Python class as a checkpoint</summary>
 
-Why is this useful???
+Mixin classes streamline model management in Python by modularizing reusable functionalities like saving/loading, enabling consistent, conflict-free, and maintainable code across multiple models.
 
-Save model:
+**Save model:**
 
 ```python
 from litmodels.integrations.mixins import PickleRegistryMixin
@@ -237,7 +237,8 @@ loaded_model = MyModel.download_model(name="my-org/my-team/my-model")
 <details>
     <summary>Save custom PyTorch models</summary>
 
-why is this useful? why do i need this?
+Mixin classes centralize serialization logic, eliminating redundant code and ensuring consistent, error-free model persistence across projects.
+The `download_model` method bypasses constructor arguments entirely, reconstructing the model directly from the registry with pre-configured architecture and weights, eliminating initialization mismatches.
 
 Save model:
 
@@ -273,7 +274,9 @@ loaded_model = MyTorchModel.download_model(name="my-org/my-team/torch-model")
 
 # Performance
 
+<!--
 TODO: show the chart between not using this vs using this and the impact on training (the GPU utilization side-by-side)... also, what are tangible speed ups in training and inference.
+-->
 
 # Community
 
