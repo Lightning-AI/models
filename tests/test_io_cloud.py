@@ -15,9 +15,7 @@ from litmodels.io import upload_model_files
 from tests.integrations import LIT_ORG, LIT_TEAMSPACE
 
 
-@pytest.mark.parametrize(
-    "name", ["/too/many/slashes", "org/model", "model-name"]
-)
+@pytest.mark.parametrize("name", ["/too/many/slashes", "org/model", "model-name"])
 @pytest.mark.parametrize("in_studio", [True, False])
 def test_upload_wrong_model_name(name, in_studio, monkeypatch):
     if in_studio:
@@ -26,13 +24,15 @@ def test_upload_wrong_model_name(name, in_studio, monkeypatch):
         monkeypatch.setenv("LIGHTNING_TEAMSPACE", LIT_TEAMSPACE)
         monkeypatch.setattr("lightning_sdk.teamspace.Teamspace.upload_model", mock.Mock())
     in_studio_only_name = in_studio and name == "model-name"
-    with pytest.raises(ValueError, match=r".*organization/teamspace/model.*") if not in_studio_only_name else nullcontext():
+    with (
+        pytest.raises(ValueError, match=r".*organization/teamspace/model.*")
+        if not in_studio_only_name
+        else nullcontext()
+    ):
         upload_model_files(path="path/to/checkpoint", name=name)
 
 
-@pytest.mark.parametrize(
-    "name", ["/too/many/slashes", "org/model", "model-name"]
-)
+@pytest.mark.parametrize("name", ["/too/many/slashes", "org/model", "model-name"])
 @pytest.mark.parametrize("in_studio", [True, False])
 def test_download_wrong_model_name(name, in_studio, monkeypatch):
     if in_studio:
@@ -41,7 +41,11 @@ def test_download_wrong_model_name(name, in_studio, monkeypatch):
         monkeypatch.setenv("LIGHTNING_TEAMSPACE", LIT_TEAMSPACE)
         monkeypatch.setattr("lightning_sdk.api.teamspace_api.TeamspaceApi.download_model_files", mock.Mock())
     in_studio_only_name = in_studio and name == "model-name"
-    with pytest.raises(ValueError, match=r".*organization/teamspace/model.*") if not in_studio_only_name else nullcontext():
+    with (
+        pytest.raises(ValueError, match=r".*organization/teamspace/model.*")
+        if not in_studio_only_name
+        else nullcontext()
+    ):
         download_model(name=name)
 
 
