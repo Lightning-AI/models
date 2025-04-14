@@ -3,15 +3,14 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from lightning_utilities import module_available
-
 from litmodels.io.cloud import download_model_files, upload_model_files
-from litmodels.io.utils import dump_pickle, load_pickle
+from litmodels.io.utils import _KERAS_AVAILABLE, _PYTORCH_AVAILABLE, dump_pickle, load_pickle
 
-if module_available("torch"):
+if _PYTORCH_AVAILABLE:
     import torch
-else:
-    torch = None
+
+if _KERAS_AVAILABLE:
+    from tensorflow import keras
 
 if TYPE_CHECKING:
     from lightning_sdk.models import UploadedModelInfo
@@ -48,12 +47,15 @@ def upload_model(
     # if LightningModule and isinstance(model, LightningModule):
     #     path = os.path.join(staging_dir, f"{model.__class__.__name__}.ckpt")
     #     model.save_checkpoint(path)
-    elif torch and isinstance(model, torch.jit.ScriptModule):
+    elif _PYTORCH_AVAILABLE and isinstance(model, torch.jit.ScriptModule):
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.ts")
         model.save(path)
-    elif torch and isinstance(model, torch.nn.Module):
+    elif _PYTORCH_AVAILABLE and isinstance(model, torch.nn.Module):
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pth")
         torch.save(model.state_dict(), path)
+    elif _KERAS_AVAILABLE and isinstance(model, keras.models.Model):
+        path = os.path.join(staging_dir, f"{model.__class__.__name__}.keras")
+        model.save(path)
     else:
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pkl")
         dump_pickle(model=model, path=path)
@@ -110,8 +112,10 @@ def load_model(name: str, download_dir: str = ".") -> Any:
     if len(download_paths) > 1:
         raise NotImplementedError("Downloaded model with multiple files is not supported yet.")
     model_path = Path(download_dir) / download_paths[0]
-    if model_path.suffix.lower() == ".pkl":
-        return load_pickle(path=model_path)
     if model_path.suffix.lower() == ".ts":
         return torch.jit.load(model_path)
+    if model_path.suffix.lower() == ".keras":
+        return keras.models.load_model(model_path)
+    if model_path.suffix.lower() == ".pkl":
+        return load_pickle(path=model_path)
     raise NotImplementedError(f"Loading model from {model_path.suffix} is not supported yet.")

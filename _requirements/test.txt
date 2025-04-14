@@ -6,3 +6,4 @@ pytest-mock
 pytorch-lightning >=2.0
 scikit-learn >=1.0
 huggingface-hub >=0.29.0
+tensorflow >=2.0

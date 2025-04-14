@@ -1,4 +1,5 @@
 import inspect
+import os.path
 import queue
 import threading
 from abc import ABC
@@ -150,12 +151,16 @@ class LitModelCheckpointMixin(ABC):
 
     @rank_zero_only
     def _upload_model(self, filepath: str, metadata: Optional[dict] = None) -> None:
-        # todo: use filename as version but need to validate that such version does not exists yet
         if not self.model_registry:
             raise RuntimeError(
                 "Model name is not specified neither updated by `setup` method via Trainer."
                 " Please set the model name before uploading or ensure that `setup` method is called."
             )
+        model_registry = self.model_registry
+        if os.path.isfile(filepath):
+            # parse the file name as version
+            version, _ = os.path.splitext(os.path.basename(filepath))
+            model_registry += f":{version}"
         if not metadata:
             metadata = {}
         # Add the integration name to the metadata
@@ -164,7 +169,7 @@ class LitModelCheckpointMixin(ABC):
         ckpt_class = mro[abc_index - 1]
         metadata.update({"litModels_integration": ckpt_class.__name__})
         # Add to queue instead of uploading directly
-        get_model_manager().queue_upload(registry_name=self.model_registry, filepath=filepath, metadata=metadata)
+        get_model_manager().queue_upload(registry_name=model_registry, filepath=filepath, metadata=metadata)
 
     @rank_zero_only
     def _remove_model(self, trainer: "pl.Trainer", filepath: str) -> None:
