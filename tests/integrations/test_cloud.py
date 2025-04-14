@@ -140,7 +140,13 @@ def test_lightning_default_checkpointing(importing, in_studio, monkeypatch, tmp_
         pytest.param("pytorch_lightning", marks=_SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1),
     ],
 )
-@pytest.mark.parametrize("in_studio", [False, pytest.param(True, marks=pytest.mark.skipif(platform.system() == "Windows", reason="studio is not Windows"))])
+@pytest.mark.parametrize(
+    "in_studio",
+    [
+        False,
+        pytest.param(True, marks=pytest.mark.skipif(platform.system() == "Windows", reason="studio is not Windows")),
+    ],
+)
 @pytest.mark.cloud
 def test_lightning_plain_resume(trainer_method, registry, importing, in_studio, tmp_path, monkeypatch):
     if importing == "lightning":
