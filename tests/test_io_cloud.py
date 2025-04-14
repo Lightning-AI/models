@@ -22,7 +22,8 @@ def test_upload_wrong_model_name(name, in_studio, monkeypatch):
         # mock env variables as it would run in studio
         monkeypatch.setenv("LIGHTNING_ORG", LIT_ORG)
         monkeypatch.setenv("LIGHTNING_TEAMSPACE", LIT_TEAMSPACE)
-        monkeypatch.setattr("lightning_sdk.teamspace.Teamspace.upload_model", mock.Mock())
+        monkeypatch.setattr("lightning_sdk.organization.Organization", mock.MagicMock)
+        monkeypatch.setattr("lightning_sdk.teamspace.Teamspace", mock.MagicMock)
         monkeypatch.setattr("lightning_sdk.teamspace.TeamspaceApi", mock.MagicMock)
         monkeypatch.setattr("lightning_sdk.models._get_teamspace", mock.MagicMock)
 
@@ -42,9 +43,9 @@ def test_download_wrong_model_name(name, in_studio, monkeypatch):
         # mock env variables as it would run in studio
         monkeypatch.setenv("LIGHTNING_ORG", LIT_ORG)
         monkeypatch.setenv("LIGHTNING_TEAMSPACE", LIT_TEAMSPACE)
+        monkeypatch.setattr("lightning_sdk.organization.Organization", mock.MagicMock)
         monkeypatch.setattr("lightning_sdk.teamspace.Teamspace", mock.MagicMock)
         monkeypatch.setattr("lightning_sdk.teamspace.TeamspaceApi", mock.MagicMock)
-        monkeypatch.setattr("lightning_sdk.api.teamspace_api.TeamspaceApi.download_model_files", mock.Mock())
     in_studio_only_name = in_studio and name == "model-name"
     with (
         pytest.raises(ValueError, match=r".*organization/teamspace/model.*")
