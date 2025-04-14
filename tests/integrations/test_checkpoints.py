@@ -78,14 +78,16 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch
     trainer.fit(BoringModel())
 
     assert mock_auth.call_count == 1
-    expected_call = mock.call(
-        name=f"{expected_org}/{expected_teamspace}/{expected_model}",
-        path=mock.ANY,
-        progress_bar=True,
-        cloud_account=None,
-        metadata={"litModels_integration": LitModelCheckpoint.__name__, "litModels": litmodels.__version__},
-    )
-    assert mock_upload_model.call_args_list == [expected_call] * 2
+    assert mock_upload_model.call_args_list == [
+        mock.call(
+            name=f"{expected_org}/{expected_teamspace}/{expected_model}:{v}",
+            path=mock.ANY,
+            progress_bar=True,
+            cloud_account=None,
+            metadata={"litModels_integration": LitModelCheckpoint.__name__, "litModels": litmodels.__version__},
+        )
+        for v in ("epoch=0-step=64", "epoch=1-step=128")
+    ]
 
     # Verify paths match the expected pattern
     for call_args in mock_upload_model.call_args_list:
