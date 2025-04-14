@@ -3,21 +3,14 @@ import tempfile
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
-from lightning_utilities.core.imports import RequirementCache, module_available
-
 from litmodels.io.cloud import download_model_files, upload_model_files
-from litmodels.io.utils import dump_pickle, load_pickle
+from litmodels.io.utils import dump_pickle, load_pickle, _KERAS_AVAILABLE, _PYTORCH_AVAILABLE
 
-if module_available("torch"):
+if _PYTORCH_AVAILABLE:
     import torch
-else:
-    torch = None
 
-if RequirementCache("tensorflow >=2.0.0"):
-    import tensorflow as tf
+if _KERAS_AVAILABLE:
     from tensorflow import keras
-else:
-    tf, keras = None, None
 
 if TYPE_CHECKING:
     from lightning_sdk.models import UploadedModelInfo
@@ -54,13 +47,13 @@ def upload_model(
     # if LightningModule and isinstance(model, LightningModule):
     #     path = os.path.join(staging_dir, f"{model.__class__.__name__}.ckpt")
     #     model.save_checkpoint(path)
-    elif torch and isinstance(model, torch.jit.ScriptModule):
+    elif _PYTORCH_AVAILABLE and isinstance(model, torch.jit.ScriptModule):
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.ts")
         model.save(path)
-    elif torch and isinstance(model, torch.nn.Module):
+    elif _PYTORCH_AVAILABLE and isinstance(model, torch.nn.Module):
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.pth")
         torch.save(model.state_dict(), path)
-    elif keras and isinstance(model, keras.models.Model):
+    elif _KERAS_AVAILABLE and isinstance(model, keras.models.Model):
         path = os.path.join(staging_dir, f"{model.__class__.__name__}.keras")
         model.save(path)
     else:
