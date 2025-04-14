@@ -1,4 +1,5 @@
 import os
+from contextlib import nullcontext
 from unittest import mock
 
 import joblib
@@ -11,21 +12,36 @@ from torch.nn import Module
 import litmodels
 from litmodels import download_model, load_model, upload_model
 from litmodels.io import upload_model_files
+from tests.integrations import LIT_ORG, LIT_TEAMSPACE
 
 
 @pytest.mark.parametrize(
-    "name", ["/too/many/slashes", "org/model"]
-)  # todo: add back "model-name" after next SDk release
-def test_upload_wrong_model_name(name):
-    with pytest.raises(ValueError, match=r".*organization/teamspace/model.*"):
+    "name", ["/too/many/slashes", "org/model", "model-name"]
+)
+@pytest.mark.parametrize("in_studio", [True, False])
+def test_upload_wrong_model_name(name, in_studio, monkeypatch):
+    if in_studio:
+        # mock env variables as it would run in studio
+        monkeypatch.setenv("LIGHTNING_ORG", LIT_ORG)
+        monkeypatch.setenv("LIGHTNING_TEAMSPACE", LIT_TEAMSPACE)
+        monkeypatch.setattr("lightning_sdk.teamspace.Teamspace.upload_model", mock.Mock())
+    in_studio_only_name = in_studio and name == "model-name"
+    with pytest.raises(ValueError, match=r".*organization/teamspace/model.*") if not in_studio_only_name else nullcontext():
         upload_model_files(path="path/to/checkpoint", name=name)
 
 
 @pytest.mark.parametrize(
-    "name", ["/too/many/slashes", "org/model"]
-)  # todo: add back "model-name" after next SDk release
-def test_download_wrong_model_name(name):
-    with pytest.raises(ValueError, match=r".*organization/teamspace/model.*"):
+    "name", ["/too/many/slashes", "org/model", "model-name"]
+)
+@pytest.mark.parametrize("in_studio", [True, False])
+def test_download_wrong_model_name(name, in_studio, monkeypatch):
+    if in_studio:
+        # mock env variables as it would run in studio
+        monkeypatch.setenv("LIGHTNING_ORG", LIT_ORG)
+        monkeypatch.setenv("LIGHTNING_TEAMSPACE", LIT_TEAMSPACE)
+        monkeypatch.setattr("lightning_sdk.api.teamspace_api.TeamspaceApi.download_model_files", mock.Mock())
+    in_studio_only_name = in_studio and name == "model-name"
+    with pytest.raises(ValueError, match=r".*organization/teamspace/model.*") if not in_studio_only_name else nullcontext():
         download_model(name=name)
 
 
