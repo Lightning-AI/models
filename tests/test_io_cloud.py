@@ -116,14 +116,15 @@ def test_load_model_torch_jit(mock_download_model, tmp_path):
 @mock.patch("litmodels.io.cloud.sdk_download_model")
 def test_load_model_tf_keras(mock_download_model, tmp_path):
     from tensorflow import keras
+
     # create a dummy model file
     model_file = tmp_path / "dummy_model.keras"
     # Define the model
     model = keras.Sequential([
-        keras.layers.Dense(10, input_shape=(784,), name='dense_1'),
-        keras.layers.Dense(10, name='dense_2')
+        keras.layers.Dense(10, input_shape=(784,), name="dense_1"),
+        keras.layers.Dense(10, name="dense_2"),
     ])
-    model.compile(optimizer='adam', loss='categorical_crossentropy')
+    model.compile(optimizer="adam", loss="categorical_crossentropy")
     model.save(model_file)
     # prepare mocked SDK download function
     mock_download_model.return_value = [str(model_file.name)]

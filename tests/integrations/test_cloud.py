@@ -10,17 +10,17 @@ from lightning_sdk import Teamspace
 from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
 
-from litmodels import download_model, upload_model, load_model
+from litmodels import download_model, load_model, upload_model
 from litmodels.integrations.duplicate import duplicate_hf_model
 from litmodels.integrations.mixins import PickleRegistryMixin, PyTorchRegistryMixin
 from litmodels.io.cloud import _list_available_teamspaces
+from litmodels.io.utils import _KERAS_AVAILABLE
 from tests.integrations import (
     _SKIP_IF_LIGHTNING_BELLOW_2_5_1,
     _SKIP_IF_PYTORCHLIGHTNING_BELLOW_2_5_1,
     LIT_ORG,
     LIT_TEAMSPACE,
 )
-from litmodels.io.utils import _KERAS_AVAILABLE
 
 
 def _prepare_variables(test_name: str) -> tuple[Teamspace, str, str]:
@@ -328,15 +328,15 @@ def test_save_load_tensorflow_keras(tmp_path):
 
     # Define the model
     model = keras.Sequential([
-        keras.layers.Dense(10, input_shape=(784,), name='dense_1'),
-        keras.layers.Dense(10, name='dense_2')
+        keras.layers.Dense(10, input_shape=(784,), name="dense_1"),
+        keras.layers.Dense(10, name="dense_2"),
     ])
 
     # Compile the model
-    model.compile(optimizer='adam', loss='categorical_crossentropy')
+    model.compile(optimizer="adam", loss="categorical_crossentropy")
 
     # model name with random hash
-    teamspace, org_team, model_name = _prepare_variables(f"tf-keras")
+    teamspace, org_team, model_name = _prepare_variables("tf-keras")
     upload_model(f"{org_team}/{model_name}", model=model)
 
     # Load the model

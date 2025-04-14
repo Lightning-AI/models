@@ -14,7 +14,6 @@ if _JOBLIB_AVAILABLE:
     import joblib
 
 
-
 def dump_pickle(model: Any, path: Union[str, Path]) -> None:
     """Dump a model to a pickle file.
 
