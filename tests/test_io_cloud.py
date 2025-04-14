@@ -45,7 +45,7 @@ def test_download_wrong_model_name(name, in_studio, monkeypatch):
         monkeypatch.setenv("LIGHTNING_TEAMSPACE", LIT_TEAMSPACE)
         monkeypatch.setattr("lightning_sdk.organization.Organization", mock.MagicMock)
         monkeypatch.setattr("lightning_sdk.teamspace.Teamspace", mock.MagicMock)
-        monkeypatch.setattr("lightning_sdk.teamspace.TeamspaceApi", mock.MagicMock)
+        monkeypatch.setattr("lightning_sdk.models.TeamspaceApi", mock.MagicMock)
     in_studio_only_name = in_studio and name == "model-name"
     with (
         pytest.raises(ValueError, match=r".*organization/teamspace/model.*")
