@@ -21,16 +21,20 @@ from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHT
 @pytest.mark.parametrize("clear_all_local", [True, False])
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
 @mock.patch("litmodels.integrations.checkpoints.Auth")
-def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch, importing, model_name, clear_all_local, tmp_path):
+def test_lightning_checkpoint_callback(
+    mock_auth, mock_upload_model, monkeypatch, importing, model_name, clear_all_local, tmp_path
+):
     if importing == "lightning":
         from lightning.pytorch import Trainer
         from lightning.pytorch.callbacks import ModelCheckpoint
         from lightning.pytorch.demos.boring_classes import BoringModel
+
         from litmodels.integrations.checkpoints import LightningModelCheckpoint as LitModelCheckpoint
     elif importing == "pytorch_lightning":
         from pytorch_lightning import Trainer
         from pytorch_lightning.callbacks import ModelCheckpoint
         from pytorch_lightning.demos.boring_classes import BoringModel
+
         from litmodels.integrations.checkpoints import PytorchLightningModelCheckpoint as LitModelCheckpoint
 
     # Validate inheritance
