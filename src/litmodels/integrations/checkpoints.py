@@ -133,12 +133,11 @@ class LitModelCheckpointMixin(ABC):
     model_registry: Optional[str] = None
     _model_manager: ModelManager
 
-    def __init__(self, model_registry: Optional[str], keep_all_uploaded: bool = False, clear_all_local: bool = False) -> None:
+    def __init__(self, model_registry: Optional[str], clear_all_local: bool = False) -> None:
         """Initialize with model name.
 
         Args:
             model_registry: Name of the model to upload in format 'organization/teamspace/modelname'.
-            keep_all_uploaded: Whether prevent deleting models from cloud if the checkpointing logic asks to do so.
             clear_all_local: Whether to clear local models after uploading to the cloud.
         """
         if not model_registry:
@@ -148,7 +147,6 @@ class LitModelCheckpointMixin(ABC):
         self._datetime_stamp = datetime.now().strftime("%Y%m%d-%H%M")
         # remove any / from beginning and end of the name
         self.model_registry = model_registry.strip("/") if model_registry else None
-        self._keep_all_uploaded = keep_all_uploaded
         self._clear_all_local = clear_all_local
 
         try:  # authenticate before anything else starts
@@ -237,7 +235,6 @@ if _LIGHTNING_AVAILABLE:
 
         Args:
             model_registry: Name of the model to upload in format 'organization/teamspace/modelname'.
-            keep_all_uploaded: Whether prevent deleting models from cloud if the checkpointing logic asks to do so.
             clear_all_local: Whether to clear local models after uploading to the cloud.
             *args: Additional arguments to pass to the parent class.
             **kwargs: Additional keyword arguments to pass to the parent class.
@@ -248,7 +245,6 @@ if _LIGHTNING_AVAILABLE:
             *args: Any,
             model_name: Optional[str] = None,
             model_registry: Optional[str] = None,
-            keep_all_uploaded: bool = False,
             clear_all_local: bool = False,
             **kwargs: Any,
         ) -> None:
@@ -260,7 +256,7 @@ if _LIGHTNING_AVAILABLE:
                     " Please use 'model_registry' instead."
                 )
             LitModelCheckpointMixin.__init__(
-                self, model_registry=model_registry or model_name, keep_all_uploaded=keep_all_uploaded, clear_all_local=clear_all_local
+                self, model_registry=model_registry or model_name, clear_all_local=clear_all_local
             )
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:
@@ -293,7 +289,6 @@ if _PYTORCHLIGHTNING_AVAILABLE:
 
         Args:
             model_registry: Name of the model to upload in format 'organization/teamspace/modelname'.
-            keep_all_uploaded: Whether prevent deleting models from cloud if the checkpointing logic asks to do so.
             clear_all_local: Whether to clear local models after uploading to the cloud.
             args: Additional arguments to pass to the parent class.
             kwargs: Additional keyword arguments to pass to the parent class.
@@ -304,7 +299,6 @@ if _PYTORCHLIGHTNING_AVAILABLE:
             *args: Any,
             model_name: Optional[str] = None,
             model_registry: Optional[str] = None,
-            keep_all_uploaded: bool = False,
             clear_all_local: bool = False,
             **kwargs: Any,
         ) -> None:
@@ -316,7 +310,7 @@ if _PYTORCHLIGHTNING_AVAILABLE:
                     " Please use 'model_registry' instead."
                 )
             LitModelCheckpointMixin.__init__(
-                self, model_registry=model_registry or model_name, keep_all_uploaded=keep_all_uploaded, clear_all_local=clear_all_local
+                self, model_registry=model_registry or model_name, clear_all_local=clear_all_local
             )
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:

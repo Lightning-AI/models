@@ -19,10 +19,9 @@ from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHT
     "model_name", [None, "org-name/teamspace/model-name", "model-in-studio", "model-user-only-project"]
 )
 @pytest.mark.parametrize("clear_all_local", [True, False])
-@pytest.mark.parametrize("keep_all_uploaded", [True, False])
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
 @mock.patch("litmodels.integrations.checkpoints.Auth")
-def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch, importing, model_name, clear_all_local, keep_all_uploaded, tmp_path):
+def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch, importing, model_name, clear_all_local, tmp_path):
     if importing == "lightning":
         from lightning.pytorch import Trainer
         from lightning.pytorch.callbacks import ModelCheckpoint
@@ -37,7 +36,7 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch
     # Validate inheritance
     assert issubclass(LitModelCheckpoint, ModelCheckpoint)
 
-    ckpt_args = {"clear_all_local": clear_all_local, "keep_all_uploaded": keep_all_uploaded}
+    ckpt_args = {"clear_all_local": clear_all_local}
     if model_name:
         ckpt_args.update({"model_registry": model_name})
 
@@ -95,7 +94,7 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch
         )
         for v in ("epoch=0-step=64", "epoch=1-step=128")
     ]
-    expected_removals = 2 if clear_local else 1
+    expected_removals = 2 if clear_all_local else 1
     assert mock_remove_ckpt.call_count == expected_removals
 
     # Verify paths match the expected pattern
