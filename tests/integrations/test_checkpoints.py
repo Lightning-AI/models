@@ -18,26 +18,29 @@ from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHT
 @pytest.mark.parametrize(
     "model_name", [None, "org-name/teamspace/model-name", "model-in-studio", "model-user-only-project"]
 )
+@pytest.mark.parametrize("clear_all_local", [True, False])
+@pytest.mark.parametrize("keep_all_uploaded", [True, False])
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
 @mock.patch("litmodels.integrations.checkpoints.Auth")
-def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch, importing, model_name, tmp_path):
+def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch, importing, model_name, clear_all_local, keep_all_uploaded, tmp_path):
     if importing == "lightning":
-        from lightning import Trainer
+        from lightning.pytorch import Trainer
         from lightning.pytorch.callbacks import ModelCheckpoint
         from lightning.pytorch.demos.boring_classes import BoringModel
-
         from litmodels.integrations.checkpoints import LightningModelCheckpoint as LitModelCheckpoint
     elif importing == "pytorch_lightning":
         from pytorch_lightning import Trainer
         from pytorch_lightning.callbacks import ModelCheckpoint
         from pytorch_lightning.demos.boring_classes import BoringModel
-
         from litmodels.integrations.checkpoints import PytorchLightningModelCheckpoint as LitModelCheckpoint
 
     # Validate inheritance
     assert issubclass(LitModelCheckpoint, ModelCheckpoint)
 
-    ckpt_args = {"model_name": model_name} if model_name else {}
+    ckpt_args = {"clear_all_local": clear_all_local, "keep_all_uploaded": keep_all_uploaded}
+    if model_name:
+        ckpt_args.update({"model_registry": model_name})
+
     all_model_registry = {
         "org-name/teamspace/model-name": {"org": "org-name", "teamspace": "teamspace", "model": "model-name"},
         "model-in-studio": {"org": "my-org", "teamspace": "dream-team", "model": "model-in-studio"},
@@ -71,10 +74,14 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch
             mock.MagicMock(return_value={f"{expected_org}/{expected_teamspace}": {}}),
         )
 
+    # mocking the trainer delete checkpoint removal
+    mock_remove_ckpt = mock.Mock()
+    # setting the Trainer and custom checkpointing
     trainer = Trainer(
         max_epochs=2,
         callbacks=LitModelCheckpoint(**ckpt_args),
     )
+    trainer.strategy.remove_checkpoint = mock_remove_ckpt
     trainer.fit(BoringModel())
 
     assert mock_auth.call_count == 1
@@ -88,6 +95,8 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch
         )
         for v in ("epoch=0-step=64", "epoch=1-step=128")
     ]
+    expected_removals = 2 if clear_local else 1
+    assert mock_remove_ckpt.call_count == expected_removals
 
     # Verify paths match the expected pattern
     for call_args in mock_upload_model.call_args_list:

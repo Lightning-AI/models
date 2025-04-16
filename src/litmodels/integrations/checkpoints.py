@@ -133,13 +133,13 @@ class LitModelCheckpointMixin(ABC):
     model_registry: Optional[str] = None
     _model_manager: ModelManager
 
-    def __init__(self, model_registry: Optional[str], upload_all: bool = False, clear_local: bool = False) -> None:
+    def __init__(self, model_registry: Optional[str], keep_all_uploaded: bool = False, clear_all_local: bool = False) -> None:
         """Initialize with model name.
 
         Args:
             model_registry: Name of the model to upload in format 'organization/teamspace/modelname'.
-            upload_all: Whether prevent deleting models from cloud if the checkpointing logic asks to do so.
-            clear_local: Whether to clear local models after uploading to the cloud.
+            keep_all_uploaded: Whether prevent deleting models from cloud if the checkpointing logic asks to do so.
+            clear_all_local: Whether to clear local models after uploading to the cloud.
         """
         if not model_registry:
             rank_zero_warn(
@@ -148,8 +148,8 @@ class LitModelCheckpointMixin(ABC):
         self._datetime_stamp = datetime.now().strftime("%Y%m%d-%H%M")
         # remove any / from beginning and end of the name
         self.model_registry = model_registry.strip("/") if model_registry else None
-        self._upload_all = upload_all
-        self._clear_local = clear_local
+        self._keep_all_uploaded = keep_all_uploaded
+        self._clear_all_local = clear_all_local
 
         try:  # authenticate before anything else starts
             Auth().authenticate()
@@ -179,13 +179,13 @@ class LitModelCheckpointMixin(ABC):
         metadata.update({"litModels_integration": ckpt_class.__name__})
         # Add to queue instead of uploading directly
         get_model_manager().queue_upload(registry_name=model_registry, filepath=filepath, metadata=metadata)
-        if self._clear_local:
+        if self._clear_all_local:
             get_model_manager().queue_remove(trainer=trainer, filepath=filepath)
 
     @rank_zero_only
     def _remove_model(self, trainer: "pl.Trainer", filepath: Union[str, Path]) -> None:
         """Remove the local version of the model if requested."""
-        if self._clear_local or self._upload_all:
+        if self._clear_all_local:
             # self._clear_local: skip the local removal we put it to the queue right after upload
             # self._upload_all: skip the local removal as user ask to preserve all models/versions
             return
@@ -237,8 +237,8 @@ if _LIGHTNING_AVAILABLE:
 
         Args:
             model_registry: Name of the model to upload in format 'organization/teamspace/modelname'.
-            upload_all: Whether prevent deleting models from cloud if the checkpointing logic asks to do so.
-            clear_local: Whether to clear local models after uploading to the cloud.
+            keep_all_uploaded: Whether prevent deleting models from cloud if the checkpointing logic asks to do so.
+            clear_all_local: Whether to clear local models after uploading to the cloud.
             *args: Additional arguments to pass to the parent class.
             **kwargs: Additional keyword arguments to pass to the parent class.
         """
@@ -248,8 +248,8 @@ if _LIGHTNING_AVAILABLE:
             *args: Any,
             model_name: Optional[str] = None,
             model_registry: Optional[str] = None,
-            upload_all: bool = False,
-            clear_local: bool = False,
+            keep_all_uploaded: bool = False,
+            clear_all_local: bool = False,
             **kwargs: Any,
         ) -> None:
             """Initialize the checkpoint with model name and other parameters."""
@@ -260,7 +260,7 @@ if _LIGHTNING_AVAILABLE:
                     " Please use 'model_registry' instead."
                 )
             LitModelCheckpointMixin.__init__(
-                self, model_registry=model_registry or model_name, upload_all=upload_all, clear_local=clear_local
+                self, model_registry=model_registry or model_name, keep_all_uploaded=keep_all_uploaded, clear_all_local=clear_all_local
             )
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:
@@ -293,8 +293,8 @@ if _PYTORCHLIGHTNING_AVAILABLE:
 
         Args:
             model_registry: Name of the model to upload in format 'organization/teamspace/modelname'.
-            upload_all: Whether prevent deleting models from cloud if the checkpointing logic asks to do so.
-            clear_local: Whether to clear local models after uploading to the cloud.
+            keep_all_uploaded: Whether prevent deleting models from cloud if the checkpointing logic asks to do so.
+            clear_all_local: Whether to clear local models after uploading to the cloud.
             args: Additional arguments to pass to the parent class.
             kwargs: Additional keyword arguments to pass to the parent class.
         """
@@ -304,8 +304,8 @@ if _PYTORCHLIGHTNING_AVAILABLE:
             *args: Any,
             model_name: Optional[str] = None,
             model_registry: Optional[str] = None,
-            upload_all: bool = False,
-            clear_local: bool = False,
+            keep_all_uploaded: bool = False,
+            clear_all_local: bool = False,
             **kwargs: Any,
         ) -> None:
             """Initialize the checkpoint with model name and other parameters."""
@@ -316,7 +316,7 @@ if _PYTORCHLIGHTNING_AVAILABLE:
                     " Please use 'model_registry' instead."
                 )
             LitModelCheckpointMixin.__init__(
-                self, model_registry=model_registry or model_name, upload_all=upload_all, clear_local=clear_local
+                self, model_registry=model_registry or model_name, keep_all_uploaded=keep_all_uploaded, clear_all_local=clear_all_local
             )
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:
