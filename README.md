@@ -226,7 +226,7 @@ trainer = Trainer(
     callbacks=[
         LightningModelCheckpoint(
             # Define the model name - this should be unique to your model
-            model_name="<organization>/<teamspace>/<model-name>",
+            model_registry="<organization>/<teamspace>/<model-name>",
         )
     ],
 )

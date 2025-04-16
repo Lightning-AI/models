@@ -15,6 +15,6 @@ MY_MODEL_NAME = "lightning-ai/jirka/lit-boring-callback"
 if __name__ == "__main__":
     trainer = Trainer(
         max_epochs=2,
-        callbacks=LightningModelCheckpoint(model_name=MY_MODEL_NAME),
+        callbacks=LightningModelCheckpoint(model_registry=MY_MODEL_NAME),
     )
     trainer.fit(BoringModel())
