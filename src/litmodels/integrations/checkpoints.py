@@ -243,10 +243,19 @@ if _LIGHTNING_AVAILABLE:
             **kwargs: Additional keyword arguments to pass to the parent class.
         """
 
-        def __init__(self, *args: Any, model_registry: Optional[str] = None, upload_all: bool = False, clear_local: bool = False, **kwargs: Any) -> None:
+        def __init__(
+            self,
+            *args: Any,
+            model_registry: Optional[str] = None,
+            upload_all: bool = False,
+            clear_local: bool = False,
+            **kwargs: Any,
+        ) -> None:
             """Initialize the checkpoint with model name and other parameters."""
             _LightningModelCheckpoint.__init__(self, *args, **kwargs)
-            LitModelCheckpointMixin.__init__(self, model_registry=model_registry, upload_all=upload_all, clear_local=clear_local)
+            LitModelCheckpointMixin.__init__(
+                self, model_registry=model_registry, upload_all=upload_all, clear_local=clear_local
+            )
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:
             """Setup the checkpoint callback."""
@@ -284,10 +293,19 @@ if _PYTORCHLIGHTNING_AVAILABLE:
             kwargs: Additional keyword arguments to pass to the parent class.
         """
 
-        def __init__(self, *args: Any, model_registry: Optional[str] = None, upload_all: bool = False, clear_local: bool = False, **kwargs: Any) -> None:
+        def __init__(
+            self,
+            *args: Any,
+            model_registry: Optional[str] = None,
+            upload_all: bool = False,
+            clear_local: bool = False,
+            **kwargs: Any,
+        ) -> None:
             """Initialize the checkpoint with model name and other parameters."""
             _PytorchLightningModelCheckpoint.__init__(self, *args, **kwargs)
-            LitModelCheckpointMixin.__init__(self, model_registry=model_registry, upload_all=upload_all, clear_local=clear_local)
+            LitModelCheckpointMixin.__init__(
+                self, model_registry=model_registry, upload_all=upload_all, clear_local=clear_local
+            )
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:
             """Setup the checkpoint callback."""
