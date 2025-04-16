@@ -246,6 +246,7 @@ if _LIGHTNING_AVAILABLE:
         def __init__(
             self,
             *args: Any,
+            model_name: Optional[str] = None,
             model_registry: Optional[str] = None,
             upload_all: bool = False,
             clear_local: bool = False,
@@ -253,8 +254,13 @@ if _LIGHTNING_AVAILABLE:
         ) -> None:
             """Initialize the checkpoint with model name and other parameters."""
             _LightningModelCheckpoint.__init__(self, *args, **kwargs)
+            if model_name is not None:
+                rank_zero_warn(
+                    "The 'model_name' argument is deprecated and will be removed in a future version."
+                    " Please use 'model_registry' instead."
+                )
             LitModelCheckpointMixin.__init__(
-                self, model_registry=model_registry, upload_all=upload_all, clear_local=clear_local
+                self, model_registry=model_registry or model_name, upload_all=upload_all, clear_local=clear_local
             )
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:
@@ -296,6 +302,7 @@ if _PYTORCHLIGHTNING_AVAILABLE:
         def __init__(
             self,
             *args: Any,
+            model_name: Optional[str] = None,
             model_registry: Optional[str] = None,
             upload_all: bool = False,
             clear_local: bool = False,
@@ -303,8 +310,13 @@ if _PYTORCHLIGHTNING_AVAILABLE:
         ) -> None:
             """Initialize the checkpoint with model name and other parameters."""
             _PytorchLightningModelCheckpoint.__init__(self, *args, **kwargs)
+            if model_name is not None:
+                rank_zero_warn(
+                    "The 'model_name' argument is deprecated and will be removed in a future version."
+                    " Please use 'model_registry' instead."
+                )
             LitModelCheckpointMixin.__init__(
-                self, model_registry=model_registry, upload_all=upload_all, clear_local=clear_local
+                self, model_registry=model_registry or model_name, upload_all=upload_all, clear_local=clear_local
             )
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:
