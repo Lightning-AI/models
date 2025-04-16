@@ -184,8 +184,7 @@ class LitModelCheckpointMixin(ABC):
     def _remove_model(self, trainer: "pl.Trainer", filepath: Union[str, Path]) -> None:
         """Remove the local version of the model if requested."""
         if self._clear_all_local:
-            # self._clear_local: skip the local removal we put it to the queue right after upload
-            # self._upload_all: skip the local removal as user ask to preserve all models/versions
+            # skip the local removal we put it in the queue right after the upload
             return
         get_model_manager().queue_remove(trainer=trainer, filepath=filepath)
 
