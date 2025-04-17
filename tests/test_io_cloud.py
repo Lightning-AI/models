@@ -10,7 +10,7 @@ from sklearn import svm
 from torch.nn import Module
 
 import litmodels
-from litmodels import download_model, load_model, upload_model, save_model
+from litmodels import download_model, load_model, save_model
 from litmodels.io import upload_model_files
 from litmodels.io.utils import _KERAS_AVAILABLE
 from tests.integrations import LIT_ORG, LIT_TEAMSPACE
