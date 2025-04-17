@@ -66,15 +66,17 @@ Save model:
 
 ```python
 import torch
-from litmodels import load_model, upload_model
+from litmodels import save_model
 
 model = torch.nn.Module()
-upload_model(model=model, name="your_org/your_team/torch-model")
+save_model(model=model, name="your_org/your_team/torch-model")
 ```
 
 Load model:
 
 ```python
+from litmodels import load_model
+
 model_ = load_model(name="your_org/your_team/torch-model")
 ```
 
@@ -131,7 +133,7 @@ Save model:
 ```python
 from tensorflow import keras
 
-from litmodels import upload_model
+from litmodels import save_model
 
 # Define the model
 model = keras.Sequential(
@@ -145,7 +147,7 @@ model = keras.Sequential(
 model.compile(optimizer="adam", loss="categorical_crossentropy")
 
 # Save the model
-upload_model("lightning-ai/jirka/sample-tf-keras-model", model=model)
+save_model("lightning-ai/jirka/sample-tf-keras-model", model=model)
 ```
 
 Load model:
@@ -167,7 +169,7 @@ Save model:
 
 ```python
 from sklearn import datasets, model_selection, svm
-from litmodels import upload_model
+from litmodels import save_model
 
 # Load example dataset
 iris = datasets.load_iris()
@@ -183,7 +185,7 @@ model = svm.SVC()
 model.fit(X_train, y_train)
 
 # Upload the saved model using litmodels
-upload_model(model=model, name="your_org/your_team/sklearn-svm-model")
+save_model(model=model, name="your_org/your_team/sklearn-svm-model")
 ```
 
 Use model:

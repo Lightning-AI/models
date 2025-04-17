@@ -1,6 +1,6 @@
 from tensorflow import keras
 
-from litmodels import load_model, upload_model
+from litmodels import load_model, save_model
 
 if __name__ == "__main__":
     # Define the model
@@ -13,7 +13,7 @@ if __name__ == "__main__":
     model.compile(optimizer="adam", loss="categorical_crossentropy")
 
     # Save the model
-    upload_model("lightning-ai/jirka/sample-tf-keras-model", model=model)
+    save_model("lightning-ai/jirka/sample-tf-keras-model", model=model)
 
     # Load the model
     model_ = load_model("lightning-ai/jirka/sample-tf-keras-model", download_dir="./my-model")
