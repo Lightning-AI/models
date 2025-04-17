@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
 from lightning_sdk.models import _extend_model_name_with_teamspace, _parse_org_teamspace_model_version
+from lightning_sdk.models import delete_model as sdk_delete_model
 from lightning_sdk.models import download_model as sdk_download_model
 from lightning_sdk.models import upload_model as sdk_upload_model
 
@@ -123,3 +124,17 @@ def _list_available_teamspaces() -> Dict[str, dict]:
         else:
             raise RuntimeError(f"Unknown organization type {ts.organization_type}")
     return teamspaces
+
+
+def delete_model_version(
+    name: str,
+    version: Optional[str] = None,
+) -> None:
+    """Delete a model version from the model store.
+
+    Args:
+        name: Name of the model to delete. Must be in the format 'organization/teamspace/modelname'
+            where entity is either your username or the name of an organization you are part of.
+        version: Version of the model to delete. If not provided, all versions will be deleted.
+    """
+    sdk_delete_model(name=f"{name}:{version}")

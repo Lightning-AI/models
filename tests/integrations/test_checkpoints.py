@@ -19,10 +19,20 @@ from tests.integrations import _SKIP_IF_LIGHTNING_MISSING, _SKIP_IF_PYTORCHLIGHT
     "model_name", [None, "org-name/teamspace/model-name", "model-in-studio", "model-user-only-project"]
 )
 @pytest.mark.parametrize("clear_all_local", [True, False])
+@pytest.mark.parametrize("keep_all_uploaded", [True, False])
+@mock.patch("litmodels.io.cloud.sdk_delete_model")
 @mock.patch("litmodels.io.cloud.sdk_upload_model")
 @mock.patch("litmodels.integrations.checkpoints.Auth")
 def test_lightning_checkpoint_callback(
-    mock_auth, mock_upload_model, monkeypatch, importing, model_name, clear_all_local, tmp_path
+    mock_auth,
+    mock_upload_model,
+    mock_delete_model,
+    monkeypatch,
+    importing,
+    model_name,
+    clear_all_local,
+    keep_all_uploaded,
+    tmp_path,
 ):
     if importing == "lightning":
         from lightning.pytorch import Trainer
@@ -40,7 +50,7 @@ def test_lightning_checkpoint_callback(
     # Validate inheritance
     assert issubclass(LitModelCheckpoint, ModelCheckpoint)
 
-    ckpt_args = {"clear_all_local": clear_all_local}
+    ckpt_args = {"clear_all_local": clear_all_local, "keep_all_uploaded": keep_all_uploaded}
     if model_name:
         ckpt_args.update({"model_registry": model_name})
 
@@ -98,8 +108,15 @@ def test_lightning_checkpoint_callback(
         )
         for v in ("epoch=0-step=64", "epoch=1-step=128")
     ]
-    expected_removals = 2 if clear_all_local else 1
-    assert mock_remove_ckpt.call_count == expected_removals
+    expected_local_removals = 2 if clear_all_local else 1
+    assert mock_remove_ckpt.call_count == expected_local_removals
+
+    expected_cloud_removals = 0 if keep_all_uploaded else 1
+    assert mock_delete_model.call_count == expected_cloud_removals
+    if expected_cloud_removals:
+        mock_delete_model.assert_called_once_with(
+            name=f"{expected_org}/{expected_teamspace}/{expected_model}:epoch=0-step=64"
+        )
 
     # Verify paths match the expected pattern
     for call_args in mock_upload_model.call_args_list:
