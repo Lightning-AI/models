@@ -95,7 +95,7 @@ def test_lightning_checkpoint_callback(mock_auth, mock_upload_model, monkeypatch
         )
         for v in ("epoch=0-step=64", "epoch=1-step=128")
     ]
-    expected_removals = 2 if clear_local else 1
+    expected_removals = 2 if clear_all_local else 1
     assert mock_remove_ckpt.call_count == expected_removals
 
     # Verify paths match the expected pattern

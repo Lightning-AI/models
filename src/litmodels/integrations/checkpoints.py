@@ -106,13 +106,13 @@ class ModelManager:
                 rank_zero_warn(f"Unknown task: {task}")
             self.task_queue.task_done()
 
-    def queue_upload(self, registry_name: str, filepath: str, metadata: Optional[dict] = None) -> None:
+    def queue_upload(self, registry_name: str, filepath: Union[str, Path], metadata: Optional[dict] = None) -> None:
         """Queue an upload task."""
         self.upload_count += 1
         self.task_queue.put((Action.UPLOAD, (registry_name, filepath, metadata)))
         rank_zero_debug(f"Queued upload: {filepath} (pending uploads: {self.upload_count})")
 
-    def queue_remove(self, trainer: "pl.Trainer", filepath: str) -> None:
+    def queue_remove(self, trainer: "pl.Trainer", filepath: Union[str, Path]) -> None:
         """Queue a removal task."""
         self.remove_count += 1
         self.task_queue.put((Action.REMOVE, (trainer, filepath)))
@@ -186,8 +186,7 @@ class LitModelCheckpointMixin(ABC):
     def _remove_model(self, trainer: "pl.Trainer", filepath: Union[str, Path]) -> None:
         """Remove the local version of the model if requested."""
         if self._clear_all_local:
-            # self._clear_local: skip the local removal we put it to the queue right after upload
-            # self._upload_all: skip the local removal as user ask to preserve all models/versions
+            # skip the local removal we put it in the queue right after the upload
             return
         get_model_manager().queue_remove(trainer=trainer, filepath=filepath)
 
