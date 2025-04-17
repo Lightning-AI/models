@@ -10,7 +10,7 @@ from sklearn import svm
 from torch.nn import Module
 
 import litmodels
-from litmodels import download_model, load_model, upload_model
+from litmodels import download_model, load_model, upload_model, save_model
 from litmodels.io import upload_model_files
 from litmodels.io.utils import _KERAS_AVAILABLE
 from tests.integrations import LIT_ORG, LIT_TEAMSPACE
@@ -59,7 +59,7 @@ def test_download_wrong_model_name(name, in_studio, monkeypatch):
 @pytest.mark.parametrize(
     ("model", "model_path", "verbose"),
     [
-        ("path/to/checkpoint", "path/to/checkpoint", False),
+        # ("path/to/checkpoint", "path/to/checkpoint", False),
         # (BoringModel(), "%s/BoringModel.ckpt"),
         (torch_jit.script(Module()), f"%s{os.path.sep}RecursiveScriptModule.ts", True),
         (Module(), f"%s{os.path.sep}Module.pth", True),
@@ -71,7 +71,7 @@ def test_upload_model(mock_upload_model, tmp_path, model, model_path, verbose):
     mock_upload_model.return_value.name = "org-name/teamspace/model-name"
 
     # The lit-logger function is just a wrapper around the SDK function
-    upload_model(
+    save_model(
         model=model,
         name="org-name/teamspace/model-name",
         cloud_account="cluster_id",
