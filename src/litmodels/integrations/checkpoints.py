@@ -15,7 +15,7 @@ from lightning_utilities.core.rank_zero import rank_zero_debug, rank_zero_only, 
 
 from litmodels import upload_model
 from litmodels.integrations.imports import _LIGHTNING_AVAILABLE, _PYTORCHLIGHTNING_AVAILABLE
-from litmodels.io.cloud import _list_available_teamspaces
+from litmodels.io.cloud import _list_available_teamspaces, delete_model_version
 
 if _LIGHTNING_AVAILABLE:
     from lightning.pytorch.callbacks import ModelCheckpoint as _LightningModelCheckpoint
@@ -45,6 +45,13 @@ class Action(StrEnum):
 
     UPLOAD = "upload"
     REMOVE = "remove"
+
+
+class RemoveType(StrEnum):
+    """Enumeration of possible remove types for the ModelManager."""
+
+    LOCAL = "local"
+    CLOUD = "cloud"
 
 
 class ModelManager:
@@ -94,10 +101,16 @@ class ModelManager:
                 finally:
                     self.upload_count -= 1
             elif action == Action.REMOVE:
-                trainer, filepath = detail
+                filepath, trainer, registry_name = detail
                 try:
-                    trainer.strategy.remove_checkpoint(filepath)
-                    rank_zero_debug(f"Removed file: {filepath}")
+                    if registry_name:
+                        rank_zero_debug(f"Removing from cloud: {filepath}")
+                        # Remove from the cloud
+                        version = os.path.splitext(os.path.basename(filepath))[0]
+                        delete_model_version(name=registry_name, version=version)
+                    if trainer:
+                        rank_zero_debug(f"Removed local file: {filepath}")
+                        trainer.strategy.remove_checkpoint(filepath)
                 except Exception as ex:
                     rank_zero_warn(f"Removal failed {filepath}: {ex}")
                 finally:
@@ -112,10 +125,12 @@ class ModelManager:
         self.task_queue.put((Action.UPLOAD, (registry_name, filepath, metadata)))
         rank_zero_debug(f"Queued upload: {filepath} (pending uploads: {self.upload_count})")
 
-    def queue_remove(self, trainer: "pl.Trainer", filepath: Union[str, Path]) -> None:
+    def queue_remove(
+        self, filepath: Union[str, Path], trainer: Optional["pl.Trainer"] = None, registry_name: Optional[str] = None
+    ) -> None:
         """Queue a removal task."""
         self.remove_count += 1
-        self.task_queue.put((Action.REMOVE, (trainer, filepath)))
+        self.task_queue.put((Action.REMOVE, (filepath, trainer, registry_name)))
         rank_zero_debug(f"Queued removal: {filepath} (pending removals: {self.remove_count})")
 
     def shutdown(self) -> None:
@@ -182,15 +197,18 @@ class LitModelCheckpointMixin(ABC):
         # Add to queue instead of uploading directly
         get_model_manager().queue_upload(registry_name=model_registry, filepath=filepath, metadata=metadata)
         if self._clear_all_local:
-            get_model_manager().queue_remove(trainer=trainer, filepath=filepath)
+            get_model_manager().queue_remove(filepath=filepath, trainer=trainer)
 
     @rank_zero_only
     def _remove_model(self, trainer: "pl.Trainer", filepath: Union[str, Path]) -> None:
         """Remove the local version of the model if requested."""
-        if self._clear_all_local:
+        get_model_manager().queue_remove(
+            filepath=filepath,
             # skip the local removal we put it in the queue right after the upload
-            return
-        get_model_manager().queue_remove(trainer=trainer, filepath=filepath)
+            trainer=None if self._clear_all_local else trainer,
+            # skip the cloud removal if we keep all uploaded models
+            registry_name=None if self._keep_all_uploaded else self.model_registry,
+        )
 
     def default_model_name(self, pl_model: "pl.LightningModule") -> str:
         """Generate a default model name based on the class name and timestamp."""
