@@ -84,7 +84,7 @@ def test_upload_model(mock_upload_model, tmp_path, model, model_path, verbose):
         name="org-name/teamspace/model-name",
         cloud_account="cluster_id",
         progress_bar=True,
-        metadata={"litModels": litmodels.__version__},
+        metadata={"litModels": litmodels.__version__, "litModels_integration": "save_model"},
     )
 
 
