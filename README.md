@@ -51,10 +51,10 @@ import torch
 
 # save a model
 model = torch.nn.Module()
-upload_model(model=model, name="model-name")
+lm.upload_model(model=model, name="model-name")
 
 # load a model
-model = load_model(name="model-name")
+model = lm.load_model(name="model-name")
 ```
 
 # Examples
