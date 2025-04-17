@@ -133,7 +133,9 @@ class LitModelCheckpointMixin(ABC):
     model_registry: Optional[str] = None
     _model_manager: ModelManager
 
-    def __init__(self, model_registry: Optional[str], keep_all_uploaded: bool = False, clear_all_local: bool = False) -> None:
+    def __init__(
+        self, model_registry: Optional[str], keep_all_uploaded: bool = False, clear_all_local: bool = False
+    ) -> None:
         """Initialize with model name.
 
         Args:
@@ -259,7 +261,10 @@ if _LIGHTNING_AVAILABLE:
                     " Please use 'model_registry' instead."
                 )
             LitModelCheckpointMixin.__init__(
-                self, model_registry=model_registry or model_name, keep_all_uploaded=keep_all_uploaded, clear_all_local=clear_all_local
+                self,
+                model_registry=model_registry or model_name,
+                keep_all_uploaded=keep_all_uploaded,
+                clear_all_local=clear_all_local,
             )
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:
@@ -315,7 +320,10 @@ if _PYTORCHLIGHTNING_AVAILABLE:
                     " Please use 'model_registry' instead."
                 )
             LitModelCheckpointMixin.__init__(
-                self, model_registry=model_registry or model_name, keep_all_uploaded=keep_all_uploaded, clear_all_local=clear_all_local
+                self,
+                model_registry=model_registry or model_name,
+                keep_all_uploaded=keep_all_uploaded,
+                clear_all_local=clear_all_local,
             )
 
         def setup(self, trainer: "pl.Trainer", pl_module: "pl.LightningModule", stage: str) -> None:

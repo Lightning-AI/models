@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
 from lightning_sdk.models import _extend_model_name_with_teamspace, _parse_org_teamspace_model_version
+from lightning_sdk.models import delete_model as sdk_delete_model
 from lightning_sdk.models import download_model as sdk_download_model
 from lightning_sdk.models import upload_model as sdk_upload_model
-from lightning_sdk.models import delete_model as sdk_delete_model
 
 import litmodels
 
