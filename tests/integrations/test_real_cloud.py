@@ -10,7 +10,7 @@ from lightning_sdk import Teamspace
 from lightning_sdk.lightning_cloud.rest_client import GridRestClient
 from lightning_sdk.utils.resolve import _resolve_teamspace
 
-from litmodels import download_model, load_model, upload_model
+from litmodels import download_model, load_model, save_model, upload_model
 from litmodels.integrations.duplicate import duplicate_hf_model
 from litmodels.integrations.mixins import PickleRegistryMixin, PyTorchRegistryMixin
 from litmodels.io.cloud import _list_available_teamspaces
@@ -349,7 +349,7 @@ def test_save_load_tensorflow_keras(tmp_path):
 
     # model name with random hash
     teamspace, org_team, model_name = _prepare_variables("tf-keras")
-    upload_model(f"{org_team}/{model_name}", model=model)
+    save_model(f"{org_team}/{model_name}", model=model)
 
     # Load the model
     model_ = load_model(f"{org_team}/{model_name}", download_dir=str(tmp_path))
