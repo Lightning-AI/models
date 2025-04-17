@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
 from lightning_sdk.lightning_cloud.env import LIGHTNING_CLOUD_URL
-from lightning_sdk.models import _extend_model_name_with_teamspace, _parse_model_name_and_version
+from lightning_sdk.models import _extend_model_name_with_teamspace, _parse_org_teamspace_model_version
 from lightning_sdk.models import download_model as sdk_download_model
 from lightning_sdk.models import upload_model as sdk_upload_model
 
@@ -31,7 +31,7 @@ def _print_model_link(name: str, verbose: Union[bool, int]) -> None:
             - If set to 2, the link will be printed every time.
     """
     name = _extend_model_name_with_teamspace(name)
-    org_name, teamspace_name, model_name, _ = _parse_model_name_and_version(name)
+    org_name, teamspace_name, model_name, _ = _parse_org_teamspace_model_version(name)
 
     url = f"{LIGHTNING_CLOUD_URL}/{org_name}/{teamspace_name}/models/{model_name}"
     msg = f"Model uploaded successfully. Link to the model: '{url}'"
