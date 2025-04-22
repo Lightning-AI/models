@@ -26,6 +26,6 @@ def test_duplicate_hf_model(mock_upload_model, mock_snapshot_download, tmp_path)
     mock_upload_model.assert_called_with(
         name=f"{model_name}",
         path=tmp_path / hf_model.replace("/", "_"),
-        metadata={"hf_model": hf_model, "litModels_integration": "duplicate_hf_model"},
+        metadata={"hf_model": hf_model, "litModels.integration": "duplicate_hf_model"},
         verbose=1,
     )

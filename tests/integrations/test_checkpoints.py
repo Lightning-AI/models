@@ -104,7 +104,7 @@ def test_lightning_checkpoint_callback(
             path=mock.ANY,
             progress_bar=True,
             cloud_account=None,
-            metadata={"litModels_integration": LitModelCheckpoint.__name__, "litModels": litmodels.__version__},
+            metadata={"litModels.integration": LitModelCheckpoint.__name__, "litModels": litmodels.__version__},
         )
         for v in ("epoch=0-step=64", "epoch=1-step=128")
     ]
