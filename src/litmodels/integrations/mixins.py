@@ -65,7 +65,7 @@ class ModelRegistryMixin(ABC):
         mro = inspect.getmro(type(self))
         abc_index = mro.index(ModelRegistryMixin)
         mixin_class = mro[abc_index - 1]
-        metadata.update({"litModels_integration": mixin_class.__name__})
+        metadata.update({"litModels.integration": mixin_class.__name__})
         upload_model_files(name=name, path=path, metadata=metadata)
 
 

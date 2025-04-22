@@ -64,6 +64,6 @@ def duplicate_hf_model(
         lit_model = model_name
     if not metadata:
         metadata = {}
-    metadata.update({"litModels_integration": "duplicate_hf_model", "hf_model": hf_model})
+    metadata.update({"litModels.integration": "duplicate_hf_model", "hf_model": hf_model})
     model = upload_model_files(name=lit_model, path=local_workdir / model_name, verbose=verbose, metadata=metadata)
     return model.name

@@ -103,7 +103,7 @@ def save_model(
 
     if not metadata:
         metadata = {}
-    metadata.update({"litModels_integration": "save_model"})
+    metadata.update({"litModels.integration": "save_model"})
 
     return upload_model(
         model=path,

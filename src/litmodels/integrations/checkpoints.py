@@ -193,7 +193,7 @@ class LitModelCheckpointMixin(ABC):
         mro = inspect.getmro(type(self))
         abc_index = mro.index(LitModelCheckpointMixin)
         ckpt_class = mro[abc_index - 1]
-        metadata.update({"litModels_integration": ckpt_class.__name__})
+        metadata.update({"litModels.integration": ckpt_class.__name__})
         # Add to queue instead of uploading directly
         get_model_manager().queue_upload(registry_name=model_registry, filepath=filepath, metadata=metadata)
         if self._clear_all_local:
